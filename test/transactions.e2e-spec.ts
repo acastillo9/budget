@@ -39,7 +39,14 @@ describe('TransactionsController (e2e)', () => {
   // runs in a timezone behind UTC.
   const midMonthDate = (() => {
     const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 15, 12, 0, 0).toISOString();
+    return new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      15,
+      12,
+      0,
+      0,
+    ).toISOString();
   })();
 
   beforeAll(async () => {

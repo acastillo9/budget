@@ -21,9 +21,7 @@ export async function createTestApp(): Promise<INestApplication> {
       whitelist: true,
     }),
   );
-  app.useGlobalInterceptors(
-    new ClassSerializerInterceptor(app.get(Reflector)),
-  );
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   await app.init();
   return app;

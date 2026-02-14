@@ -74,9 +74,7 @@ describe('UsersController (e2e)', () => {
       expect(response.status).toBe(200);
       expect(response.body.name).toBe('Multi Update');
       expect(response.body.currencyCode).toBe('USD');
-      expect(response.body.picture).toBe(
-        'https://example.com/new-avatar.jpg',
-      );
+      expect(response.body.picture).toBe('https://example.com/new-avatar.jpg');
     });
 
     it('should return 400 for invalid currencyCode enum value', async () => {

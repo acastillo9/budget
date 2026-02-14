@@ -238,6 +238,52 @@ export async function seedBill(
 }
 
 /**
+ * Seed a Budget document belonging to a user.
+ */
+export async function seedBudget(
+  app: INestApplication,
+  data: {
+    name?: string;
+    amount: number;
+    period: string;
+    startDate: Date;
+    endDate?: Date;
+    categories: string[];
+    user: string;
+  },
+): Promise<string> {
+  const connection = app.get<Connection>(getConnectionToken());
+  const Model = connection.model('Budget');
+  const doc = await Model.create(data);
+  return doc._id.toString();
+}
+
+/**
+ * Seed a Transaction document belonging to a user.
+ * Amount should be negative for expenses, positive for income.
+ */
+export async function seedTransaction(
+  app: INestApplication,
+  data: {
+    amount: number;
+    date: Date;
+    description?: string;
+    category?: string;
+    account: string;
+    user: string;
+    isTransfer?: boolean;
+  },
+): Promise<string> {
+  const connection = app.get<Connection>(getConnectionToken());
+  const Model = connection.model('Transaction');
+  const doc = await Model.create({
+    ...data,
+    isTransfer: data.isTransfer ?? false,
+  });
+  return doc._id.toString();
+}
+
+/**
  * Read the current balance of an account directly from the database.
  */
 export async function getAccountBalance(

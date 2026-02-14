@@ -1,5 +1,4 @@
-const MAILPIT_API_URL =
-  process.env.MAILPIT_API_URL || 'http://localhost:8025';
+const MAILPIT_API_URL = process.env.MAILPIT_API_URL || 'http://localhost:8025';
 
 interface MailpitAddress {
   Address: string;

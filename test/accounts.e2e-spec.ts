@@ -239,8 +239,7 @@ describe('AccountsController (e2e)', () => {
 
       // The $project stage flattens currencyCode and accountCategory to top level
       const assetSummary = response.body.find(
-        (s: any) =>
-          s.currencyCode === 'USD' && s.accountCategory === 'ASSET',
+        (s: any) => s.currencyCode === 'USD' && s.accountCategory === 'ASSET',
       );
       expect(assetSummary).toBeDefined();
       expect(assetSummary.totalBalance).toBe(6500); // 1500 + 5000

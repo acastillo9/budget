@@ -306,8 +306,9 @@ describe('BillsController (e2e)', () => {
     });
 
     it('should return 401 without auth token', async () => {
-      const response = await request(app.getHttpServer())
-        .post(`/bills/${createdBillId}/${targetDate}/unpay`);
+      const response = await request(app.getHttpServer()).post(
+        `/bills/${createdBillId}/${targetDate}/unpay`,
+      );
 
       expect(response.status).toBe(401);
     });
@@ -431,9 +432,7 @@ describe('BillsController (e2e)', () => {
 
     /** Helper: find a specific instance by its targetDate (YYYY-MM-DD). */
     function findByDate(instances: any[], dateStr: string) {
-      return instances.find(
-        (i) => i.targetDate.startsWith(dateStr),
-      );
+      return instances.find((i) => i.targetDate.startsWith(dateStr));
     }
 
     beforeAll(async () => {
