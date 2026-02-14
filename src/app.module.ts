@@ -13,6 +13,7 @@ import * as path from 'path';
 import { CacheModule } from '@nestjs/cache-manager';
 import { AccountTypesModule } from './account-types/account-types.module';
 import { BillsModule } from './bills/bills.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -37,7 +38,7 @@ import { BillsModule } from './bills/bills.module';
     AccountTypesModule,
     BillsModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
