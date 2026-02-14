@@ -32,7 +32,7 @@ AppModule imports all feature modules. Each feature module follows the same patt
 - **Entity** — Mongoose schema (extends `AuditableSchema` for timestamps, `BaseSchema` for `_id → id` transform)
 - **DTOs** — validated with `class-validator`, transformed with `class-transformer`
 
-Feature modules: Auth, Users, Accounts, Transactions, Bills, Categories, AccountTypes, Currencies.
+Feature modules: Auth, Users, Accounts, Transactions, Bills, Budgets, Categories, AccountTypes, Currencies.
 Infrastructure modules: Database, Mail, I18n (en/es), Cache (global), Config (global).
 
 ### Authentication & Guards
@@ -69,6 +69,16 @@ Bills support recurrence via `frequency` (ONCE, NEVER, DAILY, WEEKLY, BIWEEKLY, 
 Per-instance modifications are stored in an `overrides` Map keyed by ISO date string (`YYYY-MM-DD`). Each override is a `BillModification` sub-document that can change name, amount, dueDate, frequency, mark as paid, or mark as deleted.
 
 `applyToFuture: true` propagates changes to all subsequent unpaid instances. Paying a bill creates a linked transaction; cancelling payment removes it.
+
+### Budget System
+
+Budgets track spending limits per category over recurring periods (`BudgetPeriod`: WEEKLY, MONTHLY, YEARLY). A budget references one or more categories (`categories: Category[]`) and belongs to a user.
+
+**Uniqueness constraint**: For a given user and period, no category may appear in more than one budget. Enforced at the service level on create/update (not a DB index, since `categories` is an array).
+
+**Budget progress is virtual** — `spent`, `remaining`, and `percentUsed` are computed at query time by aggregating transactions matching the budget's categories within each period window. The `BudgetProgress` class is not persisted. Period windows are generated from `startDate` + `period`, aligned and advanced by week/month/year. `endDate` is optional (null = ongoing).
+
+The `GET /budgets/:id/progress` endpoint accepts optional `from` and `to` query params for historical period views.
 
 ### Transaction Logic
 
