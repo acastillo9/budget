@@ -8,12 +8,21 @@ import {
   Delete,
   Request,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryDto } from './dto/category.dto';
 import { AuthenticatedRequest } from 'src/shared/types';
 
+@ApiTags('Categories')
+@ApiBearerAuth('JWT')
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
@@ -25,6 +34,14 @@ export class CategoriesController {
    * @returns The category created.
    * @async
    */
+  @ApiOperation({ summary: 'Create a new category' })
+  @ApiResponse({
+    status: 201,
+    description: 'Category created',
+    type: CategoryDto,
+  })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @Post()
   create(
     @Request() req: AuthenticatedRequest,
@@ -43,6 +60,13 @@ export class CategoriesController {
    * @returns The categories found.
    * @async
    */
+  @ApiOperation({ summary: 'List all categories for the authenticated user' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of categories',
+    type: [CategoryDto],
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @Get()
   findAll(@Request() req: AuthenticatedRequest): Promise<CategoryDto[]> {
     return this.categoriesService.findAll(req.user.userId);
@@ -55,6 +79,19 @@ export class CategoriesController {
    * @returns The category found.
    * @async
    */
+  @ApiOperation({ summary: 'Get a category by ID' })
+  @ApiParam({
+    name: 'id',
+    description: 'Category ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Category found',
+    type: CategoryDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Category not found' })
   @Get(':id')
   findOne(
     @Request() req: AuthenticatedRequest,
@@ -71,6 +108,20 @@ export class CategoriesController {
    * @returns The category updated.
    * @async
    */
+  @ApiOperation({ summary: 'Update a category' })
+  @ApiParam({
+    name: 'id',
+    description: 'Category ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Category updated',
+    type: CategoryDto,
+  })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Category not found' })
   @Patch(':id')
   update(
     @Request() req: AuthenticatedRequest,
@@ -91,6 +142,19 @@ export class CategoriesController {
    * @returns The category removed.
    * @async
    */
+  @ApiOperation({ summary: 'Delete a category' })
+  @ApiParam({
+    name: 'id',
+    description: 'Category ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Category deleted',
+    type: CategoryDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Category not found' })
   @Delete(':id')
   remove(
     @Request() req: AuthenticatedRequest,
