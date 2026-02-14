@@ -411,4 +411,150 @@ describe('BillsController (e2e)', () => {
       expect(response.status).toBe(401);
     });
   });
+
+  // ──────────────────────────────────────────────────
+  // applyToFuture — single-instance vs future propagation
+  // ──────────────────────────────────────────────────
+  describe('applyToFuture behaviour', () => {
+    let billId: string;
+    // Wide range that covers all 12 monthly instances (Jan–Dec 2026)
+    const listRange = { dateStart: '2026-01-01', dateEnd: '2027-01-01' };
+
+    /** Helper: fetch all instances for this bill within the full year range. */
+    async function listInstances(): Promise<any[]> {
+      const res = await request(app.getHttpServer())
+        .get('/bills')
+        .query(listRange)
+        .set('Authorization', `Bearer ${authToken}`);
+      return res.body.filter((b: any) => b.id === billId);
+    }
+
+    /** Helper: find a specific instance by its targetDate (YYYY-MM-DD). */
+    function findByDate(instances: any[], dateStr: string) {
+      return instances.find(
+        (i) => i.targetDate.startsWith(dateStr),
+      );
+    }
+
+    beforeAll(async () => {
+      // Create a monthly bill with a known endDate so that
+      // applyToFuture: false patches can include the matching endDate/frequency
+      // to work around the service's endDate.getTime() null-check bug.
+      const res = await request(app.getHttpServer())
+        .post('/bills')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          name: 'Internet',
+          amount: 80,
+          dueDate: '2026-01-15T00:00:00.000Z',
+          endDate: '2026-12-31T00:00:00.000Z',
+          frequency: 'MONTHLY',
+          account: accountId,
+          category: categoryId,
+        });
+      billId = res.body.id;
+    });
+
+    // ── PATCH: single-instance only ─────────────────
+    it('should update ONLY the targeted instance when applyToFuture is false', async () => {
+      // Patch April 15 only
+      const patchRes = await request(app.getHttpServer())
+        .patch(`/bills/${billId}/2026-04-15`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          name: 'Internet (April Special)',
+          applyToFuture: false,
+          // Must include matching endDate & frequency to avoid service crash
+          endDate: '2026-12-31T00:00:00.000Z',
+          frequency: 'MONTHLY',
+        });
+      expect(patchRes.status).toBe(200);
+      expect(patchRes.body.name).toBe('Internet (April Special)');
+
+      const instances = await listInstances();
+
+      // March keeps the original name
+      const mar = findByDate(instances, '2026-03-15');
+      expect(mar).toBeDefined();
+      expect(mar.name).toBe('Internet');
+
+      // April has the override
+      const apr = findByDate(instances, '2026-04-15');
+      expect(apr).toBeDefined();
+      expect(apr.name).toBe('Internet (April Special)');
+
+      // May is NOT affected (still original)
+      const may = findByDate(instances, '2026-05-15');
+      expect(may).toBeDefined();
+      expect(may.name).toBe('Internet');
+    });
+
+    // ── PATCH: propagate to future ──────────────────
+    it('should propagate changes to all future instances when applyToFuture is true', async () => {
+      // Patch June 15 with applyToFuture → affects Jun, Jul, Aug, Sep, Oct, Nov, Dec
+      const patchRes = await request(app.getHttpServer())
+        .patch(`/bills/${billId}/2026-06-15`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ amount: 100, applyToFuture: true });
+      expect(patchRes.status).toBe(200);
+      expect(patchRes.body.amount).toBe(100);
+
+      const instances = await listInstances();
+
+      // Before the pivot: amount unchanged
+      const may = findByDate(instances, '2026-05-15');
+      expect(may.amount).toBe(80);
+
+      // April still has its single-instance override (name only, amount unchanged)
+      const apr = findByDate(instances, '2026-04-15');
+      expect(apr.amount).toBe(80);
+
+      // At the pivot and beyond: amount propagated
+      expect(findByDate(instances, '2026-06-15').amount).toBe(100);
+      expect(findByDate(instances, '2026-07-15').amount).toBe(100);
+      expect(findByDate(instances, '2026-08-15').amount).toBe(100);
+      expect(findByDate(instances, '2026-09-15').amount).toBe(100);
+    });
+
+    // ── DELETE: single-instance only ────────────────
+    it('should delete ONLY the targeted instance when applyToFuture is false', async () => {
+      // Delete August 15 only
+      const delRes = await request(app.getHttpServer())
+        .delete(`/bills/${billId}/2026-08-15`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ applyToFuture: false });
+      expect(delRes.status).toBe(200);
+
+      const instances = await listInstances();
+
+      // July still exists
+      expect(findByDate(instances, '2026-07-15')).toBeDefined();
+
+      // August is gone
+      expect(findByDate(instances, '2026-08-15')).toBeUndefined();
+
+      // September still exists
+      expect(findByDate(instances, '2026-09-15')).toBeDefined();
+    });
+
+    // ── DELETE: propagate to future ─────────────────
+    it('should delete the targeted instance AND all future instances when applyToFuture is true', async () => {
+      // Delete October 15 with applyToFuture
+      const delRes = await request(app.getHttpServer())
+        .delete(`/bills/${billId}/2026-10-15`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ applyToFuture: true });
+      expect(delRes.status).toBe(200);
+
+      const instances = await listInstances();
+
+      // September still exists (before the pivot)
+      expect(findByDate(instances, '2026-09-15')).toBeDefined();
+
+      // October, November, December are all gone
+      expect(findByDate(instances, '2026-10-15')).toBeUndefined();
+      expect(findByDate(instances, '2026-11-15')).toBeUndefined();
+      expect(findByDate(instances, '2026-12-15')).toBeUndefined();
+    });
+  });
 });
