@@ -31,7 +31,7 @@
     "editAccount": "Edit Account",
     "editAccountDescription": "Update your account details",
     "editAccountError": "Error editing account. Please check your details and try again.",
-    "editAcountSuccess": "Account edited successfully.",
+    "editAccountSuccess": "Account edited successfully.",
     "loadAccountTypesError": "Error loading account types. Please try again later.",
     "loadAccountsError": "Error loading accounts. Please try again later.",
     "loadSummaryError": "Error loading account summary. Please try again later.",

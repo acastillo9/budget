@@ -31,7 +31,7 @@
     "editAccount": "Editar cuenta",
     "editAccountDescription": "Actualiza los detalles de tu cuenta",
     "editAccountError": "Error al editar la cuenta. Por favor verifica los datos e intenta de nuevo.",
-    "editAcountSuccess": "Cuenta editada exitosamente.",
+    "editAccountSuccess": "Cuenta editada exitosamente.",
     "loadAccountTypesError": "Error al cargar los tipos de cuenta. Por favor intenta de nuevo más tarde.",
     "loadAccountsError": "Error al cargar las cuentas. Por favor intenta más tarde.",
     "loadSummaryError": "Error al cargar el resumen de la cuenta. Por favor intenta más tarde.",
