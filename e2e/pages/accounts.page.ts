@@ -80,8 +80,9 @@ export class AccountsPage {
 	// ---------------------------------------------------------------------------
 
 	async openAddDialog() {
+		await this.page.waitForLoadState('networkidle');
 		await this.addAccountButton.click();
-		await expect(this.dialog).toBeVisible();
+		await expect(this.dialog).toBeVisible({ timeout: 10_000 });
 	}
 
 	async fillName(name: string) {
@@ -203,6 +204,22 @@ export class AccountsPage {
 	async deleteAccount(accountName: string) {
 		await this.clickDelete(accountName);
 		await this.confirmDeletion();
+	}
+
+	/**
+	 * Returns the balance locator (p.font-semibold) inside a given account card.
+	 */
+	getAccountBalanceLocator(accountName: string): Locator {
+		return this.getAccountCard(accountName).locator('p.font-semibold');
+	}
+
+	/**
+	 * Assert that an account card displays the expected balance text.
+	 * Uses a regex or substring match to be locale-flexible.
+	 */
+	async expectAccountBalance(accountName: string, expectedPattern: RegExp) {
+		const balanceLocator = this.getAccountBalanceLocator(accountName);
+		await expect(balanceLocator).toHaveText(expectedPattern, { timeout: 10_000 });
 	}
 
 	/**

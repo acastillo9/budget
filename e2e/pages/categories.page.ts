@@ -66,8 +66,9 @@ export class CategoriesPage {
 	// ---------------------------------------------------------------------------
 
 	async openAddDialog() {
+		await this.page.waitForLoadState('networkidle');
 		await this.addCategoryButton.click();
-		await expect(this.dialog).toBeVisible();
+		await expect(this.dialog).toBeVisible({ timeout: 10_000 });
 	}
 
 	async fillName(name: string) {

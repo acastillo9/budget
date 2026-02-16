@@ -22,7 +22,7 @@
 		</Badge>
 	</div>
 
-	<div class="grid grid-cols-3 gap-4">
+	<div class="grid max-h-64 grid-cols-3 gap-4 overflow-y-auto">
 		{#each categories as categoryItem (categoryItem.id)}
 			{@const Icon = iconMap[categoryItem.icon as keyof typeof iconMap]}
 			<div class="flex flex-col items-center space-y-2">
