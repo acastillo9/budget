@@ -7,6 +7,7 @@ import { setFlash } from "sveltekit-flash-message/server";
 import { $t } from "$lib/i18n";
 import { fail, type Actions } from "@sveltejs/kit";
 import { createCategorySchema } from "$lib/schemas/category.schema";
+import { addCategoryAction } from "$lib/server/actions/category";
 
 export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
   // Load accounts from the API
@@ -73,6 +74,7 @@ export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
 }
 
 export const actions: Actions = {
+  addCategory: async (event) => addCategoryAction(event),
   addBill: async ({ request, cookies, fetch }) => {
     const form = await superValidate(request, zod4(createBillSchema));
 

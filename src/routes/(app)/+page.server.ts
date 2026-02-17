@@ -8,6 +8,7 @@ import { zod4 } from "sveltekit-superforms/adapters";
 import { createAccountSchema } from "$lib/schemas/account.schema";
 import { createCategorySchema } from "$lib/schemas/category.schema";
 import { createTransactionSchema, createTransferSchema } from "$lib/schemas/transaction.schema";
+import { addCategoryAction } from "$lib/server/actions/category";
 
 export const load: PageServerLoad = async ({ locals, cookies, fetch }) => {
   const { user } = locals
@@ -147,35 +148,7 @@ export const actions: Actions = {
       return fail(500, { form });
     }
   },
-  addCategory: async ({ request, cookies, fetch }) => {
-    const form = await superValidate(request, zod4(createCategorySchema));
-
-    if (!form.valid) {
-      return fail(400, { form });
-    }
-
-    try {
-      const response = await fetch(`${API_URL}/categories`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(form.data)
-      });
-
-      if (!response.ok) {
-        const { message, statusCode } = await response.json();
-        setFlash({ type: 'error', message }, cookies);
-        return fail(statusCode, { form });
-      }
-
-      setFlash({ type: 'success', message: $t('categories.addCategorySuccess') }, cookies);
-      return { form };
-    } catch {
-      setFlash({ type: 'error', message: $t('categories.addCategoryError') }, cookies);
-      return fail(500, { form });
-    }
-  },
+  addCategory: async (event) => addCategoryAction(event),
   addTransaction: async ({ request, cookies, fetch }) => {
     const form = await superValidate(request, zod4(createTransactionSchema));
 
