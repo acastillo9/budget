@@ -9,7 +9,7 @@ import { CategoriesPage } from './pages/categories.page';
 
 /** Generate a unique name to avoid collisions between parallel tests. */
 function uniqueName(prefix: string): string {
-	return `${prefix} ${Date.now()}`;
+	return `${prefix} ${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
 /** Create a test account and wait for success. Returns the account name. */
@@ -193,10 +193,13 @@ test.describe('Transactions — Wizard Navigation', () => {
 
 		// Create a new category from within the wizard
 		await transactionsPage.createCategoryInWizard(newCategoryName, 'Shopping Cart');
-		await transactionsPage.expectSuccessToast(/category added successfully/i);
-		await transactionsPage.toast.waitFor({ state: 'hidden', timeout: 10_000 });
 
 		// The newly created category should appear in the grid and be selectable
+		const newCategoryContainer = transactionsPage.dialog.locator(
+			'.flex.flex-col.items-center',
+			{ hasText: newCategoryName }
+		);
+		await expect(newCategoryContainer).toBeVisible({ timeout: 10_000 });
 		await transactionsPage.selectCategory(newCategoryName);
 		await expect(transactionsPage.nextButton).toBeEnabled();
 

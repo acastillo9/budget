@@ -294,7 +294,7 @@ export class TransactionsPage {
 	 * Returns the row locator for a transaction identified by its description text.
 	 */
 	getTransactionItem(description: string): Locator {
-		return this.page.locator('.border-b', { hasText: description });
+		return this.page.locator('.space-y-4 > div', { hasText: description });
 	}
 
 	/**
