@@ -32,6 +32,7 @@ Before writing any test, thoroughly understand what you're testing. Read the [Te
 7. Read page components (`+page.svelte`) for the feature being tested — identify UI elements, dialogs, forms, lists, buttons
 
 Capture this information to inform scenario planning. Pay special attention to:
+
 - **Form fields and validation rules** from Zod schemas (required fields, min/max, patterns)
 - **Data relationships** between entities (e.g., transactions reference accounts and categories)
 - **Auth requirements** — which routes are protected, how redirects work
@@ -76,6 +77,7 @@ Add `e2e/.auth/` to `.gitignore` if not already there.
 ### Environment variables
 
 If using a real backend for auth, ensure test credentials are available:
+
 - `TEST_USER_EMAIL` — test account email
 - `TEST_USER_PASSWORD` — test account password
 
@@ -90,6 +92,7 @@ Read the [Test Planning Guide](references/test-planning-guide.md#scenario-planni
 1. **Identify the feature scope** — which pages/flows are being tested?
 2. **List all user interactions** on those pages (forms, buttons, navigation, dialogs)
 3. **Categorize scenarios** by priority:
+
    - **P0 Critical**: Auth flows, core page loads, primary CRUD operations
    - **P1 High**: Form validation, error handling, complete CRUD cycles
    - **P2 Medium**: Cross-feature workflows, filters, navigation
@@ -101,6 +104,7 @@ Read the [Test Planning Guide](references/test-planning-guide.md#scenario-planni
 ### Scenario template
 
 For each test, define:
+
 - **Name**: Descriptive test name (`should create a new checking account with USD currency`)
 - **Preconditions**: Auth state, existing data, page state
 - **Steps**: User actions in sequence
@@ -128,13 +132,13 @@ import { test as setup, expect } from '@playwright/test';
 const authFile = 'e2e/.auth/user.json';
 
 setup('authenticate', async ({ page }) => {
-  await page.goto('/signin');
-  // Fill credentials from env vars
-  await page.getByLabel(/email/i).fill(process.env.TEST_USER_EMAIL!);
-  await page.getByLabel(/password/i).fill(process.env.TEST_USER_PASSWORD!);
-  await page.getByRole('button', { name: /sign in/i }).click();
-  await page.waitForURL('/');
-  await page.context().storageState({ path: authFile });
+	await page.goto('/signin');
+	// Fill credentials from env vars
+	await page.getByLabel(/email/i).fill(process.env.TEST_USER_EMAIL!);
+	await page.getByLabel(/password/i).fill(process.env.TEST_USER_PASSWORD!);
+	await page.getByRole('button', { name: /sign in/i }).click();
+	await page.waitForURL('/');
+	await page.context().storageState({ path: authFile });
 });
 ```
 
@@ -144,21 +148,21 @@ setup('authenticate', async ({ page }) => {
 import { test, expect } from '@playwright/test';
 
 test.describe('Feature Name', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/feature-url');
-  });
+	test.beforeEach(async ({ page }) => {
+		await page.goto('/feature-url');
+	});
 
-  test('should display the page correctly', async ({ page }) => {
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  });
+	test('should display the page correctly', async ({ page }) => {
+		await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+	});
 
-  test('should create a new item', async ({ page }) => {
-    await page.getByRole('button', { name: /add|create|new/i }).click();
-    // Fill form...
-    await page.getByRole('button', { name: /save|submit/i }).click();
-    // Verify success toast
-    await expect(page.locator('[data-sonner-toast]')).toBeVisible();
-  });
+	test('should create a new item', async ({ page }) => {
+		await page.getByRole('button', { name: /add|create|new/i }).click();
+		// Fill form...
+		await page.getByRole('button', { name: /save|submit/i }).click();
+		// Verify success toast
+		await expect(page.locator('[data-sonner-toast]')).toBeVisible();
+	});
 });
 ```
 
@@ -176,19 +180,19 @@ For complete workflow tests that span multiple features:
 
 ```typescript
 test('complete transaction workflow', async ({ page }) => {
-  // 1. Ensure prerequisites exist (or create them)
-  await page.goto('/categories');
-  // Create category if needed...
+	// 1. Ensure prerequisites exist (or create them)
+	await page.goto('/categories');
+	// Create category if needed...
 
-  // 2. Navigate to main feature
-  await page.goto('/transactions');
+	// 2. Navigate to main feature
+	await page.goto('/transactions');
 
-  // 3. Perform the workflow
-  await page.getByRole('button', { name: /add/i }).click();
-  // Fill form with references to prerequisite entities...
+	// 3. Perform the workflow
+	await page.getByRole('button', { name: /add/i }).click();
+	// Fill form with references to prerequisite entities...
 
-  // 4. Verify end state
-  await expect(page.getByText('Transaction created')).toBeVisible();
+	// 4. Verify end state
+	await expect(page.getByText('Transaction created')).toBeVisible();
 });
 ```
 
@@ -226,13 +230,13 @@ npx playwright show-report
 
 ### Common issues and fixes
 
-| Issue | Cause | Fix |
-|-------|-------|-----|
-| Element not found | Page not loaded, selector wrong | Add `waitForURL()` or `waitForLoadState()` before assertion |
-| Timeout on click | Element obscured or not interactive | Check for overlays, use `{ force: true }` as last resort |
-| Auth fails in CI | Missing env vars | Ensure `TEST_USER_EMAIL` and `TEST_USER_PASSWORD` are set in CI |
-| Flaky tests | Race conditions, animations | Add explicit waits, use `expect().toBeVisible()` before interaction |
-| Wrong URL after redirect | SvelteKit route groups | Remember `(app)` and `(auth)` groups don't appear in URLs |
+| Issue                    | Cause                               | Fix                                                                 |
+| ------------------------ | ----------------------------------- | ------------------------------------------------------------------- |
+| Element not found        | Page not loaded, selector wrong     | Add `waitForURL()` or `waitForLoadState()` before assertion         |
+| Timeout on click         | Element obscured or not interactive | Check for overlays, use `{ force: true }` as last resort            |
+| Auth fails in CI         | Missing env vars                    | Ensure `TEST_USER_EMAIL` and `TEST_USER_PASSWORD` are set in CI     |
+| Flaky tests              | Race conditions, animations         | Add explicit waits, use `expect().toBeVisible()` before interaction |
+| Wrong URL after redirect | SvelteKit route groups              | Remember `(app)` and `(auth)` groups don't appear in URLs           |
 
 ## Conditional Workflows
 

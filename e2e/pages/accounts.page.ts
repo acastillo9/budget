@@ -114,12 +114,7 @@ export class AccountsPage {
 	/**
 	 * Complete flow: open dialog → fill form → submit for creation.
 	 */
-	async createAccount(
-		name: string,
-		balance: string,
-		accountType: string,
-		currency?: string
-	) {
+	async createAccount(name: string, balance: string, accountType: string, currency?: string) {
 		await this.openAddDialog();
 		await this.fillName(name);
 		await this.fillBalance(balance);

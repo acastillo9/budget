@@ -4,23 +4,23 @@ import type { PageServerLoad } from './$types';
 import { setFlash } from 'sveltekit-flash-message/server';
 
 export const load: PageServerLoad = async ({ cookies }) => {
-  let location;
-  try {
-    const response = await fetch(`${API_URL}/auth/google`, {
-      method: 'GET',
-      redirect: 'manual' // Prevents automatic browser redirect
-    });
+	let location;
+	try {
+		const response = await fetch(`${API_URL}/auth/google`, {
+			method: 'GET',
+			redirect: 'manual' // Prevents automatic browser redirect
+		});
 
-    location = response.headers.get('location');
-  } catch {
-    setFlash({ type: 'error', message: 'Failed to redirect to Google' }, cookies);
-    throw redirect(307, '/signin');
-  }
+		location = response.headers.get('location');
+	} catch {
+		setFlash({ type: 'error', message: 'Failed to redirect to Google' }, cookies);
+		throw redirect(307, '/signin');
+	}
 
-  if (location) {
-    throw redirect(302, location); // Redirect the user to Google
-  }
+	if (location) {
+		throw redirect(302, location); // Redirect the user to Google
+	}
 
-  setFlash({ type: 'error', message: 'Failed to redirect to Google' }, cookies);
-  throw redirect(307, '/signin');
+	setFlash({ type: 'error', message: 'Failed to redirect to Google' }, cookies);
+	throw redirect(307, '/signin');
 };

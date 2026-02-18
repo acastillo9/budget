@@ -124,12 +124,7 @@ export class SignUpPage {
 	 * @param code       6-digit activation code (obtained from Mailpit)
 	 * @param password   Password meeting strength requirements
 	 */
-	async register(
-		name: string,
-		email: string,
-		code: string,
-		password: string
-	) {
+	async register(name: string, email: string, code: string, password: string) {
 		// Step 1 — Basic info
 		await this.fillBasicInfo(name, email);
 		await this.submitBasicInfo();

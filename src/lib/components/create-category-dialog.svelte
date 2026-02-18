@@ -13,12 +13,21 @@
 	import Label from './ui/label/label.svelte';
 	import * as Select from '$lib/components/ui/select';
 
+	import type { Category } from '$lib/types/category.types';
+	import type { SuperValidated, Infer } from 'sveltekit-superforms';
+
 	let {
 		data,
 		categoryType = undefined,
 		category = undefined,
 		open = $bindable(false),
 		onClose = () => {}
+	}: {
+		data: SuperValidated<Infer<typeof createCategorySchema>>;
+		categoryType?: string;
+		category?: Category;
+		open?: boolean;
+		onClose?: () => void;
 	} = $props();
 	let selectedIcon = $state('');
 	let selectedCategoryType = $state(categoryType);
@@ -28,7 +37,7 @@
 		onSubmit({ formData }) {
 			formData.set('icon', selectedIcon);
 			if (!categoryType) {
-				formData.set('categoryType', selectedCategoryType);
+				formData.set('categoryType', selectedCategoryType || '');
 			} else {
 				formData.set('categoryType', categoryType);
 			}

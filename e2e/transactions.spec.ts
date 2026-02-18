@@ -26,11 +26,7 @@ async function createTestAccount(page: Page, prefix: string): Promise<string> {
 }
 
 /** Create a test category and wait for success. Returns the category name. */
-async function createTestCategory(
-	page: Page,
-	prefix: string,
-	type: string
-): Promise<string> {
+async function createTestCategory(page: Page, prefix: string, type: string): Promise<string> {
 	const name = uniqueName(prefix);
 	const categoriesPage = new CategoriesPage(page);
 	await categoriesPage.goto();
@@ -195,10 +191,9 @@ test.describe('Transactions — Wizard Navigation', () => {
 		await transactionsPage.createCategoryInWizard(newCategoryName, 'Shopping Cart');
 
 		// The newly created category should appear in the grid and be selectable
-		const newCategoryContainer = transactionsPage.dialog.locator(
-			'.flex.flex-col.items-center',
-			{ hasText: newCategoryName }
-		);
+		const newCategoryContainer = transactionsPage.dialog.locator('.flex.flex-col.items-center', {
+			hasText: newCategoryName
+		});
 		await expect(newCategoryContainer).toBeVisible({ timeout: 10_000 });
 		await transactionsPage.selectCategory(newCategoryName);
 		await expect(transactionsPage.nextButton).toBeEnabled();
@@ -422,9 +417,7 @@ test.describe('Transactions — Edit', () => {
 		await expect(transactionsPage.dialog).not.toBeVisible({ timeout: 10_000 });
 		await transactionsPage.expectSuccessToast(/transaction edited successfully/i);
 		await expect(transactionsPage.getTransactionItem(newDescription)).toBeVisible();
-		await expect(
-			transactionsPage.getTransactionItem(transactionDescription)
-		).not.toBeVisible();
+		await expect(transactionsPage.getTransactionItem(transactionDescription)).not.toBeVisible();
 
 		// Verify account balance reflects updated expense: $10,000 - $300 = $9,700
 		const accountsPage = new AccountsPage(page);
@@ -468,9 +461,7 @@ test.describe('Transactions — Delete', () => {
 		await transactionsPage.clickDelete(transactionDescription);
 
 		await expect(transactionsPage.confirmationDialog).toBeVisible();
-		await expect(transactionsPage.confirmationDescription).toContainText(
-			transactionDescription
-		);
+		await expect(transactionsPage.confirmationDescription).toContainText(transactionDescription);
 	});
 
 	test('should cancel deletion and keep the transaction', async () => {
@@ -478,20 +469,16 @@ test.describe('Transactions — Delete', () => {
 		await transactionsPage.cancelDeletion();
 
 		await expect(transactionsPage.confirmationDialog).not.toBeVisible();
-		await expect(
-			transactionsPage.getTransactionItem(transactionDescription)
-		).toBeVisible();
+		await expect(transactionsPage.getTransactionItem(transactionDescription)).toBeVisible();
 	});
 
-	test('should delete a transaction successfully and restore account balance', async ({
-		page
-	}) => {
+	test('should delete a transaction successfully and restore account balance', async ({ page }) => {
 		await transactionsPage.deleteTransaction(transactionDescription);
 
 		await transactionsPage.expectSuccessToast(/transaction deleted successfully/i);
-		await expect(
-			transactionsPage.getTransactionItem(transactionDescription)
-		).not.toBeVisible({ timeout: 10_000 });
+		await expect(transactionsPage.getTransactionItem(transactionDescription)).not.toBeVisible({
+			timeout: 10_000
+		});
 
 		// Verify account balance restored: $10,000 - $50 (created) + $50 (deleted) = $10,000
 		const accountsPage = new AccountsPage(page);
@@ -548,9 +535,7 @@ test.describe('Transactions — Full CRUD Workflow', () => {
 		await expect(transactionsPage.dialog).not.toBeVisible({ timeout: 10_000 });
 		await transactionsPage.expectSuccessToast(/transaction edited successfully/i);
 		await expect(transactionsPage.getTransactionItem(updatedDescription)).toBeVisible();
-		await expect(
-			transactionsPage.getTransactionItem(originalDescription)
-		).not.toBeVisible();
+		await expect(transactionsPage.getTransactionItem(originalDescription)).not.toBeVisible();
 		await transactionsPage.toast.waitFor({ state: 'hidden', timeout: 10_000 });
 
 		// Verify balance after edit: $10,000 - $500 = $9,500
@@ -565,9 +550,9 @@ test.describe('Transactions — Full CRUD Workflow', () => {
 		// --- Delete ---
 		await transactionsPage.deleteTransaction(updatedDescription);
 		await transactionsPage.expectSuccessToast(/transaction deleted successfully/i);
-		await expect(
-			transactionsPage.getTransactionItem(updatedDescription)
-		).not.toBeVisible({ timeout: 10_000 });
+		await expect(transactionsPage.getTransactionItem(updatedDescription)).not.toBeVisible({
+			timeout: 10_000
+		});
 
 		// Verify balance after delete: back to $10,000
 		await accountsPage.goto();

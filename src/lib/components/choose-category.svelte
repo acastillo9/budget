@@ -4,8 +4,21 @@
 	import { t } from 'svelte-i18n';
 	import Button from './ui/button/button.svelte';
 	import CreateCategoryDialog from './create-category-dialog.svelte';
+	import type { Category } from '$lib/types/category.types';
+	import type { SuperValidated, Infer } from 'sveltekit-superforms';
+	import type { createCategorySchema } from '$lib/schemas/category.schema';
 
-	let { categoryType, createCategoryForm, categories, category = $bindable() } = $props();
+	let {
+		categoryType,
+		createCategoryForm,
+		categories,
+		category = $bindable()
+	}: {
+		categoryType: string;
+		createCategoryForm: SuperValidated<Infer<typeof createCategorySchema>>;
+		categories: Category[];
+		category?: Category;
+	} = $props();
 </script>
 
 <div class="space-y-4">

@@ -40,287 +40,284 @@ async function registerUser(page: Page, mailpit: MailpitClient): Promise<string>
 // Sign In Page
 // ---------------------------------------------------------------------------
 test.describe('Sign In Page', () => {
-  let signInPage: SignInPage;
+	let signInPage: SignInPage;
 
-  test.beforeEach(async ({ page }) => {
-    signInPage = new SignInPage(page);
-    await signInPage.goto();
-    await page.waitForLoadState('networkidle');
-  });
+	test.beforeEach(async ({ page }) => {
+		signInPage = new SignInPage(page);
+		await signInPage.goto();
+		await page.waitForLoadState('networkidle');
+	});
 
-  test('should display the sign in form with all elements', async () => {
-    await expect(signInPage.heading).toBeVisible();
-    await expect(signInPage.description).toBeVisible();
-    await expect(signInPage.emailInput).toBeVisible();
-    await expect(signInPage.passwordInput).toBeVisible();
-    await expect(signInPage.rememberMeCheckbox).toBeVisible();
-    await expect(signInPage.loginButton).toBeVisible();
-    await expect(signInPage.googleLoginButton).toBeVisible();
-    await expect(signInPage.forgotPasswordLink).toBeVisible();
-    await expect(signInPage.signUpLink).toBeVisible();
-  });
+	test('should display the sign in form with all elements', async () => {
+		await expect(signInPage.heading).toBeVisible();
+		await expect(signInPage.description).toBeVisible();
+		await expect(signInPage.emailInput).toBeVisible();
+		await expect(signInPage.passwordInput).toBeVisible();
+		await expect(signInPage.rememberMeCheckbox).toBeVisible();
+		await expect(signInPage.loginButton).toBeVisible();
+		await expect(signInPage.googleLoginButton).toBeVisible();
+		await expect(signInPage.forgotPasswordLink).toBeVisible();
+		await expect(signInPage.signUpLink).toBeVisible();
+	});
 
-  test('should keep login button disabled when fields are empty', async () => {
-    await expect(signInPage.loginButton).toBeDisabled();
-  });
+	test('should keep login button disabled when fields are empty', async () => {
+		await expect(signInPage.loginButton).toBeDisabled();
+	});
 
-  test('should enable login button when email and password are filled', async () => {
-    await signInPage.fillCredentials('user@example.com', 'SomePassword1!');
-    await expect(signInPage.loginButton).toBeEnabled();
-  });
+	test('should enable login button when email and password are filled', async () => {
+		await signInPage.fillCredentials('user@example.com', 'SomePassword1!');
+		await expect(signInPage.loginButton).toBeEnabled();
+	});
 
-  test('should toggle password visibility', async ({ page }) => {
-    const passwordInput = page.locator('input[name="password"]');
-    const toggleButton = page.locator('input[name="password"] ~ button');
+	test('should toggle password visibility', async ({ page }) => {
+		const passwordInput = page.locator('input[name="password"]');
+		const toggleButton = page.locator('input[name="password"] ~ button');
 
-    await passwordInput.fill('secret');
-    expect(await passwordInput.getAttribute('type')).toBe('password');
+		await passwordInput.fill('secret');
+		expect(await passwordInput.getAttribute('type')).toBe('password');
 
-    // Click toggle button to show
-    await toggleButton.click();
-    await page.waitForFunction(
-      () => document.querySelector<HTMLInputElement>('input[name="password"]')?.type === 'text'
-    );
-    expect(await passwordInput.getAttribute('type')).toBe('text');
+		// Click toggle button to show
+		await toggleButton.click();
+		await page.waitForFunction(
+			() => document.querySelector<HTMLInputElement>('input[name="password"]')?.type === 'text'
+		);
+		expect(await passwordInput.getAttribute('type')).toBe('text');
 
-    // Click again to hide
-    await toggleButton.click();
-    await page.waitForFunction(
-      () =>
-        document.querySelector<HTMLInputElement>('input[name="password"]')?.type === 'password'
-    );
-    expect(await passwordInput.getAttribute('type')).toBe('password');
-  });
+		// Click again to hide
+		await toggleButton.click();
+		await page.waitForFunction(
+			() => document.querySelector<HTMLInputElement>('input[name="password"]')?.type === 'password'
+		);
+		expect(await passwordInput.getAttribute('type')).toBe('password');
+	});
 
-  test('should show error toast on invalid credentials', async () => {
-    // When the backend is unavailable or returns an error, the server action
-    // fails and sets a flash message (rendered as a toast via svelte-sonner).
-    await signInPage.signIn('wrong@example.com', 'WrongPass1!');
-    await expect(signInPage.toast).toBeVisible();
-  });
+	test('should show error toast on invalid credentials', async () => {
+		// When the backend is unavailable or returns an error, the server action
+		// fails and sets a flash message (rendered as a toast via svelte-sonner).
+		await signInPage.signIn('wrong@example.com', 'WrongPass1!');
+		await expect(signInPage.toast).toBeVisible();
+	});
 
-  test('should navigate to sign up page', async ({ page }) => {
-    await signInPage.signUpLink.click();
-    await expect(page).toHaveURL(/\/signup/);
-  });
+	test('should navigate to sign up page', async ({ page }) => {
+		await signInPage.signUpLink.click();
+		await expect(page).toHaveURL(/\/signup/);
+	});
 
-  test('should navigate to forgot password page', async ({ page }) => {
-    await signInPage.forgotPasswordLink.click();
-    await expect(page).toHaveURL(/\/forgot-password/);
-  });
+	test('should navigate to forgot password page', async ({ page }) => {
+		await signInPage.forgotPasswordLink.click();
+		await expect(page).toHaveURL(/\/forgot-password/);
+	});
 });
 
 // ---------------------------------------------------------------------------
 // Sign Up Page
 // ---------------------------------------------------------------------------
 test.describe('Sign Up Page', () => {
-  let signUpPage: SignUpPage;
+	let signUpPage: SignUpPage;
 
-  test.beforeEach(async ({ page }) => {
-    signUpPage = new SignUpPage(page);
-    await signUpPage.goto();
-  });
+	test.beforeEach(async ({ page }) => {
+		signUpPage = new SignUpPage(page);
+		await signUpPage.goto();
+	});
 
-  test('should display the step 1 registration form with all elements', async () => {
-    await expect(signUpPage.heading).toBeVisible();
-    await expect(signUpPage.description).toBeVisible();
-    await expect(signUpPage.nameInput).toBeVisible();
-    await expect(signUpPage.emailInput).toBeVisible();
-    await expect(signUpPage.nextButton).toBeVisible();
-    await expect(signUpPage.googleButton).toBeVisible();
-    await expect(signUpPage.signInLink).toBeVisible();
-  });
+	test('should display the step 1 registration form with all elements', async () => {
+		await expect(signUpPage.heading).toBeVisible();
+		await expect(signUpPage.description).toBeVisible();
+		await expect(signUpPage.nameInput).toBeVisible();
+		await expect(signUpPage.emailInput).toBeVisible();
+		await expect(signUpPage.nextButton).toBeVisible();
+		await expect(signUpPage.googleButton).toBeVisible();
+		await expect(signUpPage.signInLink).toBeVisible();
+	});
 
-  test('should keep next button disabled when fields are empty', async () => {
-    await expect(signUpPage.nextButton).toBeDisabled();
-  });
+	test('should keep next button disabled when fields are empty', async () => {
+		await expect(signUpPage.nextButton).toBeDisabled();
+	});
 
-  test('should enable next button when name and email are filled', async () => {
-    await signUpPage.fillBasicInfo('John Doe', 'john@example.com');
-    await expect(signUpPage.nextButton).toBeEnabled();
-  });
+	test('should enable next button when name and email are filled', async () => {
+		await signUpPage.fillBasicInfo('John Doe', 'john@example.com');
+		await expect(signUpPage.nextButton).toBeEnabled();
+	});
 
-  test('should show validation error for invalid email format', async () => {
-    await signUpPage.nameInput.fill('John Doe');
-    await signUpPage.emailInput.fill('invalid-email');
-    // Focus away to trigger oninput validation
-    await signUpPage.nameInput.focus();
-    await expect(signUpPage.page.getByText(/invalid/i)).toBeVisible();
-  });
+	test('should show validation error for invalid email format', async () => {
+		await signUpPage.nameInput.fill('John Doe');
+		await signUpPage.emailInput.fill('invalid-email');
+		// Focus away to trigger oninput validation
+		await signUpPage.nameInput.focus();
+		await expect(signUpPage.page.getByText(/invalid/i)).toBeVisible();
+	});
 
-  test('should keep next button disabled when only email is filled', async () => {
-    await signUpPage.emailInput.fill('john@example.com');
-    // Name is not filled — button should stay disabled
-    await expect(signUpPage.nextButton).toBeDisabled();
-  });
+	test('should keep next button disabled when only email is filled', async () => {
+		await signUpPage.emailInput.fill('john@example.com');
+		// Name is not filled — button should stay disabled
+		await expect(signUpPage.nextButton).toBeDisabled();
+	});
 
-  test('should keep next button disabled when only name is filled', async () => {
-    await signUpPage.nameInput.fill('John Doe');
-    // Email is not filled — button should stay disabled
-    await expect(signUpPage.nextButton).toBeDisabled();
-  });
+	test('should keep next button disabled when only name is filled', async () => {
+		await signUpPage.nameInput.fill('John Doe');
+		// Email is not filled — button should stay disabled
+		await expect(signUpPage.nextButton).toBeDisabled();
+	});
 
-  test('should navigate to sign in page', async ({ page }) => {
-    await signUpPage.signInLink.click();
-    await expect(page).toHaveURL(/\/signin/);
-  });
+	test('should navigate to sign in page', async ({ page }) => {
+		await signUpPage.signInLink.click();
+		await expect(page).toHaveURL(/\/signin/);
+	});
 });
 
 // ---------------------------------------------------------------------------
 // Forgot Password Page
 // ---------------------------------------------------------------------------
 test.describe('Forgot Password Page', () => {
-  let forgotPasswordPage: ForgotPasswordPage;
+	let forgotPasswordPage: ForgotPasswordPage;
 
-  test.beforeEach(async ({ page }) => {
-    forgotPasswordPage = new ForgotPasswordPage(page);
-    await forgotPasswordPage.goto();
-  });
+	test.beforeEach(async ({ page }) => {
+		forgotPasswordPage = new ForgotPasswordPage(page);
+		await forgotPasswordPage.goto();
+	});
 
-  test('should display the forgot password form with all elements', async () => {
-    await expect(forgotPasswordPage.heading).toBeVisible();
-    await expect(forgotPasswordPage.description).toBeVisible();
-    await expect(forgotPasswordPage.emailInput).toBeVisible();
-    await expect(forgotPasswordPage.sendButton).toBeVisible();
-    await expect(forgotPasswordPage.signInLink).toBeVisible();
-  });
+	test('should display the forgot password form with all elements', async () => {
+		await expect(forgotPasswordPage.heading).toBeVisible();
+		await expect(forgotPasswordPage.description).toBeVisible();
+		await expect(forgotPasswordPage.emailInput).toBeVisible();
+		await expect(forgotPasswordPage.sendButton).toBeVisible();
+		await expect(forgotPasswordPage.signInLink).toBeVisible();
+	});
 
-  test('should keep send button disabled when email is empty', async () => {
-    await expect(forgotPasswordPage.sendButton).toBeDisabled();
-  });
+	test('should keep send button disabled when email is empty', async () => {
+		await expect(forgotPasswordPage.sendButton).toBeDisabled();
+	});
 
-  test('should enable send button when valid email is entered', async () => {
-    await forgotPasswordPage.fillEmail('user@example.com');
-    await expect(forgotPasswordPage.sendButton).toBeEnabled();
-  });
+	test('should enable send button when valid email is entered', async () => {
+		await forgotPasswordPage.fillEmail('user@example.com');
+		await expect(forgotPasswordPage.sendButton).toBeEnabled();
+	});
 
-  test('should navigate to sign in page', async ({ page }) => {
-    await forgotPasswordPage.signInLink.click();
-    await expect(page).toHaveURL(/\/signin/);
-  });
+	test('should navigate to sign in page', async ({ page }) => {
+		await forgotPasswordPage.signInLink.click();
+		await expect(page).toHaveURL(/\/signin/);
+	});
 });
 
 // ---------------------------------------------------------------------------
 // Reset Password Page
 // ---------------------------------------------------------------------------
 test.describe('Reset Password Page', () => {
-  test('should redirect to forgot password if token is invalid', async ({ page }) => {
-    // The server-side load function verifies the token against the backend.
-    // With no backend or an invalid token, it redirects to /forgot-password.
-    await page.goto('/reset-password/invalid-token-abc123');
-    await expect(page).toHaveURL(/\/forgot-password/);
-  });
+	test('should redirect to forgot password if token is invalid', async ({ page }) => {
+		// The server-side load function verifies the token against the backend.
+		// With no backend or an invalid token, it redirects to /forgot-password.
+		await page.goto('/reset-password/invalid-token-abc123');
+		await expect(page).toHaveURL(/\/forgot-password/);
+	});
 });
 
 // ---------------------------------------------------------------------------
 // Auth Redirects — Protected routes
 // ---------------------------------------------------------------------------
 test.describe('Auth Redirects', () => {
-  const protectedRoutes = ['/', '/accounts', '/transactions', '/bills', '/categories', '/budgets'];
+	const protectedRoutes = ['/', '/accounts', '/transactions', '/bills', '/categories', '/budgets'];
 
-  for (const route of protectedRoutes) {
-    test(`should redirect unauthenticated user from ${route} to sign in`, async ({
-      browser
-    }) => {
-      // Create a fresh context with no stored auth state
-      const context = await browser.newContext();
-      const page = await context.newPage();
+	for (const route of protectedRoutes) {
+		test(`should redirect unauthenticated user from ${route} to sign in`, async ({ browser }) => {
+			// Create a fresh context with no stored auth state
+			const context = await browser.newContext();
+			const page = await context.newPage();
 
-      await page.goto(route);
-      await expect(page).toHaveURL(/\/signin/);
+			await page.goto(route);
+			await expect(page).toHaveURL(/\/signin/);
 
-      await context.close();
-    });
-  }
+			await context.close();
+		});
+	}
 });
 
 // ---------------------------------------------------------------------------
 // Navigation between auth pages
 // ---------------------------------------------------------------------------
 test.describe('Auth Page Navigation', () => {
-  test('should navigate signin → signup → signin', async ({ page }) => {
-    await page.goto('/signin');
-    await page.getByRole('link', { name: /sign up/i }).click();
-    await expect(page).toHaveURL(/\/signup/);
+	test('should navigate signin → signup → signin', async ({ page }) => {
+		await page.goto('/signin');
+		await page.getByRole('link', { name: /sign up/i }).click();
+		await expect(page).toHaveURL(/\/signup/);
 
-    await page.getByRole('link', { name: /sign in/i }).click();
-    await expect(page).toHaveURL(/\/signin/);
-  });
+		await page.getByRole('link', { name: /sign in/i }).click();
+		await expect(page).toHaveURL(/\/signin/);
+	});
 
-  test('should navigate signin → forgot password → signin', async ({ page }) => {
-    await page.goto('/signin');
-    await page.getByRole('link', { name: /forgot password/i }).click();
-    await expect(page).toHaveURL(/\/forgot-password/);
+	test('should navigate signin → forgot password → signin', async ({ page }) => {
+		await page.goto('/signin');
+		await page.getByRole('link', { name: /forgot password/i }).click();
+		await expect(page).toHaveURL(/\/forgot-password/);
 
-    await page.getByRole('link', { name: /sign in/i }).click();
-    await expect(page).toHaveURL(/\/signin/);
-  });
+		await page.getByRole('link', { name: /sign in/i }).click();
+		await expect(page).toHaveURL(/\/signin/);
+	});
 });
 
 // ---------------------------------------------------------------------------
 // Complete Registration Flow
 // ---------------------------------------------------------------------------
 test.describe('Complete Registration Flow', () => {
-  let signUpPage: SignUpPage;
-  let mailpit: MailpitClient;
+	let signUpPage: SignUpPage;
+	let mailpit: MailpitClient;
 
-  test.beforeEach(async ({ page }) => {
-    mailpit = new MailpitClient(process.env.MAILPIT_API_URL);
-    signUpPage = new SignUpPage(page);
-  });
+	test.beforeEach(async ({ page }) => {
+		mailpit = new MailpitClient(process.env.MAILPIT_API_URL);
+		signUpPage = new SignUpPage(page);
+	});
 
-  test('should complete the full registration flow: signup → activation code → set password → dashboard', async ({
-    page
-  }) => {
-    const testEmail = `register-flow-${Date.now()}@example.com`;
-    const testName = 'Register Flow User';
+	test('should complete the full registration flow: signup → activation code → set password → dashboard', async ({
+		page
+	}) => {
+		const testEmail = `register-flow-${Date.now()}@example.com`;
+		const testName = 'Register Flow User';
 
-    // ---- Step 1: Basic info ----
-    await signUpPage.goto();
-    await expect(signUpPage.heading).toBeVisible();
-    await expect(signUpPage.description).toBeVisible();
+		// ---- Step 1: Basic info ----
+		await signUpPage.goto();
+		await expect(signUpPage.heading).toBeVisible();
+		await expect(signUpPage.description).toBeVisible();
 
-    await signUpPage.fillBasicInfo(testName, testEmail);
-    await expect(signUpPage.nextButton).toBeEnabled();
-    await signUpPage.submitBasicInfo();
+		await signUpPage.fillBasicInfo(testName, testEmail);
+		await expect(signUpPage.nextButton).toBeEnabled();
+		await signUpPage.submitBasicInfo();
 
-    // ---- Step 2: Activation code ----
-    // The app moves to step 2 and shows the activation code form
-    await expect(signUpPage.activationDescription).toBeVisible({ timeout: 15_000 });
-    await expect(signUpPage.otpCells.first()).toBeVisible();
-    await expect(signUpPage.resendActivationCodeButton).toBeVisible();
+		// ---- Step 2: Activation code ----
+		// The app moves to step 2 and shows the activation code form
+		await expect(signUpPage.activationDescription).toBeVisible({ timeout: 15_000 });
+		await expect(signUpPage.otpCells.first()).toBeVisible();
+		await expect(signUpPage.resendActivationCodeButton).toBeVisible();
 
-    // Retrieve the activation code from the email captured by Mailpit
-    const activationCode = await mailpit.getActivationCode(testEmail);
-    expect(activationCode).toMatch(/^\d{6}$/);
+		// Retrieve the activation code from the email captured by Mailpit
+		const activationCode = await mailpit.getActivationCode(testEmail);
+		expect(activationCode).toMatch(/^\d{6}$/);
 
-    await signUpPage.fillActivationCode(activationCode);
-    await signUpPage.submitActivation();
+		await signUpPage.fillActivationCode(activationCode);
+		await signUpPage.submitActivation();
 
-    // ---- Step 3: Set password ----
-    await expect(signUpPage.passwordDescription).toBeVisible({ timeout: 15_000 });
-    await expect(signUpPage.passwordInput).toBeVisible();
+		// ---- Step 3: Set password ----
+		await expect(signUpPage.passwordDescription).toBeVisible({ timeout: 15_000 });
+		await expect(signUpPage.passwordInput).toBeVisible();
 
-    await signUpPage.fillPassword(TEST_PASSWORD);
-    await signUpPage.submitPassword();
+		await signUpPage.fillPassword(TEST_PASSWORD);
+		await signUpPage.submitPassword();
 
-    // ---- Verify: redirected to dashboard ----
-    await page.waitForURL('/', { timeout: 15_000 });
-    await expect(page.locator('h1')).toBeVisible();
-  });
+		// ---- Verify: redirected to dashboard ----
+		await page.waitForURL('/', { timeout: 15_000 });
+		await expect(page.locator('h1')).toBeVisible();
+	});
 
-  test('should show activation code step after registering with valid info', async () => {
-    const testEmail = `step2-check-${Date.now()}@example.com`;
+	test('should show activation code step after registering with valid info', async () => {
+		const testEmail = `step2-check-${Date.now()}@example.com`;
 
-    await signUpPage.goto();
-    await signUpPage.fillBasicInfo('Step 2 User', testEmail);
-    await signUpPage.submitBasicInfo();
+		await signUpPage.goto();
+		await signUpPage.fillBasicInfo('Step 2 User', testEmail);
+		await signUpPage.submitBasicInfo();
 
-    // Verify step 2 is shown
-    await expect(signUpPage.activationDescription).toBeVisible({ timeout: 15_000 });
-    await expect(signUpPage.otpCells.first()).toBeVisible();
-    await expect(signUpPage.activationNextButton).toBeVisible();
-  });
+		// Verify step 2 is shown
+		await expect(signUpPage.activationDescription).toBeVisible({ timeout: 15_000 });
+		await expect(signUpPage.otpCells.first()).toBeVisible();
+		await expect(signUpPage.activationNextButton).toBeVisible();
+	});
 
 	test('should show set password step after entering a valid activation code', async () => {
 		const testEmail = `step3-check-${Date.now()}@example.com`;
@@ -346,9 +343,7 @@ test.describe('Complete Registration Flow', () => {
 // Complete Login Flow
 // ---------------------------------------------------------------------------
 test.describe('Complete Login Flow', () => {
-	test('should log in with valid credentials and redirect to dashboard', async ({
-		browser
-	}) => {
+	test('should log in with valid credentials and redirect to dashboard', async ({ browser }) => {
 		const mailpit = new MailpitClient(process.env.MAILPIT_API_URL);
 
 		// 1. Register a user in a disposable context

@@ -19,14 +19,14 @@ A personal finance management application built with Svelte 5 and SvelteKit for 
 
 ## Tech Stack
 
-| Layer       | Technology                     |
-|-------------|--------------------------------|
-| Frontend    | Svelte 5, SvelteKit, TypeScript |
-| Styling     | [Tailwind CSS / CSS — update this] |
-| Backend     | [NestJS API](https://github.com/acastillo9/budget-api) |
-| Database    | MongoDB                        |
-| Deployment  | Vercel (frontend), Heroku (backend) |
-| CI/CD       | GitHub Actions                 |
+| Layer      | Technology                                             |
+| ---------- | ------------------------------------------------------ |
+| Frontend   | Svelte 5, SvelteKit, TypeScript                        |
+| Styling    | [Tailwind CSS / CSS — update this]                     |
+| Backend    | [NestJS API](https://github.com/acastillo9/budget-api) |
+| Database   | MongoDB                                                |
+| Deployment | Vercel (frontend), Heroku (backend)                    |
+| CI/CD      | GitHub Actions                                         |
 
 ## Getting Started
 
@@ -84,8 +84,8 @@ src/
 
 ## Environment Variables
 
-| Variable      | Description          |
-|---------------|----------------------|
+| Variable         | Description          |
+| ---------------- | -------------------- |
 | `PUBLIC_API_URL` | Backend API base URL |
 
 ## Related

@@ -137,7 +137,7 @@
 				<div>
 					<BalanceBreakdownCard
 						accountsSummary={data.accountsSummary}
-						currencyRates={userState.currencyRates}
+						currencyRates={userState.currencyRates!}
 					/>
 				</div>
 			</div>

@@ -7,10 +7,10 @@ register('es', () => import('./locales/es.json'));
 
 // Initialize
 init({
-  fallbackLocale: 'en',
-  initialLocale: getLocaleFromNavigator(),
-  loadingDelay: 200,
-  warnOnMissingMessages: true
+	fallbackLocale: 'en',
+	initialLocale: getLocaleFromNavigator(),
+	loadingDelay: 200,
+	warnOnMissingMessages: true
 });
 
 export const $t = unwrapFunctionStore(t);

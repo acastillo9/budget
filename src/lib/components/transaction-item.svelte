@@ -7,8 +7,22 @@
 	import { getUserContext } from '$lib/context';
 	import Badge from './ui/badge/badge.svelte';
 	import { formatUTCStringDateWithLocal } from '$lib/utils/date';
+	import type { Transaction } from '$lib/types/transactions.types';
+	import type { Rates } from '$lib/types';
 
-	let { transaction, rates, editable = false, onEdit, onDelete } = $props();
+	let {
+		transaction,
+		rates,
+		editable = false,
+		onEdit,
+		onDelete
+	}: {
+		transaction: Transaction;
+		rates: Rates;
+		editable?: boolean;
+		onEdit?: (event: MouseEvent) => void;
+		onDelete?: (event: MouseEvent) => void;
+	} = $props();
 	let isIncome = $derived(transaction.amount > 0);
 	let description = $derived.by(() => {
 		if (transaction.isTransfer) {

@@ -12,6 +12,8 @@
 	import { getUserContext } from '$lib/context';
 	import { currencies, getCurrencyByCode } from '$lib/utils/currency';
 	import { createAccountSchema } from '$lib/schemas/account.schema';
+	import type { Account, AccountType } from '$lib/types/account.types';
+	import type { SuperValidated, Infer } from 'sveltekit-superforms';
 
 	let {
 		data,
@@ -19,6 +21,12 @@
 		accountTypes = [],
 		open = $bindable(false),
 		onClose = () => {}
+	}: {
+		data: SuperValidated<Infer<typeof createAccountSchema>>;
+		account?: Account;
+		accountTypes?: AccountType[];
+		open?: boolean;
+		onClose?: () => void;
 	} = $props();
 
 	const form = superForm(data, {
@@ -33,12 +41,12 @@
 	const { form: formData, enhance, isTainted, tainted, allErrors, delayed, reset } = form;
 
 	const userState = getUserContext();
-	$formData.currencyCode = userState.user?.currencyCode || 'USD';
+	$formData.currencyCode = (userState.user?.currencyCode || 'USD') as 'USD' | 'COP';
 	let selectedCurrencyData = $derived(getCurrencyByCode($formData.currencyCode));
 	let isEdit = $derived(!!account);
 
 	$effect(() => {
-		$formData.currencyCode = userState.user?.currencyCode || 'USD';
+		$formData.currencyCode = (userState.user?.currencyCode || 'USD') as 'USD' | 'COP';
 	});
 
 	$effect(() => {
@@ -61,7 +69,7 @@
 			reset();
 			onClose();
 		}
-		$formData.currencyCode = userState.user?.currencyCode || 'USD';
+		$formData.currencyCode = (userState.user?.currencyCode || 'USD') as 'USD' | 'COP';
 	}}
 >
 	<Dialog.Trigger class={buttonVariants({ variant: 'default' })}>

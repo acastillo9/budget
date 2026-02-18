@@ -5,7 +5,7 @@
 	import ArrowRight from '@lucide/svelte/icons/arrow-right';
 	import { t } from 'svelte-i18n';
 
-  let { type = $bindable() } = $props();
+	let { type = $bindable() } = $props();
 </script>
 
 <div class="space-y-4">
@@ -15,7 +15,7 @@
 			<Button
 				variant="outline"
 				class={[
-					'[&.selected]:border-green-300 [&.selected]:bg-green-50 dark:[&.selected]:border-green-700 dark:[&.selected]:bg-green-800/10 flex h-20 flex-col gap-2 hover:border-green-300 hover:bg-green-50 dark:hover:border-green-700 dark:hover:bg-green-800/10',
+					'flex h-20 flex-col gap-2 hover:border-green-300 hover:bg-green-50 dark:hover:border-green-700 dark:hover:bg-green-800/10 [&.selected]:border-green-300 [&.selected]:bg-green-50 dark:[&.selected]:border-green-700 dark:[&.selected]:bg-green-800/10',
 					{ selected: type === 'INCOME' }
 				]}
 				onclick={() => (type = 'INCOME')}
@@ -26,7 +26,7 @@
 			<Button
 				variant="outline"
 				class={[
-					'[&.selected]:border-red-300 [&.selected]:bg-red-50 dark:[&.selected]:border-red-700 dark:[&.selected]:bg-red-800/10 flex h-20 flex-col gap-2 hover:border-red-300 hover:bg-red-50 dark:hover:border-red-700 dark:hover:bg-red-800/10',
+					'flex h-20 flex-col gap-2 hover:border-red-300 hover:bg-red-50 dark:hover:border-red-700 dark:hover:bg-red-800/10 [&.selected]:border-red-300 [&.selected]:bg-red-50 dark:[&.selected]:border-red-700 dark:[&.selected]:bg-red-800/10',
 					{ selected: type === 'EXPENSE' }
 				]}
 				onclick={() => (type = 'EXPENSE')}
@@ -37,7 +37,7 @@
 			<Button
 				variant="outline"
 				class={[
-					'[&.selected]:border-blue-300 [&.selected]:bg-blue-50 dark:[&.selected]:border-blue-700 dark:[&.selected]:bg-blue-800/10 flex h-20 flex-col gap-2 hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-700 dark:hover:bg-blue-800/10',
+					'flex h-20 flex-col gap-2 hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-700 dark:hover:bg-blue-800/10 [&.selected]:border-blue-300 [&.selected]:bg-blue-50 dark:[&.selected]:border-blue-700 dark:[&.selected]:bg-blue-800/10',
 					{ selected: type === 'TRANSFER' }
 				]}
 				onclick={() => (type = 'TRANSFER')}

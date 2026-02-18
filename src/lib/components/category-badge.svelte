@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge';
 	import { iconMap } from '$lib/utils/icons';
+	import type { Category } from '$lib/types/category.types';
 
-	let { category, size = 'default' } = $props();
+	let { category, size = 'default' }: { category: Category; size?: 'default' | 'sm' } = $props();
 
 	let isIncome = $derived(category.categoryType === 'INCOME');
 	let Icon = iconMap[category.icon as keyof typeof iconMap];

@@ -7,7 +7,11 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4 } from 'sveltekit-superforms/adapters';
 	import { createBillSchema } from '$lib/schemas/bill.schema';
+	import { createCategorySchema } from '$lib/schemas/category.schema';
 	import type { Category } from '$lib/types/category.types';
+	import type { Account } from '$lib/types/account.types';
+	import type { Bill } from '$lib/types/bill.types';
+	import type { SuperValidated, Infer } from 'sveltekit-superforms';
 	import ChooseCategory from '../choose-category.svelte';
 	import Badge from '../ui/badge/badge.svelte';
 	import CategoryBadge from '../category-badge.svelte';
@@ -21,6 +25,14 @@
 		bill = undefined,
 		open = $bindable(false),
 		onClose = () => {}
+	}: {
+		addBillForm: SuperValidated<Infer<typeof createBillSchema>>;
+		createCategoryForm: SuperValidated<Infer<typeof createCategorySchema>>;
+		categories: Category[];
+		accounts: Account[];
+		bill?: Bill;
+		open?: boolean;
+		onClose?: () => void;
 	} = $props();
 
 	let billStep = $state(1);
@@ -75,7 +87,7 @@
 				amount: bill.amount,
 				dueDate: bill.dueDate.split('T')[0],
 				endDate: bill.endDate ? bill.endDate.split('T')[0] : '',
-				frequency: bill.frequency,
+				frequency: bill.frequency as unknown as 'ONCE' | 'DAILY' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY' | 'YEARLY',
 				account: bill.account.id,
 				applyToFuture: bill.applyToFuture || false
 			});

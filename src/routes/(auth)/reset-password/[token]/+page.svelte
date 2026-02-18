@@ -4,7 +4,7 @@
 	import type { PageProps } from './$types';
 	import Logo from '$lib/components/logo.svelte';
 	import PasswordForm from '$lib/components/register-form/password-form.svelte';
-  import { t } from 'svelte-i18n';
+	import { t } from 'svelte-i18n';
 
 	let { data }: PageProps = $props();
 </script>
@@ -13,7 +13,7 @@
 	<title>Budget App - {$t('resetPassword.title')}</title>
 </svelte:head>
 
-<div class="p-4 flex h-full items-center justify-center">
+<div class="flex h-full items-center justify-center p-4">
 	<div class="w-full md:w-96">
 		<Card.Root>
 			<Card.Header class="space-y-1">
@@ -28,7 +28,7 @@
 			</Card.Content>
 			<Card.Footer class="flex-col">
 				<div class="flex items-center">
-					<p class="text-sm text-muted-foreground">{$t('common.goTo')}</p>
+					<p class="text-muted-foreground text-sm">{$t('common.goTo')}</p>
 					<Button class="px-2" variant="link" href="/signin">{$t('common.signIn')}</Button>
 				</div>
 			</Card.Footer>

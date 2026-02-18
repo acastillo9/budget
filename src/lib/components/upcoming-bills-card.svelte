@@ -108,7 +108,7 @@
 					{@const Icon = iconMap[bill.category.icon as keyof typeof iconMap] || Receipt}
 					{@const daysLeft = getDaysInfo(bill)}
 					<div
-						class="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
+						class="hover:bg-muted/50 flex items-center justify-between rounded-lg border p-3 transition-colors"
 					>
 						<div class="flex items-center gap-3">
 							<div class={`rounded-full p-2 ${getStatusBgColor(bill.status)}`}>
@@ -120,7 +120,9 @@
 									<span>{bill.account.name}</span>
 									<span>•</span>
 									{#if bill.status === BillStatus.OVERDUE}
-										<span class="flex items-center gap-1 font-medium text-red-600 dark:text-red-400">
+										<span
+											class="flex items-center gap-1 font-medium text-red-600 dark:text-red-400"
+										>
 											<AlertTriangle class="h-3 w-3" />
 											{$t('bills.daysOverdue', { values: { count: Math.abs(daysLeft) } })}
 										</span>
@@ -158,4 +160,3 @@
 		{/if}
 	</Card.Content>
 </Card.Root>
-

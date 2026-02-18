@@ -52,15 +52,15 @@ references/project-standards.md
 
 For every changed file, evaluate against these categories:
 
-| Category | What to check |
-|---|---|
-| **Standards** | Svelte 5 runes, TypeScript strict, naming conventions, file structure |
-| **Patterns** | superforms + zod4 usage, API proxy pattern, data loading, error handling |
-| **Architecture** | Route group boundaries, server vs client separation, API_URL usage |
-| **Security** | Auth bypass, cookie handling, XSS vectors, exposed secrets, CSRF |
-| **i18n** | All user-facing strings use `$t()`, server-side uses unwrapped `$t` |
-| **Performance** | Unnecessary re-renders, missing loading states, N+1 fetches |
-| **Testing** | New functionality has tests, test covers edge cases |
+| Category         | What to check                                                            |
+| ---------------- | ------------------------------------------------------------------------ |
+| **Standards**    | Svelte 5 runes, TypeScript strict, naming conventions, file structure    |
+| **Patterns**     | superforms + zod4 usage, API proxy pattern, data loading, error handling |
+| **Architecture** | Route group boundaries, server vs client separation, API_URL usage       |
+| **Security**     | Auth bypass, cookie handling, XSS vectors, exposed secrets, CSRF         |
+| **i18n**         | All user-facing strings use `$t()`, server-side uses unwrapped `$t`      |
+| **Performance**  | Unnecessary re-renders, missing loading states, N+1 fetches              |
+| **Testing**      | New functionality has tests, test covers edge cases                      |
 
 Skip categories that don't apply to a given file. Don't manufacture issues.
 
@@ -109,12 +109,12 @@ Structure your review as a GitHub PR-style review:
 
 ## Severity Levels
 
-| Level | Meaning | Blocks merge? |
-|---|---|---|
-| **CRITICAL** | Security vulnerability, data loss risk, runtime crash, auth bypass | Yes |
-| **WARNING** | Bug likely, pattern violation, missing error handling, wrong architecture | Yes |
-| **SUGGESTION** | Better approach exists, minor improvement, readability | No |
-| **NITPICK** | Style preference, naming opinion (only if formatter won't catch it) | No |
+| Level          | Meaning                                                                   | Blocks merge? |
+| -------------- | ------------------------------------------------------------------------- | ------------- |
+| **CRITICAL**   | Security vulnerability, data loss risk, runtime crash, auth bypass        | Yes           |
+| **WARNING**    | Bug likely, pattern violation, missing error handling, wrong architecture | Yes           |
+| **SUGGESTION** | Better approach exists, minor improvement, readability                    | No            |
+| **NITPICK**    | Style preference, naming opinion (only if formatter won't catch it)       | No            |
 
 ## Verdict Rules
 

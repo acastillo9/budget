@@ -28,6 +28,7 @@ Before writing any tests, explore the codebase to understand what exists and wha
 ### Key information to capture
 
 For each page/feature, document:
+
 - URL path
 - Required auth state (authenticated / unauthenticated)
 - Forms present (fields, validation rules, submit actions)
@@ -45,27 +46,39 @@ For each page/feature, document:
 For each feature, plan tests in these categories:
 
 #### 1. Happy path (Critical - always test)
+
 The primary user workflow completing successfully.
+
 - Example: Sign in → see dashboard → navigate to accounts → create account → see success
 
 #### 2. Validation & error handling (High priority)
+
 Form validation errors, API failures, edge cases.
+
 - Example: Submit empty form → see validation errors → fix errors → submit successfully
 
 #### 3. Navigation & routing (Medium priority)
+
 Page navigation, breadcrumbs, deep linking, back button.
+
 - Example: Navigate through sidebar → verify URL and page content match
 
 #### 4. Auth boundaries (Critical)
+
 Protected routes redirect, session expiry behavior.
+
 - Example: Access /accounts without auth → redirected to /signin
 
 #### 5. CRUD operations (High priority for data-driven apps)
+
 Create, Read, Update, Delete for each entity.
+
 - Example: Create account → see in list → edit name → verify update → delete → confirm gone
 
 #### 6. Cross-feature workflows (Medium priority)
+
 Workflows that span multiple features.
+
 - Example: Create category → create account → create transaction linking both
 
 ---
@@ -74,12 +87,12 @@ Workflows that span multiple features.
 
 Prioritize test scenarios using this matrix:
 
-| Priority | Criteria | Examples |
-|----------|----------|----------|
-| P0 - Critical | Core user flow, blocks all usage if broken | Auth flow, dashboard load |
-| P1 - High | Primary feature CRUD, data integrity | Create/edit/delete accounts, transactions |
-| P2 - Medium | Secondary features, edge cases | Filters, sorting, pagination |
-| P3 - Low | Visual/cosmetic, nice-to-have | Animations, responsive layout |
+| Priority      | Criteria                                   | Examples                                  |
+| ------------- | ------------------------------------------ | ----------------------------------------- |
+| P0 - Critical | Core user flow, blocks all usage if broken | Auth flow, dashboard load                 |
+| P1 - High     | Primary feature CRUD, data integrity       | Create/edit/delete accounts, transactions |
+| P2 - Medium   | Secondary features, edge cases             | Filters, sorting, pagination              |
+| P3 - Low      | Visual/cosmetic, nice-to-have              | Animations, responsive layout             |
 
 ### Recommended test order
 
@@ -95,52 +108,52 @@ Prioritize test scenarios using this matrix:
 
 ### Authentication workflows
 
-| Workflow | Steps |
-|----------|-------|
-| Sign up | Navigate to signup → fill name/email → receive activation → set password → redirected |
-| Sign in | Navigate to signin → fill email/password → submit → see dashboard |
-| Sign out | Click sign out → redirected to signin → verify can't access protected routes |
-| Forgot password | Navigate to forgot-password → enter email → submit → check confirmation |
-| Reset password | Navigate to reset-password with token → enter new password → submit → redirected to signin |
-| Google OAuth | Click Google sign in → redirect to Google → callback → authenticated |
-| Auth redirect | Access protected page without auth → redirected to signin |
+| Workflow        | Steps                                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------ |
+| Sign up         | Navigate to signup → fill name/email → receive activation → set password → redirected      |
+| Sign in         | Navigate to signin → fill email/password → submit → see dashboard                          |
+| Sign out        | Click sign out → redirected to signin → verify can't access protected routes               |
+| Forgot password | Navigate to forgot-password → enter email → submit → check confirmation                    |
+| Reset password  | Navigate to reset-password with token → enter new password → submit → redirected to signin |
+| Google OAuth    | Click Google sign in → redirect to Google → callback → authenticated                       |
+| Auth redirect   | Access protected page without auth → redirected to signin                                  |
 
 ### Account management workflows
 
-| Workflow | Steps |
-|----------|-------|
-| Create account | Open form → fill name, balance, type, currency → submit → verify in list |
-| Edit account | Find account → click edit → modify fields → submit → verify changes |
-| Delete account | Find account → click delete → confirm → verify removed from list |
+| Workflow             | Steps                                                                    |
+| -------------------- | ------------------------------------------------------------------------ |
+| Create account       | Open form → fill name, balance, type, currency → submit → verify in list |
+| Edit account         | Find account → click edit → modify fields → submit → verify changes      |
+| Delete account       | Find account → click delete → confirm → verify removed from list         |
 | View account summary | Navigate to accounts → verify totals by category (assets vs liabilities) |
 
 ### Transaction workflows
 
-| Workflow | Steps |
-|----------|-------|
-| Create transaction | Open form → fill amount, date, description, account, category → submit |
-| Create transfer | Open transfer form → fill amount, origin account, target account → submit |
-| Edit transaction | Find transaction → click edit → modify → submit → verify |
-| Delete transaction | Find transaction → delete → confirm → verify removed |
-| Filter transactions | Apply date/category/account filters → verify filtered results |
+| Workflow            | Steps                                                                     |
+| ------------------- | ------------------------------------------------------------------------- |
+| Create transaction  | Open form → fill amount, date, description, account, category → submit    |
+| Create transfer     | Open transfer form → fill amount, origin account, target account → submit |
+| Edit transaction    | Find transaction → click edit → modify → submit → verify                  |
+| Delete transaction  | Find transaction → delete → confirm → verify removed                      |
+| Filter transactions | Apply date/category/account filters → verify filtered results             |
 
 ### Bill management workflows
 
-| Workflow | Steps |
-|----------|-------|
-| Create bill | Open form → fill name, amount, due date, frequency, account → submit |
-| Mark bill paid | Find bill → mark as paid → verify status change |
-| Edit bill | Find bill → edit → modify fields → submit |
-| Recurring bills | Create recurring bill → verify next occurrence generated |
+| Workflow        | Steps                                                                |
+| --------------- | -------------------------------------------------------------------- |
+| Create bill     | Open form → fill name, amount, due date, frequency, account → submit |
+| Mark bill paid  | Find bill → mark as paid → verify status change                      |
+| Edit bill       | Find bill → edit → modify fields → submit                            |
+| Recurring bills | Create recurring bill → verify next occurrence generated             |
 
 ### Category workflows
 
-| Workflow | Steps |
-|----------|-------|
-| Create income category | Open form → fill name, icon, type=INCOME → submit |
+| Workflow                | Steps                                              |
+| ----------------------- | -------------------------------------------------- |
+| Create income category  | Open form → fill name, icon, type=INCOME → submit  |
 | Create expense category | Open form → fill name, icon, type=EXPENSE → submit |
-| Edit category | Find category → edit → modify → submit |
-| Delete category | Find category → delete → confirm → verify removed |
+| Edit category           | Find category → edit → modify → submit             |
+| Delete category         | Find category → delete → confirm → verify removed  |
 
 ---
 
@@ -149,16 +162,19 @@ Prioritize test scenarios using this matrix:
 ### Approaches (choose based on project needs)
 
 #### 1. Real backend with test user
+
 - Use a dedicated test account with known credentials
 - Store credentials in environment variables (`TEST_USER_EMAIL`, `TEST_USER_PASSWORD`)
 - Pros: Tests real API behavior; Cons: Requires running backend, data pollution
 
 #### 2. API mocking with route interception
+
 - Use `page.route()` to intercept SvelteKit API routes (`/api/*`)
 - Return mock data matching the app's type definitions
 - Pros: Fast, isolated, no backend needed; Cons: May miss real API issues
 
 #### 3. Hybrid approach (recommended)
+
 - Use real backend for auth setup and critical paths
 - Use API mocking for edge cases, error scenarios, and data-heavy tests
 - Best balance of coverage and reliability

@@ -39,7 +39,6 @@ async function createTestCategory(page: Page, prefix: string): Promise<string> {
 	return name;
 }
 
-
 // ---------------------------------------------------------------------------
 // Bills — Page Load & List
 // ---------------------------------------------------------------------------
@@ -110,9 +109,7 @@ test.describe('Bills — Wizard Navigation', () => {
 		await billsPage.selectCategory(categoryName);
 		await billsPage.goToNextStep();
 
-		await expect(
-			billsPage.dialog.getByRole('heading', { name: /bill details/i })
-		).toBeVisible();
+		await expect(billsPage.dialog.getByRole('heading', { name: /bill details/i })).toBeVisible();
 		await expect(billsPage.nameInput).toBeVisible();
 		await expect(billsPage.amountInput).toBeVisible();
 	});
@@ -878,9 +875,7 @@ test.describe('Bills — Full CRUD Workflow', () => {
 test.describe('Bills — Transaction Impact', () => {
 	test.setTimeout(120_000);
 
-	test('paying a bill should create a transaction on the transactions page', async ({
-		page
-	}) => {
+	test('paying a bill should create a transaction on the transactions page', async ({ page }) => {
 		const accountName = await createTestAccount(page, 'PayTxAcc');
 		const categoryName = await createTestCategory(page, 'PayTxCat');
 

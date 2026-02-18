@@ -5,16 +5,20 @@
 	import { buttonVariants } from './ui/button/button.svelte';
 	import { currencies, getCurrencyByCode } from '$lib/utils/currency';
 
-	let { selectedCurrency = $bindable(), open = $bindable(), onChange } = $props();
+	let {
+		selectedCurrency = $bindable(),
+		open = $bindable(),
+		onChange
+	}: { selectedCurrency: string; open: boolean; onChange: (currency: string) => void } = $props();
 	let selectedCurrencyData = $derived(getCurrencyByCode(selectedCurrency));
 </script>
 
-<Popover.Root bind:open={open}>
+<Popover.Root bind:open>
 	<Popover.Trigger
 		class={buttonVariants({
 			variant: 'ghost',
 			class: 'h-8 gap-1 px-2',
-      size: 'sm',
+			size: 'sm'
 		})}
 	>
 		<span class="text-lg">{selectedCurrencyData?.flag}</span>

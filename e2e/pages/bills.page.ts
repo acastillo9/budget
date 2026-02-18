@@ -159,9 +159,7 @@ export class BillsPage {
 			MONTHLY: 'Monthly',
 			YEARLY: 'Yearly'
 		};
-		await this.page
-			.getByRole('option', { name: frequencyLabels[frequency], exact: true })
-			.click();
+		await this.page.getByRole('option', { name: frequencyLabels[frequency], exact: true }).click();
 	}
 
 	async selectAccount(accountName: string) {

@@ -32,7 +32,7 @@
 	<title>Budget App - {$t('signUp.title')}</title>
 </svelte:head>
 
-<div class="p-4 flex h-full items-center justify-center">
+<div class="flex h-full items-center justify-center p-4">
 	<div class="w-full md:w-96">
 		<Card.Root>
 			<Card.Header class="space-y-1">
@@ -59,7 +59,7 @@
 							<span class="w-full border-t"></span>
 						</div>
 						<div class="relative flex justify-center text-xs uppercase">
-							<span class="bg-card px-2 text-muted-foreground">
+							<span class="bg-card text-muted-foreground px-2">
 								{$t('signUp.orContinueWith')}
 							</span>
 						</div>
@@ -68,8 +68,8 @@
 				{:else if step === 2}
 					<ActivationForm
 						data={data.activationForm}
-						{email}
-						{activationCodeResendAt}
+						email={email!}
+						activationCodeResendAt={activationCodeResendAt!}
 						goToNextStep={setAccessToken}
 					></ActivationForm>
 				{:else if step === 3}
@@ -79,7 +79,7 @@
 			</Card.Content>
 			<Card.Footer class="flex-col">
 				<div class="flex items-center">
-					<p class="text-sm text-muted-foreground">{$t('signUp.haveAccount')}</p>
+					<p class="text-muted-foreground text-sm">{$t('signUp.haveAccount')}</p>
 					<Button class="ml-1 p-0" variant="link" href="/signin">{$t('common.signIn')}</Button>
 				</div>
 			</Card.Footer>

@@ -11,8 +11,19 @@
 	import { toast } from 'svelte-sonner';
 	import { t } from 'svelte-i18n';
 	import { activationSchema } from '$lib/schemas/auth.schema';
+	import type { SuperValidated, Infer } from 'sveltekit-superforms';
 
-	let { data, email, activationCodeResendAt, goToNextStep } = $props();
+	let {
+		data,
+		email,
+		activationCodeResendAt,
+		goToNextStep
+	}: {
+		data: SuperValidated<Infer<typeof activationSchema>>;
+		email: string;
+		activationCodeResendAt: Date | string;
+		goToNextStep: (accessToken: string) => void;
+	} = $props();
 	let remainingTime = $state(activationCodeResendAt);
 	let resendingActivationCode = $state(false);
 

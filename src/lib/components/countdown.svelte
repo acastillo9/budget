@@ -1,10 +1,12 @@
 <script lang="ts">
 	import dayjs from 'dayjs';
 	import duration from 'dayjs/plugin/duration.js';
+	import type { Snippet } from 'svelte';
+	import type { CountdownData } from '$lib/types';
 
 	dayjs.extend(duration);
 
-	let { from, remaining } = $props();
+	let { from, remaining }: { from: Date | string; remaining: Snippet<[CountdownData]> } = $props();
 
 	let data = $state({
 		hours: 0,

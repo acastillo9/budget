@@ -21,8 +21,24 @@
 	} from '@internationalized/date';
 	import { AlertCircle, Calendar1, CalendarIcon } from '@lucide/svelte';
 	import * as Card from '$lib/components/ui/card';
+	import type { SuperForm, Infer } from 'sveltekit-superforms';
+	import { createBillSchema } from '$lib/schemas/bill.schema';
 
-	let { form, formData = $bindable(), enhance, accounts, isEdit = false } = $props();
+	type BillFormData = Infer<typeof createBillSchema>;
+
+	let {
+		form,
+		formData = $bindable(),
+		enhance,
+		accounts,
+		isEdit = false
+	}: {
+		form: SuperForm<BillFormData>;
+		formData: BillFormData;
+		enhance: SuperForm<BillFormData>['enhance'];
+		accounts: Account[];
+		isEdit?: boolean;
+	} = $props();
 
 	const df = new DateFormatter($locale || 'en-US', {
 		dateStyle: 'long'
@@ -239,7 +255,7 @@
 					<Select.Trigger class="w-full" {...props}>
 						{formData.account
 							? formatAccountName(
-									accounts.find((account: Account) => account.id === formData.account)
+									accounts.find((account: Account) => account.id === formData.account)!
 								)
 							: $t('bills.accountPlaceholder')}
 					</Select.Trigger>

@@ -4,6 +4,7 @@
 	import Badge from './ui/badge/badge.svelte';
 	import { formatCurrencyWithSymbol, getCurrencyByCode } from '$lib/utils/currency';
 	import type { AccountSummary } from '$lib/types/account.types';
+	import type { CurrencyRates } from '$lib/types';
 	import { t } from 'svelte-i18n';
 
 	type AccountSummaryByCurrency = {
@@ -16,7 +17,7 @@
 		[currencyCode: string]: AccountSummaryByCurrency;
 	};
 
-	let { accountsSummary, currencyRates } = $props();
+	let { accountsSummary, currencyRates }: { accountsSummary: AccountSummary[]; currencyRates: CurrencyRates } = $props();
 	let baseCurrency = $derived(getCurrencyByCode(currencyRates.baseCurrencyCode || 'USD'));
 	let accountsSummaryByCurrency: AccountsSummaryByCurrency = $derived(
 		accountsSummary.reduce((acc: AccountsSummaryByCurrency, accountSummary: AccountSummary) => {

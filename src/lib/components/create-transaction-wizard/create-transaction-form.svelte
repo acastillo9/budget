@@ -18,8 +18,22 @@
 	} from '@internationalized/date';
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
 	import { formatAccountName } from '$lib/utils/account';
+	import type { SuperForm, Infer } from 'sveltekit-superforms';
+	import { createTransactionSchema } from '$lib/schemas/transaction.schema';
 
-	let { form, formData = $bindable(), enhance, accounts } = $props();
+	type TransactionFormData = Infer<typeof createTransactionSchema>;
+
+	let {
+		form,
+		formData = $bindable(),
+		enhance,
+		accounts
+	}: {
+		form: SuperForm<TransactionFormData>;
+		formData: TransactionFormData;
+		enhance: SuperForm<TransactionFormData>['enhance'];
+		accounts: Account[];
+	} = $props();
 
 	const df = new DateFormatter($locale || 'en-US', {
 		dateStyle: 'long'
@@ -39,7 +53,7 @@
 					<Select.Trigger class="w-full" {...props}>
 						{formData.account
 							? formatAccountName(
-									accounts.find((account: Account) => account.id === formData.account)
+									accounts.find((account: Account) => account.id === formData.account)!
 								)
 							: $t('transactions.accountPlaceholder')}
 					</Select.Trigger>

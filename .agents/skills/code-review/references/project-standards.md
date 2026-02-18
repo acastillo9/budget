@@ -2,20 +2,20 @@
 
 ## Tech Stack
 
-| Layer | Technology | Version |
-|---|---|---|
-| Framework | SvelteKit | 2.x |
-| UI Framework | Svelte | 5 (runes) |
-| Language | TypeScript | strict mode |
-| Styling | Tailwind CSS | v4 |
-| UI Components | shadcn-svelte | (bits-ui + tailwind-variants) |
-| Forms | sveltekit-superforms | with zod4 adapter |
-| Validation | Zod | v4 |
-| i18n | svelte-i18n | en, es locales |
-| Icons | @lucide/svelte | only |
-| Dates | dayjs | only |
-| Flash messages | sveltekit-flash-message | + svelte-sonner |
-| Backend | NestJS API | separate repo, proxied |
+| Layer          | Technology              | Version                       |
+| -------------- | ----------------------- | ----------------------------- |
+| Framework      | SvelteKit               | 2.x                           |
+| UI Framework   | Svelte                  | 5 (runes)                     |
+| Language       | TypeScript              | strict mode                   |
+| Styling        | Tailwind CSS            | v4                            |
+| UI Components  | shadcn-svelte           | (bits-ui + tailwind-variants) |
+| Forms          | sveltekit-superforms    | with zod4 adapter             |
+| Validation     | Zod                     | v4                            |
+| i18n           | svelte-i18n             | en, es locales                |
+| Icons          | @lucide/svelte          | only                          |
+| Dates          | dayjs                   | only                          |
+| Flash messages | sveltekit-flash-message | + svelte-sonner               |
+| Backend        | NestJS API              | separate repo, proxied        |
 
 ## Formatting Rules (Prettier)
 
@@ -28,29 +28,29 @@
 
 ## File Naming Conventions
 
-| Type | Convention | Example |
-|---|---|---|
-| Svelte components | kebab-case | `date-picker.svelte` |
-| TypeScript types | PascalCase | `Account`, `Transaction` |
-| Functions/variables | camelCase | `formatCurrency`, `getUserState` |
-| Route files | SvelteKit conventions | `+page.svelte`, `+page.server.ts` |
-| Schema files | kebab-case | `account-schema.ts` |
-| Locale files | language code | `en.json`, `es.json` |
+| Type                | Convention            | Example                           |
+| ------------------- | --------------------- | --------------------------------- |
+| Svelte components   | kebab-case            | `date-picker.svelte`              |
+| TypeScript types    | PascalCase            | `Account`, `Transaction`          |
+| Functions/variables | camelCase             | `formatCurrency`, `getUserState`  |
+| Route files         | SvelteKit conventions | `+page.svelte`, `+page.server.ts` |
+| Schema files        | kebab-case            | `account-schema.ts`               |
+| Locale files        | language code         | `en.json`, `es.json`              |
 
 ## Svelte 5 Runes (Mandatory)
 
 This project uses Svelte 5 runes exclusively. Svelte 4 patterns are forbidden.
 
-| Correct (Svelte 5) | Forbidden (Svelte 4) |
-|---|---|
-| `let count = $state(0)` | `let count = 0` (reactive) |
-| `let doubled = $derived(count * 2)` | `$: doubled = count * 2` |
-| `$effect(() => { ... })` | `$: { ... }` (side effects) |
-| `let { data } = $props()` | `export let data` |
-| `{#snippet name()}...{/snippet}` | `<slot>` / `<slot name="x">` |
-| `{@render name()}` | slot rendering |
-| `onclick={handler}` | `on:click={handler}` |
-| `bind:value={val}` | Still valid, no change |
+| Correct (Svelte 5)                  | Forbidden (Svelte 4)         |
+| ----------------------------------- | ---------------------------- |
+| `let count = $state(0)`             | `let count = 0` (reactive)   |
+| `let doubled = $derived(count * 2)` | `$: doubled = count * 2`     |
+| `$effect(() => { ... })`            | `$: { ... }` (side effects)  |
+| `let { data } = $props()`           | `export let data`            |
+| `{#snippet name()}...{/snippet}`    | `<slot>` / `<slot name="x">` |
+| `{@render name()}`                  | slot rendering               |
+| `onclick={handler}`                 | `on:click={handler}`         |
+| `bind:value={val}`                  | Still valid, no change       |
 
 ### Key Rune Rules
 
@@ -71,17 +71,17 @@ import { zod4 } from 'sveltekit-superforms/adapters';
 import { accountSchema } from '$lib/schemas/account-schema';
 
 export const load = async () => {
-  const form = await superValidate(zod4(accountSchema));
-  return { form };
+	const form = await superValidate(zod4(accountSchema));
+	return { form };
 };
 
 export const actions = {
-  default: async ({ request }) => {
-    const form = await superValidate(request, zod4(accountSchema));
-    if (!form.valid) return fail(400, { form });
-    // process...
-    return { form };
-  }
+	default: async ({ request }) => {
+		const form = await superValidate(request, zod4(accountSchema));
+		if (!form.valid) return fail(400, { form });
+		// process...
+		return { form };
+	}
 };
 ```
 
@@ -108,8 +108,8 @@ Accept-Language header.
 import { API_URL } from '$env/static/private';
 
 export const GET = async ({ fetch }) => {
-  const res = await fetch(`${API_URL}/accounts`);
-  return new Response(res.body, { status: res.status, headers: res.headers });
+	const res = await fetch(`${API_URL}/accounts`);
+	return new Response(res.body, { status: res.status, headers: res.headers });
 };
 ```
 
@@ -125,10 +125,10 @@ export const GET = async ({ fetch }) => {
 
 ### Cookie Configuration
 
-| Cookie | httpOnly | secure | sameSite | path |
-|---|---|---|---|---|
-| `AuthorizationToken` | true | prod only | strict | `/` |
-| `RefreshToken` | true | prod only | strict | `/` |
+| Cookie               | httpOnly | secure    | sameSite | path |
+| -------------------- | -------- | --------- | -------- | ---- |
+| `AuthorizationToken` | true     | prod only | strict   | `/`  |
+| `RefreshToken`       | true     | prod only | strict   | `/`  |
 
 ### Flow
 
@@ -156,7 +156,7 @@ export const GET = async ({ fetch }) => {
 
 ```svelte
 <script>
-  import { t } from '$lib/i18n';
+	import { t } from '$lib/i18n';
 </script>
 
 <h1>{$t('dashboard.title')}</h1>
@@ -237,15 +237,15 @@ import { toast } from 'svelte-sonner';
 
 ## Security Checklist
 
-| Check | Details |
-|---|---|
-| **API_URL exposure** | Must NEVER appear in client bundles. Only in `$env/static/private` |
-| **XSS** | No `{@html}` with user input. Svelte auto-escapes by default |
-| **CSRF** | SvelteKit form actions have built-in CSRF protection. Don't disable it |
-| **Cookies** | Must be `httpOnly`, `secure` in production, `sameSite: 'strict'` |
-| **Auth bypass** | All `(app)/` routes must check `event.locals.user` |
-| **Secrets in code** | No API keys, tokens, or credentials in source code |
-| **Input validation** | All user input validated via Zod schemas before processing |
+| Check                | Details                                                                |
+| -------------------- | ---------------------------------------------------------------------- |
+| **API_URL exposure** | Must NEVER appear in client bundles. Only in `$env/static/private`     |
+| **XSS**              | No `{@html}` with user input. Svelte auto-escapes by default           |
+| **CSRF**             | SvelteKit form actions have built-in CSRF protection. Don't disable it |
+| **Cookies**          | Must be `httpOnly`, `secure` in production, `sameSite: 'strict'`       |
+| **Auth bypass**      | All `(app)/` routes must check `event.locals.user`                     |
+| **Secrets in code**  | No API keys, tokens, or credentials in source code                     |
+| **Input validation** | All user input validated via Zod schemas before processing             |
 
 ## Project Structure
 

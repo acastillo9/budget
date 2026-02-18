@@ -8,8 +8,15 @@
 	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
 	import { t } from 'svelte-i18n';
 	import { signupFormSchema } from '$lib/schemas/auth.schema';
+	import type { SuperValidated, Infer } from 'sveltekit-superforms';
 
-	let { data, goToNextStep } = $props();
+	let {
+		data,
+		goToNextStep
+	}: {
+		data: SuperValidated<Infer<typeof signupFormSchema>>;
+		goToNextStep: (email: string, activationCodeResendAt: Date) => void;
+	} = $props();
 
 	const form = superForm(data, {
 		validationMethod: 'oninput',

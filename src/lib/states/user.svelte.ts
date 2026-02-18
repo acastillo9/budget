@@ -1,7 +1,6 @@
-import type { UserState } from "$lib/types";
+import type { UserState } from '$lib/types';
 
 export const userState: UserState = $state({
-  user: undefined,
-  currencyRates: undefined
+	user: undefined,
+	currencyRates: undefined
 });
-

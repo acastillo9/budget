@@ -85,16 +85,16 @@
 		>
 			<div class="flex-flex-col-gap-1">
 				<div>
-				<p
-					class={`font-medium ${
-						{
-							OVERDUE: 'text-red-900 dark:text-red-100',
-							DUE: 'text-yellow-900 dark:text-yellow-100',
-							UPCOMING: 'text-blue-900 dark:text-blue-100',
-							PAID: 'text-green-900 dark:text-green-100'
-						}[colorStatus]
-					}`}
-				>
+					<p
+						class={`font-medium ${
+							{
+								OVERDUE: 'text-red-900 dark:text-red-100',
+								DUE: 'text-yellow-900 dark:text-yellow-100',
+								UPCOMING: 'text-blue-900 dark:text-blue-100',
+								PAID: 'text-green-900 dark:text-green-100'
+							}[colorStatus]
+						}`}
+					>
 						{bill.name}
 					</p>
 					<div

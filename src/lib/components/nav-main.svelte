@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { page } from '$app/state';
-  import { t } from 'svelte-i18n';
+	import { t } from 'svelte-i18n';
 
 	let {
 		items
