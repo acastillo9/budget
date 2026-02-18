@@ -1,5 +1,6 @@
 <script lang="ts" generics="T extends Record<string, unknown>, U extends FormPath<T>">
 	import * as FormPrimitive from 'formsnap';
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	import type { FormPath } from 'sveltekit-superforms';
 	import { cn, type WithElementRef, type WithoutChildren } from '$lib/utils.js';
 	import type { HTMLAttributes } from 'svelte/elements';
