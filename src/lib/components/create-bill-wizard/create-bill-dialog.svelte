@@ -87,7 +87,13 @@
 				amount: bill.amount,
 				dueDate: bill.dueDate.split('T')[0],
 				endDate: bill.endDate ? bill.endDate.split('T')[0] : '',
-				frequency: bill.frequency as unknown as 'ONCE' | 'DAILY' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY' | 'YEARLY',
+				frequency: bill.frequency as unknown as
+					| 'ONCE'
+					| 'DAILY'
+					| 'WEEKLY'
+					| 'BIWEEKLY'
+					| 'MONTHLY'
+					| 'YEARLY',
 				account: bill.account.id,
 				applyToFuture: bill.applyToFuture || false
 			});

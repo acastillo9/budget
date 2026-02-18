@@ -17,7 +17,10 @@
 		[currencyCode: string]: AccountSummaryByCurrency;
 	};
 
-	let { accountsSummary, currencyRates }: { accountsSummary: AccountSummary[]; currencyRates: CurrencyRates } = $props();
+	let {
+		accountsSummary,
+		currencyRates
+	}: { accountsSummary: AccountSummary[]; currencyRates: CurrencyRates } = $props();
 	let baseCurrency = $derived(getCurrencyByCode(currencyRates.baseCurrencyCode || 'USD'));
 	let accountsSummaryByCurrency: AccountsSummaryByCurrency = $derived(
 		accountsSummary.reduce((acc: AccountsSummaryByCurrency, accountSummary: AccountSummary) => {
