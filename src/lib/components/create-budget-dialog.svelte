@@ -26,6 +26,7 @@
 	} from '@internationalized/date';
 	import { CalendarIcon } from '@lucide/svelte';
 	import { locale } from 'svelte-i18n';
+	import { invalidateAll } from '$app/navigation';
 
 	import type { SuperValidated, Infer } from 'sveltekit-superforms';
 
@@ -68,6 +69,7 @@
 			if (form.valid) {
 				resetDialog();
 				open = false;
+				invalidateAll();
 			}
 		}
 	});
@@ -103,6 +105,8 @@
 		} else {
 			selectedCategories = [...selectedCategories, category];
 		}
+		// Keep $formData.categories in sync so Zod validation passes
+		$formData.categories = selectedCategories.map((c) => c.id);
 	}
 
 	$effect(() => {
