@@ -5,5 +5,5 @@ export enum BillFrequency {
   WEEKLY = 'WEEKLY',
   BIWEEKLY = 'BIWEEKLY',
   MONTHLY = 'MONTHLY',
-  ANNUALLY = 'ANNUALLY',
+  YEARLY = 'YEARLY',
 }

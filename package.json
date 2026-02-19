@@ -12,6 +12,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "start:e2e": "ENV_FILE=.env.test nest start --watch",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -21,7 +22,10 @@
     "migrate:create": "migrate-mongo create",
     "migrate:status": "migrate-mongo status",
     "migrate:up": "migrate-mongo up",
-    "migrate:down": "migrate-mongo down"
+    "migrate:down": "migrate-mongo down",
+    "migrate:status:test": "ENV_FILE=.env.test migrate-mongo status",
+    "migrate:up:test": "ENV_FILE=.env.test migrate-mongo up",
+    "migrate:down:test": "ENV_FILE=.env.test migrate-mongo down"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",

@@ -64,7 +64,7 @@ Used in transactions (create/update/delete adjust account balances), bill paymen
 
 ### Bill System
 
-Bills support recurrence via `frequency` (ONCE, NEVER, DAILY, WEEKLY, BIWEEKLY, MONTHLY, ANNUALLY). Bill instances are **virtual** — generated on-the-fly by `getInstances(rangeStart, rangeEnd)` as a Mongoose schema method.
+Bills support recurrence via `frequency` (ONCE, NEVER, DAILY, WEEKLY, BIWEEKLY, MONTHLY, YEARLY). Bill instances are **virtual** — generated on-the-fly by `getInstances(rangeStart, rangeEnd)` as a Mongoose schema method.
 
 Per-instance modifications are stored in an `overrides` Map keyed by ISO date string (`YYYY-MM-DD`). Each override is a `BillModification` sub-document that can change name, amount, dueDate, frequency, mark as paid, or mark as deleted.
 

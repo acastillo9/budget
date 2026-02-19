@@ -104,7 +104,7 @@ classDiagram
         WEEKLY
         BIWEEKLY
         MONTHLY
-        ANNUALLY
+        YEARLY
     }
 
     class BillStatus {

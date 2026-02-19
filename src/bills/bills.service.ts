@@ -24,7 +24,7 @@ export class BillsService {
     @InjectModel(Bill.name)
     private readonly billModel: Model<Bill>,
     private readonly transactionsService: TransactionsService,
-  ) {}
+  ) { }
 
   /**
    * Create a new bill.
@@ -234,7 +234,8 @@ export class BillsService {
 
     if (
       !updateBillDto.applyToFuture &&
-      (updateBillDto.endDate.getTime() !== bill.endDate.getTime() ||
+      ((updateBillDto.endDate &&
+        updateBillDto.endDate.getTime() !== bill.endDate.getTime()) ||
         updateBillDto.frequency !== bill.frequency)
     ) {
       throw new HttpException(

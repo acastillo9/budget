@@ -18,7 +18,10 @@ import { AppController } from './app.controller';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: process.env.ENV_FILE || '.env',
+    }),
     DatabaseModule,
     CacheModule.register({ isGlobal: true }),
     I18nModule.forRoot({
