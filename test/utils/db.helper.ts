@@ -8,12 +8,14 @@ import { ConfigService } from '@nestjs/config';
 const BCRYPT_SALT_ROUNDS = 10;
 
 /**
- * Clear all documents from every collection in the test database.
+ * Clear all documents from every collection in the test database,
+ * except `accounttypes` which is managed by migrations.
  */
 export async function clearDatabase(app: INestApplication): Promise<void> {
   const connection = app.get<Connection>(getConnectionToken());
   const collections = connection.collections;
   for (const key in collections) {
+    if (key === 'accounttypes') continue;
     await collections[key].deleteMany({});
   }
 }
@@ -166,15 +168,21 @@ export function nonExistentId(): string {
 }
 
 /**
- * Seed an AccountType reference document.
+ * Look up an existing AccountType by name (seeded by migrations).
+ * Throws if the account type is not found.
  */
-export async function seedAccountType(
+export async function getAccountTypeId(
   app: INestApplication,
-  data: { name: string; accountCategory: string },
+  name: string,
 ): Promise<string> {
   const connection = app.get<Connection>(getConnectionToken());
   const Model = connection.model('AccountType');
-  const doc = await Model.create(data);
+  const doc = await Model.findOne({ name });
+  if (!doc) {
+    throw new Error(
+      `AccountType "${name}" not found. Ensure migrations have been run.`,
+    );
+  }
   return doc._id.toString();
 }
 

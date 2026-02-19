@@ -6,9 +6,9 @@ import {
   clearDatabase,
   createActiveUser,
   getAccountBalance,
+  getAccountTypeId,
   nonExistentId,
   seedAccount,
-  seedAccountType,
   seedCategory,
 } from './utils/db.helper';
 
@@ -36,10 +36,7 @@ describe('BillsController (e2e)', () => {
       userId,
     });
 
-    const accountTypeId = await seedAccountType(app, {
-      name: 'Checking',
-      accountCategory: 'ASSET',
-    });
+    const accountTypeId = await getAccountTypeId(app, 'CHECKING');
 
     initialBalance = 2000;
     accountId = await seedAccount(app, {

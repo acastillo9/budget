@@ -5,8 +5,8 @@ import { getAuthToken } from './utils/auth.helper';
 import {
   clearDatabase,
   createActiveUser,
+  getAccountTypeId,
   nonExistentId,
-  seedAccountType,
   seedCategory,
 } from './utils/db.helper';
 
@@ -33,19 +33,10 @@ describe('AccountsController (e2e)', () => {
       userId,
     });
 
-    // Seed reference data
-    checkingTypeId = await seedAccountType(app, {
-      name: 'Checking',
-      accountCategory: 'ASSET',
-    });
-    savingsTypeId = await seedAccountType(app, {
-      name: 'Savings',
-      accountCategory: 'ASSET',
-    });
-    creditCardTypeId = await seedAccountType(app, {
-      name: 'Credit Card',
-      accountCategory: 'LIABILITY',
-    });
+    // Look up migration-seeded account types
+    checkingTypeId = await getAccountTypeId(app, 'CHECKING');
+    savingsTypeId = await getAccountTypeId(app, 'SAVINGS');
+    creditCardTypeId = await getAccountTypeId(app, 'CREDIT_CARD');
 
     // Seed a category for cascade delete test
     expenseCategoryId = await seedCategory(app, {
@@ -65,8 +56,6 @@ describe('AccountsController (e2e)', () => {
   // POST /accounts
   // ──────────────────────────────────────────────────
   describe('POST /accounts', () => {
-    let createdAccountId: string;
-
     it('should create an account with valid data', async () => {
       const response = await request(app.getHttpServer())
         .post('/accounts')
@@ -86,7 +75,6 @@ describe('AccountsController (e2e)', () => {
       });
       expect(response.body.id).toBeDefined();
       expect(response.body.accountType).toHaveProperty('id', checkingTypeId);
-      createdAccountId = response.body.id;
     });
 
     it('should create a second account with different type', async () => {

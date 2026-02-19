@@ -5,9 +5,9 @@ import { getAuthToken } from './utils/auth.helper';
 import {
   clearDatabase,
   createActiveUser,
+  getAccountTypeId,
   nonExistentId,
   seedAccount,
-  seedAccountType,
   seedBudget,
   seedCategory,
   seedTransaction,
@@ -62,11 +62,8 @@ describe('BudgetsController (e2e)', () => {
       user: userId,
     });
 
-    // Seed account (needed for transaction seeding)
-    const accountTypeId = await seedAccountType(app, {
-      name: 'Checking',
-      accountCategory: 'ASSET',
-    });
+    // Look up migration-seeded account type
+    const accountTypeId = await getAccountTypeId(app, 'CHECKING');
     accountId = await seedAccount(app, {
       name: 'Main Checking',
       balance: 5000,

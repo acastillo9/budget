@@ -6,9 +6,9 @@ import {
   clearDatabase,
   createActiveUser,
   getAccountBalance,
+  getAccountTypeId,
   nonExistentId,
   seedAccount,
-  seedAccountType,
   seedCategory,
 } from './utils/db.helper';
 
@@ -30,7 +30,6 @@ describe('TransactionsController (e2e)', () => {
 
   // Track created transaction IDs for later tests
   let expenseTransactionId: string;
-  let incomeTransactionId: string;
   let transferTransactionId: string;
 
   // Use a date safely in the middle of the current month to avoid timezone edge cases.
@@ -63,10 +62,7 @@ describe('TransactionsController (e2e)', () => {
       userId,
     });
 
-    accountTypeId = await seedAccountType(app, {
-      name: 'Checking',
-      accountCategory: 'ASSET',
-    });
+    accountTypeId = await getAccountTypeId(app, 'CHECKING');
 
     expectedCheckingBalance = 1000;
     checkingAccountId = await seedAccount(app, {
@@ -148,7 +144,6 @@ describe('TransactionsController (e2e)', () => {
 
       expect(response.status).toBe(201);
       expect(response.body.amount).toBe(3000);
-      incomeTransactionId = response.body.id;
 
       // Verify account balance increased
       expectedCheckingBalance += 3000;
