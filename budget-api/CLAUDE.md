@@ -22,7 +22,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture
 
-NestJS + TypeScript + MongoDB (Mongoose). Deployed on Heroku.
+NestJS + TypeScript + MongoDB (Mongoose).
 
 ### Module Structure
 

@@ -24,7 +24,6 @@ RESTful API for the Budget App personal finance management system. Built with Ne
 | Database       | MongoDB with Mongoose ODM         |
 | Authentication | Passport.js, JWT                  |
 | Validation     | class-validator, class-transformer|
-| Deployment     | Heroku                            |
 | CI/CD          | GitHub Actions                    |
 
 ## API Endpoints
