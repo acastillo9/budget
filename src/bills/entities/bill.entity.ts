@@ -110,7 +110,7 @@ function calculateStatus(dueDate: Date): BillStatus {
   return BillStatus.UPCOMING;
 }
 
-BillSchema.methods.getInstances = function(
+BillSchema.methods.getInstances = function (
   this: BillDocument,
   rangeStart: Date,
   rangeEnd: Date,
@@ -191,7 +191,7 @@ BillSchema.methods.getInstances = function(
   return [...overdueInstances, ...rangeInstances];
 };
 
-BillSchema.methods.getInstance = function(
+BillSchema.methods.getInstance = function (
   this: BillDocument,
   targetDate: Date,
 ): BillInstance | null {
@@ -216,7 +216,7 @@ BillSchema.methods.getInstance = function(
   return instance;
 };
 
-BillSchema.methods.updateInstance = async function(
+BillSchema.methods.updateInstance = async function (
   this: BillDocument,
   targetDate: Date,
   updates,
@@ -244,8 +244,8 @@ BillSchema.methods.updateInstance = async function(
   const newOverride = {
     ...(existingOverride
       ? existingOverride.toObject({
-        depopulate: true,
-      })
+          depopulate: true,
+        })
       : {}),
     ...updates,
     applyToFuture,

@@ -24,7 +24,7 @@ export class BillsService {
     @InjectModel(Bill.name)
     private readonly billModel: Model<Bill>,
     private readonly transactionsService: TransactionsService,
-  ) { }
+  ) {}
 
   /**
    * Create a new bill.
