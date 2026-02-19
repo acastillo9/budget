@@ -60,11 +60,15 @@ export class DashboardPage {
 		// Summary cards — identified by their card title text
 		this.netWorthCard = page.locator('[class*="card"]', { hasText: /net worth/i }).first();
 		this.totalIncomeCard = page.locator('[class*="card"]', { hasText: /total income/i }).first();
-		this.totalExpensesCard = page.locator('[class*="card"]', { hasText: /total expenses/i }).first();
+		this.totalExpensesCard = page
+			.locator('[class*="card"]', { hasText: /total expenses/i })
+			.first();
 		this.cashFlowCard = page.locator('[class*="card"]', { hasText: /cash flow/i }).first();
 
 		// Currency Rates card
-		this.currencyRatesCard = page.locator('[class*="card"]', { hasText: /exchange rates/i }).first();
+		this.currencyRatesCard = page
+			.locator('[class*="card"]', { hasText: /exchange rates/i })
+			.first();
 		this.refreshRatesButton = this.currencyRatesCard.getByRole('button');
 
 		// Balance Breakdown card

@@ -399,6 +399,112 @@ test.describe('Budgets — Delete Budget', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Budgets — Month Navigation
+// ---------------------------------------------------------------------------
+test.describe('Budgets — Month Navigation', () => {
+	test.setTimeout(60_000);
+
+	test('should display month navigation controls', async ({ page }) => {
+		const budgetsPage = new BudgetsPage(page);
+		await budgetsPage.goto();
+		await expect(budgetsPage.heading).toBeVisible({ timeout: 15_000 });
+
+		await expect(budgetsPage.prevMonthButton).toBeVisible();
+		await expect(budgetsPage.nextMonthButton).toBeVisible();
+		await expect(budgetsPage.monthLabel).toBeVisible();
+	});
+
+	test('should navigate to previous month', async ({ page }) => {
+		const budgetsPage = new BudgetsPage(page);
+		await budgetsPage.goto();
+		await expect(budgetsPage.heading).toBeVisible({ timeout: 15_000 });
+
+		const initialMonth = await budgetsPage.monthLabel.textContent();
+		await budgetsPage.goToPreviousMonth();
+
+		const newMonth = await budgetsPage.monthLabel.textContent();
+		expect(newMonth).not.toBe(initialMonth);
+	});
+
+	test('should navigate to next month', async ({ page }) => {
+		const budgetsPage = new BudgetsPage(page);
+		await budgetsPage.goto();
+		await expect(budgetsPage.heading).toBeVisible({ timeout: 15_000 });
+
+		const initialMonth = await budgetsPage.monthLabel.textContent();
+		await budgetsPage.goToNextMonth();
+
+		const newMonth = await budgetsPage.monthLabel.textContent();
+		expect(newMonth).not.toBe(initialMonth);
+	});
+
+	test('should show Go to current month link when not on current month', async ({ page }) => {
+		const budgetsPage = new BudgetsPage(page);
+		await budgetsPage.goto();
+		await expect(budgetsPage.heading).toBeVisible({ timeout: 15_000 });
+
+		// On current month, link should not be visible
+		await expect(budgetsPage.goToCurrentMonthLink).not.toBeVisible();
+
+		// Navigate away
+		await budgetsPage.goToPreviousMonth();
+
+		// Link should now be visible
+		await expect(budgetsPage.goToCurrentMonthLink).toBeVisible();
+	});
+
+	test('should navigate back to current month when clicking Go to current month', async ({
+		page
+	}) => {
+		const budgetsPage = new BudgetsPage(page);
+		await budgetsPage.goto();
+		await expect(budgetsPage.heading).toBeVisible({ timeout: 15_000 });
+
+		const currentMonthLabel = await budgetsPage.monthLabel.textContent();
+
+		await budgetsPage.goToPreviousMonth();
+		await expect(budgetsPage.monthLabel).not.toHaveText(currentMonthLabel!);
+
+		await budgetsPage.goToCurrentMonth();
+		await expect(budgetsPage.monthLabel).toHaveText(currentMonthLabel!);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Budgets — Budget Visibility Across Months
+// ---------------------------------------------------------------------------
+test.describe('Budgets — Budget Visibility Across Months', () => {
+	test.setTimeout(90_000);
+
+	test('should show a monthly budget in the next month', async ({ page }) => {
+		const categoryName = await createTestCategory(page, 'MonthNavCat');
+
+		const budgetsPage = new BudgetsPage(page);
+		await budgetsPage.goto();
+		await expect(budgetsPage.heading).toBeVisible({ timeout: 15_000 });
+
+		// Create a monthly budget
+		const budgetName = uniqueName('MonthlyNav');
+		await budgetsPage.createBudget({
+			categoryName,
+			name: budgetName,
+			amount: '500',
+			period: 'MONTHLY'
+		});
+		await expect(budgetsPage.dialog).not.toBeVisible({ timeout: 10_000 });
+		await budgetsPage.expectSuccessToast(/budget added successfully/i);
+		await budgetsPage.toast.waitFor({ state: 'hidden', timeout: 10_000 });
+
+		// Verify budget is visible in current month
+		await expect(budgetsPage.getBudgetItem(budgetName)).toBeVisible({ timeout: 10_000 });
+
+		// Navigate to next month — budget should also appear there
+		await budgetsPage.goToNextMonth();
+		await expect(budgetsPage.getBudgetItem(budgetName)).toBeVisible({ timeout: 10_000 });
+	});
+});
+
+// ---------------------------------------------------------------------------
 // Budgets — Empty State
 // ---------------------------------------------------------------------------
 test.describe('Budgets — Empty State', () => {

@@ -42,6 +42,12 @@ export class BudgetsPage {
 	readonly inlineCategoryNameInput: Locator;
 	readonly inlineCreateCategoryButton: Locator;
 
+	// Month navigation
+	readonly prevMonthButton: Locator;
+	readonly nextMonthButton: Locator;
+	readonly monthLabel: Locator;
+	readonly goToCurrentMonthLink: Locator;
+
 	// Empty state
 	readonly emptyState: Locator;
 
@@ -89,6 +95,12 @@ export class BudgetsPage {
 			name: /create category/i
 		});
 
+		// Month navigation
+		this.prevMonthButton = page.getByRole('button', { name: /previous month/i });
+		this.nextMonthButton = page.getByRole('button', { name: /next month/i });
+		this.monthLabel = page.locator('span.text-2xl.font-bold.capitalize');
+		this.goToCurrentMonthLink = page.getByRole('button', { name: /go to current month/i });
+
 		// Toast
 		this.toast = page.locator('[data-sonner-toast]');
 
@@ -96,8 +108,9 @@ export class BudgetsPage {
 		this.emptyState = page.getByText(/no budgets yet/i);
 	}
 
-	async goto() {
-		await this.page.goto('/budgets');
+	async goto(month?: string) {
+		const url = month ? `/budgets?month=${month}` : '/budgets';
+		await this.page.goto(url);
 	}
 
 	// ---------------------------------------------------------------------------
@@ -313,6 +326,33 @@ export class BudgetsPage {
 			await this.selectPeriod(newData.period);
 		}
 		await this.submitSave();
+	}
+
+	// ---------------------------------------------------------------------------
+	// Month navigation
+	// ---------------------------------------------------------------------------
+
+	async goToPreviousMonth() {
+		await this.page.waitForLoadState('networkidle');
+		const currentLabel = await this.monthLabel.textContent();
+		await this.prevMonthButton.click();
+		await expect(this.monthLabel).not.toHaveText(currentLabel!, { timeout: 10_000 });
+		await this.page.waitForLoadState('networkidle');
+	}
+
+	async goToNextMonth() {
+		await this.page.waitForLoadState('networkidle');
+		const currentLabel = await this.monthLabel.textContent();
+		await this.nextMonthButton.click();
+		await expect(this.monthLabel).not.toHaveText(currentLabel!, { timeout: 10_000 });
+		await this.page.waitForLoadState('networkidle');
+	}
+
+	async goToCurrentMonth() {
+		await this.page.waitForLoadState('networkidle');
+		await this.goToCurrentMonthLink.click();
+		await expect(this.goToCurrentMonthLink).not.toBeVisible({ timeout: 10_000 });
+		await this.page.waitForLoadState('networkidle');
 	}
 
 	// ---------------------------------------------------------------------------

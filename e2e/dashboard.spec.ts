@@ -370,8 +370,8 @@ test.describe('Dashboard — Currency Rates Refresh', () => {
 		await expect(dashboardPage.refreshRatesButton).toBeVisible();
 
 		// Intercept the API call to verify it was made
-		const refreshRequest = page.waitForRequest((req) =>
-			req.url().includes('/api/currencies/USD') && req.method() === 'GET'
+		const refreshRequest = page.waitForRequest(
+			(req) => req.url().includes('/api/currencies/USD') && req.method() === 'GET'
 		);
 
 		await dashboardPage.refreshRatesButton.click();
