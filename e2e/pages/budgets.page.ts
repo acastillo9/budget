@@ -36,6 +36,12 @@ export class BudgetsPage {
 	// Toast
 	readonly toast: Locator;
 
+	// Inline create category (within step 1 of budget wizard)
+	readonly createCategoryTrigger: Locator;
+	readonly createCategoryDialog: Locator;
+	readonly inlineCategoryNameInput: Locator;
+	readonly inlineCreateCategoryButton: Locator;
+
 	// Empty state
 	readonly emptyState: Locator;
 
@@ -72,6 +78,17 @@ export class BudgetsPage {
 		this.confirmDeleteButton = this.confirmationDialog.getByRole('button', { name: /delete/i });
 		this.cancelDeleteButton = this.confirmationDialog.getByRole('button', { name: /cancel/i });
 
+		// Inline create category (the dashed-border "Create New" plus button in step 1)
+		this.createCategoryTrigger = this.dialog
+			.locator('.flex.flex-col.items-center', { hasText: /create new/i })
+			.getByRole('button');
+		// The nested category creation dialog is identified by its title
+		this.createCategoryDialog = page.getByRole('dialog', { name: /create new category/i });
+		this.inlineCategoryNameInput = this.createCategoryDialog.getByLabel(/category name/i);
+		this.inlineCreateCategoryButton = this.createCategoryDialog.getByRole('button', {
+			name: /create category/i
+		});
+
 		// Toast
 		this.toast = page.locator('[data-sonner-toast]');
 
@@ -102,6 +119,40 @@ export class BudgetsPage {
 			hasText: categoryName
 		});
 		await categoryContainer.getByRole('button').click();
+	}
+
+	// ---------------------------------------------------------------------------
+	// Step 1: Inline category creation
+	// ---------------------------------------------------------------------------
+
+	async openCreateCategoryDialog() {
+		await this.createCategoryTrigger.scrollIntoViewIfNeeded();
+		await this.createCategoryTrigger.click();
+		await expect(this.createCategoryDialog).toBeVisible({ timeout: 10_000 });
+	}
+
+	async fillInlineCategoryName(name: string) {
+		await this.inlineCategoryNameInput.fill(name);
+	}
+
+	async selectInlineCategoryIcon(iconTitle: string) {
+		await this.createCategoryDialog.getByTitle(iconTitle).click();
+	}
+
+	async submitInlineCreateCategory() {
+		await expect(this.inlineCreateCategoryButton).toBeEnabled({ timeout: 10_000 });
+		await this.inlineCreateCategoryButton.click();
+		await expect(this.createCategoryDialog).not.toBeVisible({ timeout: 10_000 });
+	}
+
+	/**
+	 * Complete flow: open create-category dialog → fill name → select icon → submit.
+	 */
+	async createCategoryInline(name: string, iconTitle = 'Shopping Cart') {
+		await this.openCreateCategoryDialog();
+		await this.fillInlineCategoryName(name);
+		await this.selectInlineCategoryIcon(iconTitle);
+		await this.submitInlineCreateCategory();
 	}
 
 	// ---------------------------------------------------------------------------
@@ -143,7 +194,9 @@ export class BudgetsPage {
 	async selectStartDate() {
 		// Click today in the calendar
 		await this.startDateTrigger.click();
-		const today = this.page.locator('[data-today="true"]').first();
+		// bits-ui sets data-today as a boolean attribute (no value)
+		const today = this.page.locator('[data-today]').first();
+		await today.waitFor({ state: 'visible', timeout: 10_000 });
 		await today.click();
 	}
 

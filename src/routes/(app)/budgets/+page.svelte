@@ -1,14 +1,47 @@
 <script lang="ts">
-	import { t } from 'svelte-i18n';
+	import { t, locale } from 'svelte-i18n';
 	import type { PageProps } from './$types';
 	import BudgetList from '$lib/components/budget-list.svelte';
 	import CreateBudgetDialog from '$lib/components/create-budget-dialog.svelte';
 	import type { BudgetProgress } from '$lib/types/budget.types';
 	import { toast } from 'svelte-sonner';
-	import { invalidateAll } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import ConfirmationDialog from '$lib/components/confirmation-dialog.svelte';
+	import * as Card from '$lib/components/ui/card';
+	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
+	import { Button } from '$lib/components/ui/button';
 
 	let { data }: PageProps = $props();
+
+	// Month navigation
+	let selectedMonth = $derived(data.selectedMonth);
+
+	const currentMonthKey = $derived(() => {
+		const now = new Date();
+		return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+	});
+
+	const isCurrentMonth = $derived(selectedMonth === currentMonthKey());
+
+	const formattedMonthYear = $derived(() => {
+		const [year, month] = selectedMonth.split('-').map(Number);
+		const date = new Date(year, month - 1, 1);
+		return date.toLocaleDateString($locale ?? 'en', {
+			month: 'long',
+			year: 'numeric'
+		});
+	});
+
+	function navigateMonth(direction: 'prev' | 'next') {
+		const [year, month] = selectedMonth.split('-').map(Number);
+		const newDate = new Date(year, month - 1 + (direction === 'next' ? 1 : -1), 1);
+		const newMonth = `${newDate.getFullYear()}-${String(newDate.getMonth() + 1).padStart(2, '0')}`;
+		goto(`?month=${newMonth}`, { replaceState: false, noScroll: true });
+	}
+
+	function goToCurrentMonth() {
+		goto('/budgets', { replaceState: false, noScroll: true });
+	}
 
 	let isEditBudgetDialogOpen = $state(false);
 	let selectedBudget: BudgetProgress | undefined = $state(undefined);
@@ -76,6 +109,7 @@
 			<div class="flex items-center space-x-2">
 				<CreateBudgetDialog
 					addBudgetForm={data.createBudgetForm}
+					createCategoryForm={data.createCategoryForm}
 					categories={data.categories}
 					budget={selectedBudget}
 					bind:open={isEditBudgetDialogOpen}
@@ -85,6 +119,47 @@
 				/>
 			</div>
 		</div>
+	</div>
+
+	<!-- Month Selector -->
+	<div class="container mx-auto">
+		<Card.Root>
+			<Card.Content class="py-3">
+				<div class="flex items-center justify-between">
+					<Button
+						variant="ghost"
+						size="icon"
+						onclick={() => navigateMonth('prev')}
+						aria-label={$t('budgets.previousMonth')}
+					>
+						<ChevronLeft class="h-5 w-5" />
+					</Button>
+
+					<div class="flex flex-col items-center gap-1">
+						<span class="text-2xl font-bold capitalize">{formattedMonthYear()}</span>
+						{#if !isCurrentMonth}
+							<Button
+								variant="link"
+								size="sm"
+								class="text-muted-foreground h-auto p-0 text-xs"
+								onclick={goToCurrentMonth}
+							>
+								{$t('budgets.goToCurrentMonth')}
+							</Button>
+						{/if}
+					</div>
+
+					<Button
+						variant="ghost"
+						size="icon"
+						onclick={() => navigateMonth('next')}
+						aria-label={$t('budgets.nextMonth')}
+					>
+						<ChevronRight class="h-5 w-5" />
+					</Button>
+				</div>
+			</Card.Content>
+		</Card.Root>
 	</div>
 
 	<div class="container mx-auto">

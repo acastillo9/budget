@@ -64,7 +64,9 @@ test.describe('Budgets — Wizard Navigation', () => {
 	test('should open the wizard dialog when clicking Add Budget', async () => {
 		await budgetsPage.openAddDialog();
 		await expect(budgetsPage.dialog).toBeVisible();
-		await expect(budgetsPage.dialog.getByText(/choose categories/i)).toBeVisible();
+		await expect(
+			budgetsPage.dialog.getByRole('heading', { name: /choose.*categor/i })
+		).toBeVisible();
 	});
 
 	test('should keep Next button disabled when no category is selected', async () => {
@@ -97,7 +99,9 @@ test.describe('Budgets — Wizard Navigation', () => {
 
 		await budgetsPage.goToPreviousStep();
 
-		await expect(budgetsPage.dialog.getByText(/choose categories/i)).toBeVisible();
+		await expect(
+			budgetsPage.dialog.getByRole('heading', { name: /choose.*categor/i })
+		).toBeVisible();
 	});
 
 	test('should keep Save button disabled when form is incomplete', async () => {
@@ -107,6 +111,92 @@ test.describe('Budgets — Wizard Navigation', () => {
 
 		// On step 2 without filling required fields — Save should be disabled
 		await expect(budgetsPage.saveButton).toBeDisabled();
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Budgets — Inline Category Creation
+// ---------------------------------------------------------------------------
+test.describe('Budgets — Inline Category Creation', () => {
+	test.setTimeout(90_000);
+	let budgetsPage: BudgetsPage;
+
+	test.beforeEach(async ({ page }) => {
+		budgetsPage = new BudgetsPage(page);
+		await budgetsPage.goto();
+		await expect(budgetsPage.heading).toBeVisible({ timeout: 15_000 });
+		await budgetsPage.openAddDialog();
+	});
+
+	test('should display a Create New Category button in step 1', async () => {
+		await expect(budgetsPage.createCategoryTrigger).toBeVisible();
+	});
+
+	test('should open the create category dialog when clicking Create New', async () => {
+		await budgetsPage.openCreateCategoryDialog();
+		await expect(budgetsPage.createCategoryDialog).toBeVisible();
+	});
+
+	test('should show Create New Category as the dialog title', async () => {
+		await budgetsPage.openCreateCategoryDialog();
+		await expect(
+			budgetsPage.createCategoryDialog.getByRole('heading', { name: /create new category/i })
+		).toBeVisible();
+	});
+
+	test('should not show a category type selector (type is pre-set to EXPENSE)', async () => {
+		await budgetsPage.openCreateCategoryDialog();
+		await expect(budgetsPage.createCategoryDialog.getByLabel(/category type/i)).not.toBeVisible();
+	});
+
+	test('should keep Create Category button disabled until name is entered', async () => {
+		await budgetsPage.openCreateCategoryDialog();
+		await expect(budgetsPage.inlineCreateCategoryButton).toBeDisabled();
+	});
+
+	test('should keep Create Category button disabled when name is filled but no icon selected', async () => {
+		await budgetsPage.openCreateCategoryDialog();
+		await budgetsPage.fillInlineCategoryName(uniqueName('InlineCat'));
+		await expect(budgetsPage.inlineCreateCategoryButton).toBeDisabled();
+	});
+
+	test('should create a category inline and show success toast', async () => {
+		await budgetsPage.createCategoryInline(uniqueName('InlineCat'));
+		await budgetsPage.expectSuccessToast(/category added successfully/i);
+	});
+
+	test('should make the newly created category appear in the step 1 picker', async () => {
+		const categoryName = uniqueName('InlinePicker');
+		await budgetsPage.createCategoryInline(categoryName);
+		await budgetsPage.expectSuccessToast(/category added successfully/i);
+		await expect(
+			budgetsPage.dialog.locator('.flex.flex-col.items-center', { hasText: categoryName })
+		).toBeVisible({ timeout: 10_000 });
+	});
+
+	test('should complete budget creation using an inline-created category', async () => {
+		const categoryName = uniqueName('InlineBudgetCat');
+		const budgetName = uniqueName('Inline Budget');
+
+		// Create the category inline in step 1
+		await budgetsPage.createCategoryInline(categoryName);
+		await budgetsPage.expectSuccessToast(/category added successfully/i);
+		await budgetsPage.toast.waitFor({ state: 'hidden', timeout: 10_000 });
+
+		// Select the newly created category and proceed to step 2
+		await budgetsPage.selectCategory(categoryName);
+		await budgetsPage.goToNextStep();
+
+		// Fill budget details and save
+		await budgetsPage.fillName(budgetName);
+		await budgetsPage.fillAmount('300');
+		await budgetsPage.selectPeriod('MONTHLY');
+		await budgetsPage.selectStartDate();
+		await budgetsPage.submitSave();
+
+		await expect(budgetsPage.dialog).not.toBeVisible({ timeout: 10_000 });
+		await budgetsPage.expectSuccessToast(/budget added successfully/i);
+		await expect(budgetsPage.getBudgetItem(budgetName)).toBeVisible({ timeout: 10_000 });
 	});
 });
 

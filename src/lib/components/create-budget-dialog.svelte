@@ -12,10 +12,11 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4 } from 'sveltekit-superforms/adapters';
 	import { createBudgetSchema } from '$lib/schemas/budget.schema';
+	import { createCategorySchema } from '$lib/schemas/category.schema';
 	import type { Category } from '$lib/types/category.types';
 	import type { BudgetProgress } from '$lib/types/budget.types';
 	import CategoryBadge from './category-badge.svelte';
-	import { iconMap } from '$lib/utils/icons';
+	import ChooseCategory from './choose-category.svelte';
 	import { cn } from '$lib/utils';
 	import {
 		CalendarDate,
@@ -32,12 +33,14 @@
 
 	let {
 		addBudgetForm,
+		createCategoryForm,
 		categories,
 		budget = undefined,
 		open = $bindable(false),
 		onClose = () => {}
 	}: {
 		addBudgetForm: SuperValidated<Infer<typeof createBudgetSchema>>;
+		createCategoryForm: SuperValidated<Infer<typeof createCategorySchema>>;
 		categories: Category[];
 		budget?: BudgetProgress | undefined;
 		open?: boolean;
@@ -82,6 +85,11 @@
 	let startDateContentRef = $state<HTMLElement | null>(null);
 	let endDateContentRef = $state<HTMLElement | null>(null);
 
+	// Keep $formData.categories in sync with selectedCategories
+	$effect(() => {
+		$formData.categories = selectedCategories.map((c) => c.id);
+	});
+
 	function resetDialog() {
 		budgetStep = 1;
 		selectedCategories = [];
@@ -96,17 +104,6 @@
 
 	function goToNextStep() {
 		budgetStep += 1;
-	}
-
-	function toggleCategory(category: Category) {
-		const idx = selectedCategories.findIndex((c) => c.id === category.id);
-		if (idx >= 0) {
-			selectedCategories = selectedCategories.filter((c) => c.id !== category.id);
-		} else {
-			selectedCategories = [...selectedCategories, category];
-		}
-		// Keep $formData.categories in sync so Zod validation passes
-		$formData.categories = selectedCategories.map((c) => c.id);
 	}
 
 	$effect(() => {
@@ -196,53 +193,20 @@
 
 		{#if budgetStep === 1}
 			<!-- Step 1: Multi-select category picker -->
-			<div class="space-y-4">
-				<div class="flex items-center justify-between">
-					<h3 class="font-medium">{$t('budgets.chooseCategories')}</h3>
-					{#if selectedCategories.length > 0}
-						<span class="text-muted-foreground text-sm">
-							{selectedCategories.length} selected
-						</span>
-					{/if}
-				</div>
-
-				<div class="grid max-h-64 grid-cols-3 gap-4 overflow-y-auto">
-					{#each expenseCategories as categoryItem (categoryItem.id)}
-						{@const Icon = iconMap[categoryItem.icon as keyof typeof iconMap]}
-						{@const isSelected = selectedCategories.some((c) => c.id === categoryItem.id)}
-						<div class="flex flex-col items-center space-y-2">
-							<Button
-								variant="outline"
-								size="icon"
-								class={[
-									'h-16 w-16 rounded-full transition-transform hover:scale-105 hover:dark:bg-blue-800/10 [&.selected]:bg-blue-800/10 [&.selected]:text-blue-700 [&.selected]:dark:text-blue-400',
-									{
-										'selected border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400':
-											isSelected,
-										'border-gray-300 text-gray-500 dark:border-gray-600 dark:text-gray-400':
-											!isSelected
-									}
-								]}
-								onclick={() => toggleCategory(categoryItem)}
-								aria-pressed={isSelected}
-							>
-								<Icon class="h-6 w-6" />
-							</Button>
-							<div class="text-center">
-								<p class="text-xs font-medium">{categoryItem.name}</p>
-							</div>
-						</div>
+			<ChooseCategory
+				categoryType="EXPENSE"
+				{createCategoryForm}
+				categories={expenseCategories}
+				multiSelect
+				bind:selectedCategories
+			/>
+			{#if selectedCategories.length > 0}
+				<div class="flex flex-wrap gap-2 border-t pt-2">
+					{#each selectedCategories as cat (cat.id)}
+						<CategoryBadge category={cat} size="sm" />
 					{/each}
 				</div>
-
-				{#if selectedCategories.length > 0}
-					<div class="flex flex-wrap gap-2 border-t pt-2">
-						{#each selectedCategories as cat (cat.id)}
-							<CategoryBadge category={cat} size="sm" />
-						{/each}
-					</div>
-				{/if}
-			</div>
+			{/if}
 		{:else}
 			<!-- Step 2: Budget details form -->
 			<div class="space-y-4">
