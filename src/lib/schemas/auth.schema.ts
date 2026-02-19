@@ -4,7 +4,7 @@ import { z } from 'zod/v4';
 export const signupFormSchema = z.object({
 	name: z
 		.string()
-		.min(1, { message: $t('signUp.validation.nameIsRequired') })
+		.min(1, { error: () => $t('signUp.validation.nameIsRequired') })
 		.max(200),
 	email: z.string().email()
 });
@@ -18,7 +18,7 @@ export type CheckEmailSchema = z.infer<typeof checkEmailSchema>;
 export const activationSchema = z.object({
 	activationCode: z
 		.string()
-		.min(6, { message: $t('signUp.validation.activationCodeMinLength') })
+		.min(6, { error: () => $t('signUp.validation.activationCodeMinLength') })
 		.max(6)
 });
 
@@ -28,7 +28,7 @@ export const activationWithEmailSchema = z.object({
 	email: z.string().email(),
 	activationCode: z
 		.string()
-		.min(6, { message: $t('signUp.validation.activationCodeMinLength') })
+		.min(6, { error: () => $t('signUp.validation.activationCodeMinLength') })
 		.max(6)
 });
 
@@ -37,10 +37,10 @@ export type ActivationWithEmailSchema = z.infer<typeof activationWithEmailSchema
 export const passwordSchema = z.object({
 	password: z
 		.string()
-		.min(8, { message: $t('signUp.validation.passwordMinLength') })
+		.min(8, { error: () => $t('signUp.validation.passwordMinLength') })
 		.max(250)
 		.regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d\s]).*$/, {
-			message: $t('signUp.validation.passwordMustContainUppercase')
+			error: () => $t('signUp.validation.passwordMustContainUppercase')
 		})
 });
 
