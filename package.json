@@ -1,0 +1,22 @@
+{
+  "name": "budget",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start:api:dev": "npm run start:dev --workspace=budget-api",
+    "start:ui:dev": "npm run dev --workspace=budget-ui"
+  },
+  "workspaces": [
+    "budget-api",
+    "budget-ui"
+  ],
+  "overrides": {
+    "bson": "6.10.4"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
