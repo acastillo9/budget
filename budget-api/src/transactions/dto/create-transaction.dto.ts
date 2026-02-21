@@ -6,8 +6,11 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  ValidateIf,
+  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { InlineCategoryDto } from './inline-category.dto';
 
 export class CreateTransactionDto {
   @ApiProperty({
@@ -46,8 +49,19 @@ export class CreateTransactionDto {
     description: 'Category ID',
     example: '507f1f77bcf86cd799439011',
   })
+  @ValidateIf((o) => !o.newCategory)
   @IsMongoId()
   category: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Inline category to create along with the transaction. Provide this OR category, not both.',
+    type: InlineCategoryDto,
+  })
+  @ValidateIf((o) => !o.category)
+  @ValidateNested()
+  @Type(() => InlineCategoryDto)
+  newCategory?: InlineCategoryDto;
 
   @ApiProperty({
     description: 'Account ID',

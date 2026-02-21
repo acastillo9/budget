@@ -42,21 +42,41 @@ export class TransactionsService {
     userId: string,
     session?: ClientSession,
   ): Promise<TransactionDto> {
-    const category = await this.categoriesService.findById(
-      createTransactionDto.category,
-      userId,
-    );
-
-    const newTransaction = {
-      ...createTransactionDto,
-      amount:
-        category.categoryType === CategoryType.EXPENSE
-          ? -createTransactionDto.amount
-          : createTransactionDto.amount,
-      user: userId,
-    };
+    if (createTransactionDto.category && createTransactionDto.newCategory) {
+      throw new HttpException(
+        'Provide either category or newCategory, not both',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     const saveTransactionFn = async (session: ClientSession) => {
+      // Resolve category: use existing or create inline
+      let category;
+      if (createTransactionDto.newCategory) {
+        category = await this.categoriesService.create(
+          { ...createTransactionDto.newCategory, user: userId } as any,
+          session,
+        );
+      } else {
+        category = await this.categoriesService.findById(
+          createTransactionDto.category,
+          userId,
+        );
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { newCategory: _, ...transactionData } = createTransactionDto;
+
+      const newTransaction = {
+        ...transactionData,
+        category: category.id,
+        amount:
+          category.categoryType === CategoryType.EXPENSE
+            ? -createTransactionDto.amount
+            : createTransactionDto.amount,
+        user: userId,
+      };
+
       // create the transaction
       const transactionModel = new this.transactionModel(newTransaction);
       const savedTransaction = await transactionModel.save({ session });

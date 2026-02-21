@@ -3,7 +3,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Category } from './entities/category.entity';
-import { Model } from 'mongoose';
+import { ClientSession, Model } from 'mongoose';
 import { CategoryDto } from './dto/category.dto';
 import { plainToClass } from 'class-transformer';
 
@@ -22,10 +22,13 @@ export class CategoriesService {
    * @returns The category created.
    * @async
    */
-  async create(createCategoryDto: CreateCategoryDto): Promise<CategoryDto> {
+  async create(
+    createCategoryDto: CreateCategoryDto,
+    session?: ClientSession,
+  ): Promise<CategoryDto> {
     try {
       const categoryModel = new this.categoryModel(createCategoryDto);
-      const savedCategory = await categoryModel.save();
+      const savedCategory = await categoryModel.save({ session });
       return plainToClass(CategoryDto, savedCategory.toObject());
     } catch (error) {
       this.logger.error(

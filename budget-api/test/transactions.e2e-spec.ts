@@ -196,6 +196,195 @@ describe('TransactionsController (e2e)', () => {
   });
 
   // ──────────────────────────────────────────────────
+  // POST /transactions — inline category creation
+  // ──────────────────────────────────────────────────
+  describe('POST /transactions (inline category)', () => {
+    it('should create a transaction with an inline expense category', async () => {
+      const balanceBefore = await getAccountBalance(app, checkingAccountId);
+
+      const response = await request(app.getHttpServer())
+        .post('/transactions')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          amount: 120,
+          date: midMonthDate,
+          description: 'Electronics purchase',
+          newCategory: {
+            name: 'Electronics',
+            icon: 'laptop',
+            categoryType: 'EXPENSE',
+          },
+          account: checkingAccountId,
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body.amount).toBe(-120);
+      expect(response.body.description).toBe('Electronics purchase');
+      expect(response.body.id).toBeDefined();
+
+      // Verify account balance decreased
+      expectedCheckingBalance -= 120;
+      const balanceAfter = await getAccountBalance(app, checkingAccountId);
+      expect(balanceAfter).toBe(balanceBefore - 120);
+
+      // Cleanup
+      await request(app.getHttpServer())
+        .delete(`/transactions/${response.body.id}`)
+        .set('Authorization', `Bearer ${authToken}`);
+      expectedCheckingBalance += 120;
+    });
+
+    it('should create a transaction with an inline income category', async () => {
+      const balanceBefore = await getAccountBalance(app, checkingAccountId);
+
+      const response = await request(app.getHttpServer())
+        .post('/transactions')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          amount: 500,
+          date: midMonthDate,
+          description: 'Freelance payment',
+          newCategory: {
+            name: 'Freelance',
+            icon: 'briefcase',
+            categoryType: 'INCOME',
+          },
+          account: checkingAccountId,
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body.amount).toBe(500);
+
+      // Verify account balance increased
+      expectedCheckingBalance += 500;
+      const balanceAfter = await getAccountBalance(app, checkingAccountId);
+      expect(balanceAfter).toBe(balanceBefore + 500);
+
+      // Cleanup
+      await request(app.getHttpServer())
+        .delete(`/transactions/${response.body.id}`)
+        .set('Authorization', `Bearer ${authToken}`);
+      expectedCheckingBalance -= 500;
+    });
+
+    it('should create the inline category and make it retrievable via GET /categories', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/transactions')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          amount: 30,
+          date: midMonthDate,
+          description: 'Subscription payment',
+          newCategory: {
+            name: 'Subscriptions',
+            icon: 'repeat',
+            categoryType: 'EXPENSE',
+          },
+          account: checkingAccountId,
+        });
+
+      expect(response.status).toBe(201);
+      expectedCheckingBalance -= 30;
+
+      // Verify the newly created category appears in the categories list
+      const categoriesResponse = await request(app.getHttpServer())
+        .get('/categories')
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(categoriesResponse.status).toBe(200);
+      const subscriptionsCat = categoriesResponse.body.find(
+        (c: any) => c.name === 'Subscriptions',
+      );
+      expect(subscriptionsCat).toBeDefined();
+      expect(subscriptionsCat.icon).toBe('repeat');
+      expect(subscriptionsCat.categoryType).toBe('EXPENSE');
+
+      // Cleanup
+      await request(app.getHttpServer())
+        .delete(`/transactions/${response.body.id}`)
+        .set('Authorization', `Bearer ${authToken}`);
+      expectedCheckingBalance += 30;
+    });
+
+    it('should return 400 when both category and newCategory are provided', async () => {
+      const balanceBefore = await getAccountBalance(app, checkingAccountId);
+
+      const response = await request(app.getHttpServer())
+        .post('/transactions')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          amount: 50,
+          date: midMonthDate,
+          description: 'Both fields',
+          category: expenseCategoryId,
+          newCategory: {
+            name: 'Duplicate',
+            icon: 'copy',
+            categoryType: 'EXPENSE',
+          },
+          account: checkingAccountId,
+        });
+
+      expect(response.status).toBe(400);
+
+      // Verify balance unchanged
+      expect(await getAccountBalance(app, checkingAccountId)).toBe(
+        balanceBefore,
+      );
+    });
+
+    it('should return 400 when neither category nor newCategory is provided', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/transactions')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          amount: 50,
+          date: midMonthDate,
+          description: 'No category',
+          account: checkingAccountId,
+        });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should return 400 when newCategory has invalid categoryType', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/transactions')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          amount: 50,
+          date: midMonthDate,
+          description: 'Bad category type',
+          newCategory: {
+            name: 'Invalid',
+            icon: 'x',
+            categoryType: 'INVALID_TYPE',
+          },
+          account: checkingAccountId,
+        });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should return 400 when newCategory is missing required fields', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/transactions')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          amount: 50,
+          date: midMonthDate,
+          description: 'Incomplete category',
+          newCategory: {
+            name: 'Missing icon and type',
+          },
+          account: checkingAccountId,
+        });
+
+      expect(response.status).toBe(400);
+    });
+  });
+
+  // ──────────────────────────────────────────────────
   // POST /transactions/transfer
   // ──────────────────────────────────────────────────
   describe('POST /transactions/transfer', () => {
