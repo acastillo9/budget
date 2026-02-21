@@ -13,7 +13,7 @@ async function bootstrap() {
     mongoose.set('debug', true);
   }
 
-  app.enableCors();
+  app.enableCors({ origin: configService.get('CORS_ORIGIN', '*') });
 
   app.useGlobalPipes(
     new ValidationPipe({

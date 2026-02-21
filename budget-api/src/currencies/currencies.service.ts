@@ -11,12 +11,15 @@ import { firstValueFrom } from 'rxjs';
 @Injectable()
 export class CurrenciesService {
   private readonly logger: Logger = new Logger(CurrenciesService.name);
+  private readonly isDevelopment: boolean;
 
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
-  ) {}
+  ) {
+    this.isDevelopment = this.configService.get('NODE_ENV') === 'development';
+  }
 
   /**
    * Fetch the exchange rate for a given currency code.
@@ -31,7 +34,11 @@ export class CurrenciesService {
     );
 
     if (cacheData) {
-      this.logger.debug(`Returning cached exchange rates for ${currencyCode}`);
+      if (this.isDevelopment) {
+        this.logger.debug(
+          `Returning cached exchange rates for ${currencyCode}`,
+        );
+      }
       return cacheData;
     }
 
@@ -80,9 +87,11 @@ export class CurrenciesService {
       // Calculate the difference in milliseconds
       const ttl = next4AM.getTime() - now.getTime();
 
-      this.logger.debug(
-        `Caching exchange rates for ${currencyCode} with TTL: ${ttl}ms`,
-      );
+      if (this.isDevelopment) {
+        this.logger.debug(
+          `Caching exchange rates for ${currencyCode} with TTL: ${ttl}ms`,
+        );
+      }
 
       await this.cacheManager.set(
         `exchange_rates_${currencyCode}`,

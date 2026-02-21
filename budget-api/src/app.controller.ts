@@ -12,4 +12,10 @@ export class AppController {
       status: 'running',
     };
   }
+
+  @Public()
+  @Get('health')
+  getHealth() {
+    return { status: 'ok' };
+  }
 }

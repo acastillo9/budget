@@ -1,0 +1,11 @@
+node_modules
+.svelte-kit
+build
+.git
+.env*
+test-results
+playwright-report
+e2e
+*.log
+.idea
+.vscode
