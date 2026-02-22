@@ -187,17 +187,26 @@ export class TransactionsPage {
 
 	async selectAccount(accountName: string) {
 		await this.accountTrigger.click();
-		await this.page.getByRole('option', { name: new RegExp(accountName) }).click();
+		await this.page
+			.getByRole('option', { name: new RegExp(accountName) })
+			.and(this.page.locator(':visible'))
+			.click();
 	}
 
 	async selectFromAccount(accountName: string) {
 		await this.fromAccountTrigger.click();
-		await this.page.getByRole('option', { name: new RegExp(accountName) }).click();
+		await this.page
+			.locator('[data-slot="select-content"][data-state="open"]')
+			.getByRole('option', { name: new RegExp(accountName) })
+			.click();
 	}
 
 	async selectToAccount(accountName: string) {
 		await this.toAccountTrigger.click();
-		await this.page.getByRole('option', { name: new RegExp(accountName) }).click();
+		await this.page
+			.locator('[data-slot="select-content"][data-state="open"]')
+			.getByRole('option', { name: new RegExp(accountName) })
+			.click();
 	}
 
 	async fillAmount(amount: string) {

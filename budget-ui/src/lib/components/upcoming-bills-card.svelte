@@ -47,7 +47,6 @@
 		bills
 			.filter((bill) => bill.status !== BillStatus.PAID)
 			.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
-			.slice(0, 5)
 	);
 
 	function getDaysInfo(bill: Bill) {
@@ -103,7 +102,7 @@
 				<p>{$t('dashboard.noPendingBills')}</p>
 			</div>
 		{:else}
-			<div class="space-y-3">
+			<div class="max-h-80 space-y-3 overflow-y-auto">
 				{#each unpaidBills as bill (bill.id + bill.targetDate)}
 					{@const Icon = iconMap[bill.category.icon as keyof typeof iconMap] || Receipt}
 					{@const daysLeft = getDaysInfo(bill)}

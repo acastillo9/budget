@@ -3,38 +3,19 @@
 	import Button from './ui/button/button.svelte';
 	import { t } from 'svelte-i18n';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
-	import { iconMap } from '$lib/utils/icons';
+	import { iconMap, iconCategories } from '$lib/utils/icons';
 
 	let { icon = $bindable() } = $props();
 
 	let searchTerm = $state('');
 	let selectedCategory = $state<string | null>(null);
 
-	const iconCategories = {
-		foodDining: ['ShoppingCart', 'UtensilsCrossed', 'Coffee', 'Pizza'],
-		transportation: ['Car', 'Bus', 'Plane', 'Fuel', 'Bike', 'Train'],
-		shopping: ['ShoppingBag', 'Shirt'],
-		entertainment: ['Film', 'Music', 'Gamepad2', 'Camera', 'Headphones'],
-		utilitiesBills: ['Zap', 'Wifi', 'Phone', 'Smartphone', 'Monitor'],
-		healthFitness: ['Heart', 'Pill', 'Stethoscope', 'Dumbbell'],
-		workIncome: [
-			'Briefcase',
-			'Laptop',
-			'DollarSign',
-			'PiggyBank',
-			'Banknote',
-			'CreditCard',
-			'TrendingUp',
-			'TrendingDown'
-		],
-		homePersonal: ['Home', 'Book', 'Scissors', 'Wrench', 'Gift', 'MapPin']
-	};
-
 	const getFilteredIcons = () => {
 		let iconsToShow: string[] = [];
 
 		if (selectedCategory) {
-			iconsToShow = iconCategories[selectedCategory as keyof typeof iconCategories] || [];
+			const category = iconCategories[selectedCategory as keyof typeof iconCategories];
+			iconsToShow = category ? Object.keys(category) : [];
 		} else {
 			iconsToShow = Object.keys(iconMap);
 		}
