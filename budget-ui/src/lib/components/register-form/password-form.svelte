@@ -21,6 +21,7 @@
 	let { data, accessToken, saveButtonText }: Props = $props();
 	let showPassword = $state(false);
 
+	// svelte-ignore state_referenced_locally
 	const form = superForm(data, {
 		validators: zod4(passwordSchema),
 		onSubmit({ formData, cancel }) {

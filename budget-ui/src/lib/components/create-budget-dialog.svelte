@@ -57,6 +57,7 @@
 
 	const df = new DateFormatter($locale || 'en-US', { dateStyle: 'long' });
 
+	// svelte-ignore state_referenced_locally
 	const form = superForm(addBudgetForm, {
 		validators: zod4(createBudgetSchema),
 		onSubmit({ formData, cancel }) {

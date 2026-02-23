@@ -17,6 +17,7 @@
 	let { data }: PageProps = $props();
 	let showPassword = $state(false);
 
+	// svelte-ignore state_referenced_locally
 	const form = superForm(data.form, {
 		validators: zod4(loginFormSchema)
 	});

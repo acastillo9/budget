@@ -43,6 +43,7 @@
 		categories.filter((c: Category) => c.categoryType === categoryType)
 	);
 
+	// svelte-ignore state_referenced_locally
 	const form = superForm(addBillForm, {
 		validators: zod4(createBillSchema),
 		onSubmit({ formData, cancel }) {

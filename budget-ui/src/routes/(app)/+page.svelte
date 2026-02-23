@@ -17,6 +17,7 @@
 
 	const userState = getUserContext();
 
+	// svelte-ignore state_referenced_locally
 	let usdExchangeRates = $state(data.usdExchangeRates);
 	let isRefreshingRates = $state(false);
 	let userCurrencyCode = $derived(userState.user?.currencyCode || 'USD');

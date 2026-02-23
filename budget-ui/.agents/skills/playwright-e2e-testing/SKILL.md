@@ -92,7 +92,6 @@ Read the [Test Planning Guide](references/test-planning-guide.md#scenario-planni
 1. **Identify the feature scope** — which pages/flows are being tested?
 2. **List all user interactions** on those pages (forms, buttons, navigation, dialogs)
 3. **Categorize scenarios** by priority:
-
    - **P0 Critical**: Auth flows, core page loads, primary CRUD operations
    - **P1 High**: Form validation, error handling, complete CRUD cycles
    - **P2 Medium**: Cross-feature workflows, filters, navigation

@@ -6,7 +6,7 @@
 	let { category, size = 'default' }: { category: Category; size?: 'default' | 'sm' } = $props();
 
 	let isIncome = $derived(category.categoryType === 'INCOME');
-	let Icon = iconMap[category.icon as keyof typeof iconMap];
+	let Icon = $derived(iconMap[category.icon as keyof typeof iconMap]);
 	let colorClass = $derived(
 		isIncome
 			? 'bg-green-100 text-green-800 hover:bg-green-200'

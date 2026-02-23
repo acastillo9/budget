@@ -18,7 +18,9 @@
 
 	let { data, children } = $props();
 
+	// svelte-ignore state_referenced_locally
 	userState.user = data.user;
+	// svelte-ignore state_referenced_locally
 	userState.currencyRates = data.currencyRates;
 	setUserContext(userState);
 

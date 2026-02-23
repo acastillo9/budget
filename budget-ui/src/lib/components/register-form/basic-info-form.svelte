@@ -18,6 +18,7 @@
 		goToNextStep: (email: string, activationCodeResendAt: Date) => void;
 	} = $props();
 
+	// svelte-ignore state_referenced_locally
 	const form = superForm(data, {
 		validationMethod: 'oninput',
 		validators: zod4(signupFormSchema),

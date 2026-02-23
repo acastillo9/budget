@@ -30,8 +30,10 @@
 		onClose?: () => void;
 	} = $props();
 	let selectedIcon = $state('');
+	// svelte-ignore state_referenced_locally
 	let selectedCategoryType = $state(categoryType);
 
+	// svelte-ignore state_referenced_locally
 	const form = superForm(data, {
 		validators: zod4(createCategorySchema),
 		onSubmit({ formData }) {

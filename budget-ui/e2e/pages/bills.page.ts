@@ -216,21 +216,27 @@ export class BillsPage {
 	 * Sections are `.space-y-3` divs that contain an h3 header and a grid of bill items.
 	 */
 	private getSection(headingPattern: RegExp): Locator {
-		return this.page.locator('.space-y-3').filter({ has: this.page.locator('h3', { hasText: headingPattern }) });
+		return this.page
+			.locator('.space-y-3')
+			.filter({ has: this.page.locator('h3', { hasText: headingPattern }) });
 	}
 
 	/**
 	 * Returns a bill item scoped to the "Upcoming Bills" section (non-current months).
 	 */
 	getUpcomingBillItem(billName: string): Locator {
-		return this.getSection(/upcoming bills/i).locator('.rounded-lg.border.p-4', { hasText: billName });
+		return this.getSection(/upcoming bills/i).locator('.rounded-lg.border.p-4', {
+			hasText: billName
+		});
 	}
 
 	/**
 	 * Returns a bill item scoped to the "Overdue Bills" section.
 	 */
 	getOverdueBillItem(billName: string): Locator {
-		return this.getSection(/overdue bills/i).locator('.rounded-lg.border.p-4', { hasText: billName });
+		return this.getSection(/overdue bills/i).locator('.rounded-lg.border.p-4', {
+			hasText: billName
+		});
 	}
 
 	/**

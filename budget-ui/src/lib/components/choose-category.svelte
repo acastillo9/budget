@@ -94,7 +94,7 @@
 					variant="outline"
 					size="icon"
 					class={[
-						'h-16 w-16 rounded-full mb-2 transition-transform hover:scale-105 hover:dark:bg-blue-800/10 [&.selected]:bg-blue-800/10 [&.selected]:text-blue-700 [&.selected]:dark:text-blue-400',
+						'mb-2 h-16 w-16 rounded-full transition-transform hover:scale-105 hover:dark:bg-blue-800/10 [&.selected]:bg-blue-800/10 [&.selected]:text-blue-700 [&.selected]:dark:text-blue-400',
 						{
 							'selected border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400':
 								isSelected(categoryItem),

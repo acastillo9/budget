@@ -24,9 +24,11 @@
 		activationCodeResendAt: Date | string;
 		goToNextStep: (accessToken: string) => void;
 	} = $props();
+	// svelte-ignore state_referenced_locally
 	let remainingTime = $state(activationCodeResendAt);
 	let resendingActivationCode = $state(false);
 
+	// svelte-ignore state_referenced_locally
 	const form = superForm(data, {
 		validators: zod4(activationSchema),
 		onSubmit({ formData, cancel }) {

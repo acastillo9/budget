@@ -74,6 +74,7 @@
 		}
 	}
 
+	// svelte-ignore state_referenced_locally
 	const form = superForm(addTransactionForm, {
 		validators: zod4(createTransactionSchema),
 		onSubmit({ formData, cancel }) {
@@ -93,6 +94,7 @@
 
 	const { form: formData, enhance, isTainted, tainted, allErrors, delayed, reset } = form;
 
+	// svelte-ignore state_referenced_locally
 	const transferForm = superForm(addTransferForm, {
 		validators: zod4(createTransferSchema),
 		onUpdate({ form }) {

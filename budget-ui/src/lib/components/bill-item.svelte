@@ -38,8 +38,10 @@
 	// Use this for color lookups - maps UPCOMING to DUE when in current month
 	const colorStatus = $derived(useYellowForUpcoming ? 'DUE' : bill.status);
 
-	let daysDiff = Math.abs(
-		Math.floor((new Date().getTime() - new Date(bill.dueDate).getTime()) / (1000 * 60 * 60 * 24))
+	let daysDiff = $derived(
+		Math.abs(
+			Math.floor((new Date().getTime() - new Date(bill.dueDate).getTime()) / (1000 * 60 * 60 * 24))
+		)
 	);
 
 	let itemClasses = $derived.by(() => {
@@ -58,7 +60,7 @@
 
 	const userState = getUserContext();
 
-	const Icon = iconMap[bill.category.icon as keyof typeof iconMap];
+	const Icon = $derived(iconMap[bill.category.icon as keyof typeof iconMap]);
 </script>
 
 <div class={itemClasses}>
