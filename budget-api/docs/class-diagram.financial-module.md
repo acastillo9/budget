@@ -62,6 +62,7 @@ classDiagram
         +String name
         +String icon
         +CategoryType categoryType
+        +Category parent
         +User user
         +Date createdAt
         +Date updatedAt
@@ -110,4 +111,5 @@ classDiagram
     %% Categories
     Category "*" --> "1" User : owned by
     Category --> CategoryType : categoryType
+    Category "0..*" --> "0..1" Category : parent (1-level nesting)
 ```

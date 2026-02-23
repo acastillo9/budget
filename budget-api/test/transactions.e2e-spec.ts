@@ -679,6 +679,74 @@ describe('TransactionsController (e2e)', () => {
   });
 
   // ──────────────────────────────────────────────────
+  // GET /transactions?categoryId= — subcategory expansion
+  // ──────────────────────────────────────────────────
+  describe('GET /transactions?categoryId (subcategory filter)', () => {
+    let parentCatId: string;
+    let subCatId: string;
+
+    beforeAll(async () => {
+      // Create parent + subcategory
+      parentCatId = await seedCategory(app, {
+        name: 'Shopping',
+        icon: 'bag',
+        categoryType: 'EXPENSE',
+        user: userId,
+      });
+      subCatId = await seedCategory(app, {
+        name: 'Online Shopping',
+        icon: 'globe',
+        categoryType: 'EXPENSE',
+        user: userId,
+        parent: parentCatId,
+      });
+
+      // Create transactions: one on parent, one on subcategory
+      const createTx = (categoryId: string, description: string) =>
+        request(app.getHttpServer())
+          .post('/transactions')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({
+            amount: 25,
+            date: midMonthDate,
+            description,
+            category: categoryId,
+            account: checkingAccountId,
+          });
+
+      await createTx(parentCatId, 'Parent category purchase');
+      expectedCheckingBalance -= 25;
+      await createTx(subCatId, 'Subcategory purchase');
+      expectedCheckingBalance -= 25;
+    });
+
+    it('should return transactions from both parent and subcategories when filtering by parent categoryId', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/transactions')
+        .query({ categoryId: parentCatId })
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      const descriptions = response.body.data.map((t: any) => t.description);
+      expect(descriptions).toContain('Parent category purchase');
+      expect(descriptions).toContain('Subcategory purchase');
+    });
+
+    it('should return only subcategory transactions when filtering by subcategory categoryId', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/transactions')
+        .query({ categoryId: subCatId })
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBeGreaterThanOrEqual(1);
+      const descriptions = response.body.data.map((t: any) => t.description);
+      expect(descriptions).toContain('Subcategory purchase');
+      expect(descriptions).not.toContain('Parent category purchase');
+    });
+  });
+
+  // ──────────────────────────────────────────────────
   // Account balance integrity — isolated scenarios
   // ──────────────────────────────────────────────────
   describe('Account balance integrity', () => {

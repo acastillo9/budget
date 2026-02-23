@@ -3,17 +3,18 @@
 	import { t } from 'svelte-i18n';
 	import type { PageProps } from './$types';
 	import CategoryList from '$lib/components/category-list.svelte';
-	import * as Pagination from '$lib/components/ui/pagination';
 	import type { Category } from '$lib/types/category.types';
 	import { toast } from 'svelte-sonner';
 	import { invalidateAll } from '$app/navigation';
 	import ConfirmationDialog from '$lib/components/confirmation-dialog.svelte';
 
-	const PER_PAGE = 15;
 	let { data }: PageProps = $props();
-	let page = $state(1);
 	let selectedCategory: Category | undefined = $state(undefined);
 	let isEditCategoryDialogOpen = $state(false);
+	let preSelectedParent: Category | undefined = $state(undefined);
+
+	// Top-level categories (those without a parent) for the parent dropdown
+	let parentCategories = $derived(data.categories.filter((c) => !c.parent));
 
 	let confirmationDialog = $state({
 		open: false,
@@ -24,13 +25,18 @@
 	});
 
 	const confirmDeleteCategory = (category: Category) => {
+		const hasChildren = category.children && category.children.length > 0;
 		confirmationDialog = {
 			open: true,
 			loading: false,
 			title: $t('categories.deleteCategoryTitle'),
-			description: $t('categories.deleteCategoryDescription', {
-				values: { name: category.name }
-			}),
+			description: hasChildren
+				? $t('categories.deleteParentWarning', {
+						values: { name: category.name }
+					})
+				: $t('categories.deleteCategoryDescription', {
+						values: { name: category.name }
+					}),
 			onConfirm: () => {
 				deleteCategory(category);
 			}
@@ -64,6 +70,12 @@
 			toast.error($t('categories.deleteCategoryError'));
 		}
 	}
+
+	function handleAddSubcategory(parent: Category) {
+		preSelectedParent = parent;
+		selectedCategory = undefined;
+		isEditCategoryDialogOpen = true;
+	}
 </script>
 
 <svelte:head>
@@ -82,9 +94,12 @@
 				<CreateCategoryDialog
 					data={data.createCategoryForm}
 					category={selectedCategory}
+					{parentCategories}
+					{preSelectedParent}
 					bind:open={isEditCategoryDialogOpen}
 					onClose={() => {
 						selectedCategory = undefined;
+						preSelectedParent = undefined;
 					}}
 				/>
 			</div>
@@ -93,38 +108,15 @@
 
 	<div class="container mx-auto">
 		<CategoryList
-			categories={data.categories.slice((page - 1) * PER_PAGE, page * PER_PAGE)}
+			categories={data.categories}
 			onEdit={(event) => {
 				selectedCategory = event;
+				preSelectedParent = undefined;
 				isEditCategoryDialogOpen = true;
 			}}
 			onDelete={confirmDeleteCategory}
+			onAddSubcategory={handleAddSubcategory}
 		/>
-		<Pagination.Root count={data.categories.length} perPage={PER_PAGE} bind:page>
-			{#snippet children({ pages, currentPage })}
-				<Pagination.Content>
-					<Pagination.Item>
-						<Pagination.PrevButton />
-					</Pagination.Item>
-					{#each pages as page (page.key)}
-						{#if page.type === 'ellipsis'}
-							<Pagination.Item>
-								<Pagination.Ellipsis />
-							</Pagination.Item>
-						{:else}
-							<Pagination.Item>
-								<Pagination.Link {page} isActive={currentPage === page.value}>
-									{page.value}
-								</Pagination.Link>
-							</Pagination.Item>
-						{/if}
-					{/each}
-					<Pagination.Item>
-						<Pagination.NextButton />
-					</Pagination.Item>
-				</Pagination.Content>
-			{/snippet}
-		</Pagination.Root>
 	</div>
 </section>
 

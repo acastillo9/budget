@@ -19,6 +19,14 @@ export class Category {
 
   @Prop({
     type: SchemaTypes.ObjectId,
+    ref: 'Category',
+    default: null,
+    autopopulate: true,
+  })
+  parent?: CategoryDocument;
+
+  @Prop({
+    type: SchemaTypes.ObjectId,
     ref: 'User',
     required: true,
     autopopulate: true,
@@ -28,3 +36,5 @@ export class Category {
 
 export const CategorySchema =
   SchemaFactory.createForClass(Category).add(AuditableSchema);
+
+CategorySchema.index({ parent: 1, user: 1 });

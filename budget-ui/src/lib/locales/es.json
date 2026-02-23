@@ -307,7 +307,14 @@
 		},
 		"loadCategoriesError": "Error al cargar las categorías. Por favor, inténtalo de nuevo más tarde.",
 		"noCategories": "Aún no tienes categorías. Crea tu primera categoría para comenzar.",
+		"noParent": "Ninguna (nivel superior)",
+		"parentCategory": "Categoría padre (opcional)",
+		"parentCategoryPlaceholder": "Selecciona una categoría padre",
 		"searchIcons": "Buscar íconos...",
+		"subcategories": "Subcategorías",
+		"addSubcategory": "Agregar subcategoría",
+		"childCount": "{count} subcategorías",
+		"deleteParentWarning": "Esta categoría tiene subcategorías. Eliminarla también eliminará todas sus subcategorías. ¿Estás seguro de que deseas eliminar \"{name}\"?",
 		"title": "Categorías"
 	},
 	"common": {

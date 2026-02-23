@@ -31,7 +31,7 @@ export const load: PageServerLoad = async ({ locals, cookies, fetch }) => {
 	// load categories from the API
 	let categories = [];
 	try {
-		const response = await fetch(`${API_URL}/categories`);
+		const response = await fetch(`${API_URL}/categories/tree`);
 		if (!response.ok) {
 			throw new Error('Failed to load categories');
 		}

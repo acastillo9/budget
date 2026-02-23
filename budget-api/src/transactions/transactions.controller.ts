@@ -24,6 +24,7 @@ import { AuthenticatedRequest } from 'src/shared/types';
 import { CreateTransferDto } from './dto/create-transfer.dto';
 import { PaginationDto } from 'src/shared/dto/pagination.dto';
 import { UpdateTransferDto } from './dto/update-transfer.dto';
+import { TransactionsQueryDto } from './dto/transactions-query.dto';
 
 @ApiTags('Transactions')
 @ApiBearerAuth('JWT')
@@ -104,8 +105,13 @@ export class TransactionsController {
   findAll(
     @Request() req: AuthenticatedRequest,
     @Query() paginationDto: PaginationDto,
+    @Query() queryDto: TransactionsQueryDto,
   ) {
-    return this.transactionsService.findAll(req.user.userId, paginationDto);
+    return this.transactionsService.findAll(
+      req.user.userId,
+      paginationDto,
+      queryDto.categoryId,
+    );
   }
 
   /**

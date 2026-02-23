@@ -202,11 +202,22 @@ export class TransactionsService {
   async findAll(
     userId: string,
     paginationDto: PaginationDto,
+    categoryId?: string,
   ): Promise<PaginatedDataDto<TransactionDto>> {
-    const filter = { user: userId };
+    const filter: any = { user: userId };
     const skip = paginationDto.offset || 0;
     const limit = paginationDto.limit || 10; // Default limit to 10 if not provided
     const sort = { createdAt: -1 }; // Sort by date descending
+
+    // If categoryId is provided, expand to include subcategories
+    if (categoryId) {
+      const expandedIds =
+        await this.categoriesService.findCategoryIdsWithChildren(
+          [categoryId],
+          userId,
+        );
+      filter.category = { $in: expandedIds };
+    }
 
     try {
       const transactions = await this.transactionModel.find(filter, null, {

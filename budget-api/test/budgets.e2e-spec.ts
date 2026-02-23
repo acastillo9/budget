@@ -463,6 +463,78 @@ describe('BudgetsController (e2e)', () => {
   });
 
   // ──────────────────────────────────────────────────
+  // GET /budgets/:id/progress — subcategory expansion
+  // ──────────────────────────────────────────────────
+  describe('GET /budgets/:id/progress (subcategory expansion)', () => {
+    let subCatBudgetId: string;
+    let parentCatId: string;
+    let subCatId: string;
+
+    beforeAll(async () => {
+      // Create a parent category + subcategory
+      parentCatId = await seedCategory(app, {
+        name: 'Shopping',
+        icon: 'bag',
+        categoryType: 'EXPENSE',
+        user: userId,
+      });
+      subCatId = await seedCategory(app, {
+        name: 'Online Shopping',
+        icon: 'globe',
+        categoryType: 'EXPENSE',
+        user: userId,
+        parent: parentCatId,
+      });
+
+      // Create a YEARLY budget on the parent category (avoids MONTHLY conflicts)
+      subCatBudgetId = await seedBudget(app, {
+        name: 'Shopping Budget',
+        amount: 1000,
+        period: 'YEARLY',
+        startDate: new Date('2024-01-01T00:00:00.000Z'),
+        categories: [parentCatId],
+        user: userId,
+      });
+
+      // Seed transactions: one on parent, one on subcategory
+      await seedTransaction(app, {
+        amount: -100,
+        date: new Date('2024-03-15T00:00:00.000Z'),
+        description: 'In-store purchase',
+        category: parentCatId,
+        account: accountId,
+        user: userId,
+      });
+      await seedTransaction(app, {
+        amount: -60,
+        date: new Date('2024-06-10T00:00:00.000Z'),
+        description: 'Online order',
+        category: subCatId,
+        account: accountId,
+        user: userId,
+      });
+    });
+
+    it('should include spending from subcategories in budget progress', async () => {
+      const response = await request(app.getHttpServer())
+        .get(`/budgets/${subCatBudgetId}/progress`)
+        .query({
+          from: '2024-01-01T00:00:00.000Z',
+          to: '2025-01-01T00:00:00.000Z',
+        })
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveLength(1);
+
+      // Total spent should be 100 + 60 = 160 (parent + subcategory)
+      const window = response.body[0];
+      expect(window.spent).toBe(160);
+      expect(window.remaining).toBe(840); // 1000 - 160
+    });
+  });
+
+  // ──────────────────────────────────────────────────
   // PATCH /budgets/:id
   // ──────────────────────────────────────────────────
   describe('PATCH /budgets/:id', () => {

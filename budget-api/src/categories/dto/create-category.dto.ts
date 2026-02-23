@@ -1,5 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsEnum,
+  IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateIf,
+} from 'class-validator';
 import { CategoryType } from '../entities/category-type.enum';
 
 export class CreateCategoryDto {
@@ -14,10 +21,20 @@ export class CreateCategoryDto {
   icon: string;
 
   @ApiProperty({
-    description: 'Category type',
+    description:
+      'Category type. Required for top-level categories, inherited from parent for subcategories.',
     enum: CategoryType,
     example: CategoryType.EXPENSE,
   })
+  @ValidateIf((o) => !o.parent)
   @IsEnum(CategoryType)
-  categoryType: string;
+  categoryType?: string;
+
+  @ApiPropertyOptional({
+    description: 'Parent category ID (creates a subcategory)',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @IsOptional()
+  @IsMongoId()
+  parent?: string;
 }

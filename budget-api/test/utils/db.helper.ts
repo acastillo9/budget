@@ -196,6 +196,7 @@ export async function seedCategory(
     icon: string;
     categoryType: string;
     user: string;
+    parent?: string;
   },
 ): Promise<string> {
   const connection = app.get<Connection>(getConnectionToken());

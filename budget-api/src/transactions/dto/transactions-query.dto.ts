@@ -19,4 +19,12 @@ export class TransactionsQueryDto {
   @IsString()
   @IsOptional()
   year?: number;
+
+  @ApiPropertyOptional({
+    description: 'Filter by category ID (includes subcategories automatically)',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @IsMongoId()
+  @IsOptional()
+  categoryId?: string;
 }

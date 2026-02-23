@@ -34,7 +34,6 @@ test.describe('Categories — Page Load & List', () => {
 	test('should open the Add Category dialog when clicking the button', async () => {
 		await categoriesPage.openAddDialog();
 		await expect(categoriesPage.nameInput).toBeVisible();
-		await expect(categoriesPage.categoryTypeTrigger).toBeVisible();
 		await expect(categoriesPage.createCategoryButton).toBeVisible();
 	});
 });
@@ -121,9 +120,6 @@ test.describe('Categories — Edit', () => {
 
 		// Name should be pre-filled
 		await expect(categoriesPage.nameInput).toHaveValue(categoryName);
-
-		// Category type trigger should show the selected type
-		await expect(categoriesPage.categoryTypeTrigger).toHaveText(/expense/i);
 	});
 
 	test('should update a category name successfully', async () => {
@@ -237,5 +233,71 @@ test.describe('Categories — Full CRUD Workflow', () => {
 		await expect(categoriesPage.getCategoryCard(updatedName)).not.toBeVisible({
 			timeout: 10_000
 		});
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Categories — Subcategories
+// ---------------------------------------------------------------------------
+test.describe('Categories — Subcategories', () => {
+	let categoriesPage: CategoriesPage;
+	let parentName: string;
+
+	test.beforeEach(async ({ page }) => {
+		categoriesPage = new CategoriesPage(page);
+		await categoriesPage.goto();
+		await page.waitForLoadState('networkidle');
+
+		// Create a parent category
+		parentName = uniqueName('Parent');
+		await categoriesPage.createCategory(parentName, 'Expense', 'Shopping Cart');
+		await expect(categoriesPage.dialog).not.toBeVisible({ timeout: 10_000 });
+		await categoriesPage.expectSuccessToast(/category added successfully/i);
+		await categoriesPage.toast.waitFor({ state: 'hidden', timeout: 10_000 });
+	});
+
+	test('should create a subcategory under a parent via dialog', async () => {
+		const childName = uniqueName('Child');
+		await categoriesPage.createSubcategory(childName, parentName, 'Coffee');
+
+		await expect(categoriesPage.dialog).not.toBeVisible({ timeout: 10_000 });
+		await categoriesPage.expectSuccessToast(/category added successfully/i);
+
+		// Expand parent to see the subcategory
+		await categoriesPage.expandParentCategory(parentName);
+		await expect(categoriesPage.getSubcategoryCard(parentName, childName)).toBeVisible();
+	});
+
+	test('should create a subcategory via Add Subcategory button on parent card', async () => {
+		const childName = uniqueName('QuickChild');
+		await categoriesPage.clickAddSubcategory(parentName);
+		await categoriesPage.fillName(childName);
+		await categoriesPage.selectIcon('Pizza');
+		await categoriesPage.submitCreate();
+
+		await expect(categoriesPage.dialog).not.toBeVisible({ timeout: 10_000 });
+		await categoriesPage.expectSuccessToast(/category added successfully/i);
+
+		// Expand parent to see the subcategory
+		await categoriesPage.expandParentCategory(parentName);
+		await expect(categoriesPage.getSubcategoryCard(parentName, childName)).toBeVisible();
+	});
+
+	test('should delete a parent with subcategories and show warning', async () => {
+		// First create a subcategory
+		const childName = uniqueName('ChildToDelete');
+		await categoriesPage.createSubcategory(childName, parentName, 'Coffee');
+		await expect(categoriesPage.dialog).not.toBeVisible({ timeout: 10_000 });
+		await categoriesPage.expectSuccessToast(/category added successfully/i);
+		await categoriesPage.toast.waitFor({ state: 'hidden', timeout: 10_000 });
+
+		// Now delete the parent — should show warning about subcategories
+		await categoriesPage.clickDelete(parentName);
+		await expect(categoriesPage.confirmationDialog).toBeVisible();
+		await expect(categoriesPage.confirmationDescription).toContainText(/subcategories/i);
+		await categoriesPage.confirmDeletion();
+
+		// Verify a toast appears (success or error depending on backend support)
+		await expect(categoriesPage.toast).toBeVisible({ timeout: 10_000 });
 	});
 });

@@ -14,6 +14,7 @@ export class CategoriesPage {
 	readonly dialog: Locator;
 	readonly nameInput: Locator;
 	readonly categoryTypeTrigger: Locator;
+	readonly parentCategoryTrigger: Locator;
 	readonly createCategoryButton: Locator;
 	readonly saveButton: Locator;
 
@@ -40,7 +41,8 @@ export class CategoriesPage {
 		// Dialog elements (inside the dialog overlay)
 		this.dialog = page.getByRole('dialog');
 		this.nameInput = page.getByLabel(/category name/i);
-		this.categoryTypeTrigger = this.dialog.locator('[data-slot="select-trigger"]');
+		this.categoryTypeTrigger = this.dialog.locator('[data-slot="select-trigger"]').first();
+		this.parentCategoryTrigger = this.dialog.locator('[data-slot="select-trigger"]').first();
 		this.createCategoryButton = page.getByRole('button', { name: /create category/i });
 		this.saveButton = page.getByRole('button', { name: /^save$/i });
 
@@ -76,8 +78,20 @@ export class CategoriesPage {
 	}
 
 	async selectCategoryType(typeName: string) {
-		await this.categoryTypeTrigger.click();
+		// Category type is the last select trigger when parent selector is visible,
+		// or the first when it's not
+		const triggers = this.dialog.locator('[data-slot="select-trigger"]');
+		const count = await triggers.count();
+		const typeTrigger = count > 1 ? triggers.nth(1) : triggers.first();
+		await typeTrigger.click();
 		await this.page.getByRole('option', { name: typeName, exact: true }).click();
+	}
+
+	async selectParentCategory(parentName: string) {
+		// Parent category is always the first select trigger
+		const triggers = this.dialog.locator('[data-slot="select-trigger"]');
+		await triggers.first().click();
+		await this.page.getByRole('option', { name: parentName, exact: true }).click();
 	}
 
 	async selectIcon(iconTitle: string) {
@@ -103,6 +117,17 @@ export class CategoriesPage {
 		await this.submitCreate();
 	}
 
+	/**
+	 * Complete flow: open dialog → select parent → fill form → submit for subcategory creation.
+	 */
+	async createSubcategory(name: string, parentName: string, iconTitle: string) {
+		await this.openAddDialog();
+		await this.fillName(name);
+		await this.selectParentCategory(parentName);
+		await this.selectIcon(iconTitle);
+		await this.submitCreate();
+	}
+
 	// ---------------------------------------------------------------------------
 	// Category list interactions
 	// ---------------------------------------------------------------------------
@@ -111,7 +136,34 @@ export class CategoriesPage {
 	 * Returns the card locator for a category identified by its name.
 	 */
 	getCategoryCard(name: string): Locator {
-		return this.page.locator('.rounded-lg.border', { hasText: name });
+		return this.page.locator('.rounded-lg.border, .rounded-md.border', { hasText: name });
+	}
+
+	/**
+	 * Click the "Add Subcategory" button (+) on a parent card.
+	 */
+	async clickAddSubcategory(parentName: string) {
+		const card = this.page.locator('.rounded-lg.border', { hasText: parentName });
+		await card.getByTitle(/add subcategory/i).click();
+		await expect(this.dialog).toBeVisible({ timeout: 10_000 });
+	}
+
+	/**
+	 * Expand a parent category's collapsible section.
+	 */
+	async expandParentCategory(parentName: string) {
+		// The Collapsible.Root wraps the .rounded-lg.border div, so find the trigger inside the card
+		const card = this.page.locator('.rounded-lg.border', { hasText: parentName });
+		const trigger = card.locator('[data-slot="collapsible-trigger"]');
+		await trigger.click();
+	}
+
+	/**
+	 * Get a subcategory card nested under a parent.
+	 */
+	getSubcategoryCard(parentName: string, childName: string): Locator {
+		const parentCard = this.page.locator('.rounded-lg.border', { hasText: parentName });
+		return parentCard.locator('.rounded-md.border', { hasText: childName });
 	}
 
 	/**
@@ -119,7 +171,7 @@ export class CategoriesPage {
 	 */
 	async clickEdit(categoryName: string) {
 		const card = this.getCategoryCard(categoryName);
-		await card.getByRole('button').first().click();
+		await card.getByTitle('Edit').first().click();
 		await expect(this.dialog).toBeVisible();
 	}
 
@@ -128,7 +180,7 @@ export class CategoriesPage {
 	 */
 	async clickDelete(categoryName: string) {
 		const card = this.getCategoryCard(categoryName);
-		await card.getByRole('button').last().click();
+		await card.getByTitle('Delete').first().click();
 		await expect(this.confirmationDialog).toBeVisible();
 	}
 

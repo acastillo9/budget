@@ -19,6 +19,7 @@ classDiagram
         +string name
         +string icon
         +CategoryType categoryType
+        +Category parent
         +User user
     }
 
@@ -87,9 +88,10 @@ classDiagram
     %% Relationships
     %% ============================================================
 
-    Budget "1" --> "*" Category : tracks spending of
+    Budget "1" --> "*" Category : tracks spending of (incl. subcategories)
     Budget "*" --> "1" User : belongs to
     Category "1" --> "1" CategoryType : classified by
+    Category "0..*" --> "0..1" Category : parent (1-level nesting)
     Transaction "*" --> "1" Category : tagged with
     Transaction "*" --> "1" User : belongs to
 

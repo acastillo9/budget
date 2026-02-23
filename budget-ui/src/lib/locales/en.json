@@ -307,7 +307,14 @@
 		},
 		"loadCategoriesError": "Error loading categories. Please try again later.",
 		"noCategories": "No categories yet. Create your first category to get started.",
+		"noParent": "None (Top-level)",
+		"parentCategory": "Parent Category (Optional)",
+		"parentCategoryPlaceholder": "Select parent category",
 		"searchIcons": "Search Icons...",
+		"subcategories": "Subcategories",
+		"addSubcategory": "Add Subcategory",
+		"childCount": "{count} subcategories",
+		"deleteParentWarning": "This category has subcategories. Deleting it will also delete all its subcategories. Are you sure you want to delete \"{name}\"?",
 		"title": "Categories"
 	},
 	"common": {

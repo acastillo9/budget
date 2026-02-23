@@ -10,6 +10,7 @@ import { BudgetProgressDto } from './dto/budget-progress.dto';
 import { BudgetPeriod } from './entities/budget-period.enum';
 import { plainToClass } from 'class-transformer';
 import { ObjectId } from 'mongodb';
+import { CategoriesService } from 'src/categories/categories.service';
 
 @Injectable()
 export class BudgetsService {
@@ -20,6 +21,7 @@ export class BudgetsService {
     private readonly budgetModel: Model<Budget>,
     @InjectModel(Transaction.name)
     private readonly transactionModel: Model<Transaction>,
+    private readonly categoriesService: CategoriesService,
   ) {}
 
   /**
@@ -223,8 +225,14 @@ export class BudgetsService {
       return [];
     }
 
-    // Get category IDs for the aggregation query
-    const categoryIds = budget.categories.map((c) => new ObjectId(c.id));
+    // Get category IDs for the aggregation query, expanding to include subcategories
+    const baseCategoryIds = budget.categories.map((c) => c.id);
+    const expandedIds =
+      await this.categoriesService.findCategoryIdsWithChildren(
+        baseCategoryIds,
+        userId,
+      );
+    const categoryIds = expandedIds.map((id) => new ObjectId(id));
 
     // Aggregate all spending in one query across the full range
     const globalStart = windows[0].start;
@@ -275,10 +283,17 @@ export class BudgetsService {
     userId: string,
     excludeBudgetId?: string,
   ): Promise<void> {
+    // Expand to include subcategories for conflict detection
+    const expandedIds =
+      await this.categoriesService.findCategoryIdsWithChildren(
+        categoryIds,
+        userId,
+      );
+
     const filter: any = {
       user: userId,
       period,
-      categories: { $in: categoryIds },
+      categories: { $in: expandedIds },
     };
     if (excludeBudgetId) {
       filter._id = { $ne: excludeBudgetId };

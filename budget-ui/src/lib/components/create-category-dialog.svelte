@@ -20,25 +20,39 @@
 		data,
 		categoryType = undefined,
 		category = undefined,
+		parentCategories = [],
+		preSelectedParent = undefined,
 		open = $bindable(false),
 		onClose = () => {}
 	}: {
 		data: SuperValidated<Infer<typeof createCategorySchema>>;
 		categoryType?: string;
 		category?: Category;
+		parentCategories?: Category[];
+		preSelectedParent?: Category;
 		open?: boolean;
 		onClose?: () => void;
 	} = $props();
 	let selectedIcon = $state('');
 	// svelte-ignore state_referenced_locally
 	let selectedCategoryType = $state(categoryType);
+	let selectedParentId = $state<string | undefined>(undefined);
+
+	let selectedParentCategory = $derived(parentCategories.find((c) => c.id === selectedParentId));
 
 	// svelte-ignore state_referenced_locally
 	const form = superForm(data, {
 		validators: zod4(createCategorySchema),
 		onSubmit({ formData }) {
 			formData.set('icon', selectedIcon);
-			if (!categoryType) {
+			if (selectedParentId) {
+				formData.set('parent', selectedParentId);
+				// Inherit categoryType from parent
+				const parentCat = parentCategories.find((c) => c.id === selectedParentId);
+				if (parentCat) {
+					formData.set('categoryType', parentCat.categoryType);
+				}
+			} else if (!categoryType) {
 				formData.set('categoryType', selectedCategoryType || '');
 			} else {
 				formData.set('categoryType', categoryType);
@@ -54,14 +68,29 @@
 	const { form: formData, enhance, isTainted, tainted, allErrors, delayed, reset } = form;
 	let isEdit = $derived(!!category);
 
+	// Determine if the submit button should be enabled
+	let isFormValid = $derived(
+		isTainted($tainted?.name) &&
+			selectedIcon &&
+			(selectedParentId || selectedCategoryType || categoryType) &&
+			!$allErrors.length
+	);
+
 	$effect(() => {
 		if (category) {
 			$formData.id = category.id;
 			$formData.name = category.name;
 			selectedIcon = category.icon;
 			selectedCategoryType = category.categoryType;
+			selectedParentId = category.parent?.id ?? undefined;
 		} else {
 			reset();
+		}
+	});
+
+	$effect(() => {
+		if (preSelectedParent) {
+			selectedParentId = preSelectedParent.id;
 		}
 	});
 </script>
@@ -75,6 +104,7 @@
 		}
 		selectedIcon = '';
 		selectedCategoryType = categoryType || '';
+		selectedParentId = preSelectedParent?.id ?? undefined;
 	}}
 >
 	{#if !categoryType}
@@ -135,7 +165,23 @@
 				</Form.Control>
 				<Form.FieldErrors />
 			</Form.Field>
-			{#if !categoryType}
+			{#if !categoryType && parentCategories.length > 0}
+				<div>
+					<Label class="mb-2">{$t('categories.parentCategory')}</Label>
+					<Select.Root type="single" bind:value={selectedParentId} name="parent">
+						<Select.Trigger class="w-full">
+							{selectedParentCategory ? selectedParentCategory.name : $t('categories.noParent')}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="">{$t('categories.noParent')}</Select.Item>
+							{#each parentCategories as parent (parent.id)}
+								<Select.Item value={parent.id}>{parent.name}</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
+				</div>
+			{/if}
+			{#if !categoryType && !selectedParentId}
 				<Form.Field {form} name="categoryType">
 					<Form.Control>
 						{#snippet children({ props })}
@@ -154,6 +200,16 @@
 						{/snippet}
 					</Form.Control>
 				</Form.Field>
+			{:else if selectedParentCategory}
+				<div>
+					<Label class="text-muted-foreground mb-2">{$t('categories.categoryTypeLabel')}</Label>
+					<p class="text-sm">
+						{$t(`categories.categoryType.${selectedParentCategory.categoryType}`)}
+						<span class="text-muted-foreground text-xs">
+							— inherited from {selectedParentCategory.name}
+						</span>
+					</p>
+				</div>
 			{/if}
 			<div>
 				<Label class="mb-2">{$t('categories.categoryIcon')}</Label>
@@ -165,11 +221,7 @@
 				class="mt-5 w-full"
 				type="submit"
 				form="createCategoryForm"
-				disabled={$delayed ||
-					!isTainted($tainted?.name) ||
-					(!categoryType && !selectedCategoryType) ||
-					!selectedIcon ||
-					!!$allErrors.length}
+				disabled={$delayed || !isFormValid}
 			>
 				{#if $delayed}<LoaderCircle class="mr-1 animate-spin" />{/if}
 				{#if isEdit}

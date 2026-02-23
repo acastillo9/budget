@@ -27,10 +27,38 @@ export class CategoriesService {
     session?: ClientSession,
   ): Promise<CategoryDto> {
     try {
-      const categoryModel = new this.categoryModel(createCategoryDto);
+      const data: any = { ...createCategoryDto };
+
+      // If parent is provided, validate and inherit categoryType
+      if (createCategoryDto.parent) {
+        const parent = await this.categoryModel.findOne({
+          _id: createCategoryDto.parent,
+          user: (createCategoryDto as any).user,
+        });
+
+        if (!parent) {
+          throw new HttpException(
+            'Parent category not found',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
+        if (parent.parent) {
+          throw new HttpException(
+            'Cannot create subcategory of a subcategory. Only one level of nesting is allowed.',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
+        // Inherit categoryType from parent
+        data.categoryType = parent.categoryType;
+      }
+
+      const categoryModel = new this.categoryModel(data);
       const savedCategory = await categoryModel.save({ session });
       return plainToClass(CategoryDto, savedCategory.toObject());
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       this.logger.error(
         `Failed to create category: ${error.message}`,
         error.stack,
@@ -69,6 +97,103 @@ export class CategoriesService {
   }
 
   /**
+   * Find all categories as a tree (parents with nested children).
+   * @param userId The id of the user.
+   * @returns Top-level categories with children populated.
+   * @async
+   */
+  async findTree(userId: string): Promise<CategoryDto[]> {
+    try {
+      const categories = await this.categoryModel.find({ user: userId }).sort({
+        createdAt: -1,
+      });
+
+      const allDtos = categories.map((c) =>
+        plainToClass(CategoryDto, c.toObject()),
+      );
+
+      // Build a map of parent ID → children
+      const childrenMap = new Map<string, CategoryDto[]>();
+      const topLevel: CategoryDto[] = [];
+
+      for (const dto of allDtos) {
+        if (dto.parent?.id) {
+          const parentId = dto.parent.id;
+          if (!childrenMap.has(parentId)) {
+            childrenMap.set(parentId, []);
+          }
+          childrenMap.get(parentId).push(dto);
+        } else {
+          topLevel.push(dto);
+        }
+      }
+
+      // Attach children to parents
+      for (const parent of topLevel) {
+        parent.children = childrenMap.get(parent.id) || [];
+      }
+
+      return topLevel;
+    } catch (error) {
+      this.logger.error(
+        `Failed to find category tree: ${error.message}`,
+        error.stack,
+      );
+      throw new HttpException(
+        'Error finding the category tree',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Find subcategories of a specific parent.
+   * @param parentId The id of the parent category.
+   * @param userId The id of the user.
+   * @returns The subcategories found.
+   * @async
+   */
+  async findByParent(parentId: string, userId: string): Promise<CategoryDto[]> {
+    try {
+      const categories = await this.categoryModel
+        .find({ parent: parentId, user: userId })
+        .sort({ createdAt: -1 });
+      return categories.map((category) =>
+        plainToClass(CategoryDto, category.toObject()),
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to find subcategories: ${error.message}`,
+        error.stack,
+      );
+      throw new HttpException(
+        'Error finding the subcategories',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Expand category IDs to include all their subcategory IDs.
+   * @param categoryIds The category IDs to expand.
+   * @param userId The user ID.
+   * @returns Expanded set of category IDs including subcategories.
+   * @async
+   */
+  async findCategoryIdsWithChildren(
+    categoryIds: string[],
+    userId: string,
+  ): Promise<string[]> {
+    const children = await this.categoryModel.find({
+      parent: { $in: categoryIds },
+      user: userId,
+    });
+    const childIds = children.map((c) => c.id as string);
+    // Return deduplicated union
+    return [...new Set([...categoryIds, ...childIds])];
+  }
+
+  /**
    * Find a category by id.
    * @param id The id of the category to find.
    * @param userId The id of the user to find the category.
@@ -86,6 +211,7 @@ export class CategoriesService {
       }
       return plainToClass(CategoryDto, category.toObject());
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       this.logger.error(
         `Failed to find category: ${error.message}`,
         error.stack,
@@ -111,6 +237,51 @@ export class CategoriesService {
     userId: string,
   ): Promise<CategoryDto> {
     try {
+      // If setting a parent, validate hierarchy rules
+      if (updateCategoryDto.parent) {
+        const parent = await this.categoryModel.findOne({
+          _id: updateCategoryDto.parent,
+          user: userId,
+        });
+
+        if (!parent) {
+          throw new HttpException(
+            'Parent category not found',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
+        if (parent.parent) {
+          throw new HttpException(
+            'Cannot set parent to a subcategory. Only one level of nesting is allowed.',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
+        // Prevent setting parent on a category that has children
+        const childCount = await this.categoryModel.countDocuments({
+          parent: id,
+          user: userId,
+        });
+        if (childCount > 0) {
+          throw new HttpException(
+            'Cannot set parent on a category that has subcategories',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
+        // Inherit categoryType from parent
+        updateCategoryDto.categoryType = parent.categoryType;
+      }
+
+      // If changing categoryType on a parent, cascade to children
+      if (updateCategoryDto.categoryType && !updateCategoryDto.parent) {
+        await this.categoryModel.updateMany(
+          { parent: id, user: userId },
+          { categoryType: updateCategoryDto.categoryType },
+        );
+      }
+
       const updatedCategory = await this.categoryModel.findOneAndUpdate(
         { _id: id, user: userId },
         updateCategoryDto,
@@ -123,6 +294,7 @@ export class CategoriesService {
       }
       return plainToClass(CategoryDto, updatedCategory.toObject());
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       this.logger.error(
         `Failed to update category: ${error.message}`,
         error.stack,
@@ -143,6 +315,18 @@ export class CategoriesService {
    */
   async remove(id: string, userId: string): Promise<CategoryDto> {
     try {
+      // Check if category has children
+      const childCount = await this.categoryModel.countDocuments({
+        parent: id,
+        user: userId,
+      });
+      if (childCount > 0) {
+        throw new HttpException(
+          'Cannot delete a category that has subcategories. Delete the subcategories first.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       const deletedCategory = await this.categoryModel.findOneAndDelete({
         _id: id,
         user: userId,
@@ -152,6 +336,7 @@ export class CategoriesService {
       }
       return plainToClass(CategoryDto, deletedCategory.toObject());
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       this.logger.error(
         `Failed to remove category: ${error.message}`,
         error.stack,

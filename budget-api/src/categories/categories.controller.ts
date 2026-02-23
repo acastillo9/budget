@@ -55,6 +55,26 @@ export class CategoriesController {
   }
 
   /**
+   * Find all categories as a tree (parents with nested children).
+   * @param req The request object.
+   * @returns Top-level categories with children populated.
+   * @async
+   */
+  @ApiOperation({
+    summary: 'List categories as a tree (parents with nested children)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Category tree',
+    type: [CategoryDto],
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Get('tree')
+  findTree(@Request() req: AuthenticatedRequest): Promise<CategoryDto[]> {
+    return this.categoriesService.findTree(req.user.userId);
+  }
+
+  /**
    * Find all categories of a user.
    * @param req The request object.
    * @returns The categories found.
@@ -70,6 +90,33 @@ export class CategoriesController {
   @Get()
   findAll(@Request() req: AuthenticatedRequest): Promise<CategoryDto[]> {
     return this.categoriesService.findAll(req.user.userId);
+  }
+
+  /**
+   * Find subcategories of a specific parent category.
+   * @param req The request object.
+   * @param id The id of the parent category.
+   * @returns The subcategories found.
+   * @async
+   */
+  @ApiOperation({ summary: 'List subcategories of a parent category' })
+  @ApiParam({
+    name: 'id',
+    description: 'Parent Category ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of subcategories',
+    type: [CategoryDto],
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Get(':id/subcategories')
+  findSubcategories(
+    @Request() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ): Promise<CategoryDto[]> {
+    return this.categoriesService.findByParent(id, req.user.userId);
   }
 
   /**
