@@ -120,6 +120,7 @@
 				<Form.Label>{$t('bills.billAmount')}</Form.Label>
 				<Input
 					type="number"
+					step="0.01"
 					placeholder={$t('bills.billAmountPlaceholder')}
 					{...props}
 					bind:value={formData.amount}
