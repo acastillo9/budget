@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsMongoId, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDate, IsMongoId, IsOptional } from 'class-validator';
 
 export class TransactionsQueryDto {
   @ApiPropertyOptional({
@@ -10,15 +11,23 @@ export class TransactionsQueryDto {
   @IsOptional()
   accountId?: string;
 
-  @ApiPropertyOptional({ description: 'Filter by month (1-12)', example: 6 })
-  @IsString()
+  @ApiPropertyOptional({
+    description: 'Start date for filtering transactions (inclusive)',
+    example: '2026-01-01',
+  })
+  @IsDate()
   @IsOptional()
-  month?: number;
+  @Type(() => Date)
+  dateFrom?: Date;
 
-  @ApiPropertyOptional({ description: 'Filter by year', example: 2025 })
-  @IsString()
+  @ApiPropertyOptional({
+    description: 'End date for filtering transactions (exclusive)',
+    example: '2026-02-01',
+  })
+  @IsDate()
   @IsOptional()
-  year?: number;
+  @Type(() => Date)
+  dateTo?: Date;
 
   @ApiPropertyOptional({
     description: 'Filter by category ID (includes subcategories automatically)',

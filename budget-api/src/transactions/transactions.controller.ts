@@ -111,6 +111,8 @@ export class TransactionsController {
       req.user.userId,
       paginationDto,
       queryDto.categoryId,
+      queryDto.dateFrom,
+      queryDto.dateTo,
     );
   }
 

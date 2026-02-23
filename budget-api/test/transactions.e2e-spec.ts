@@ -10,6 +10,7 @@ import {
   nonExistentId,
   seedAccount,
   seedCategory,
+  seedTransaction,
 } from './utils/db.helper';
 
 describe('TransactionsController (e2e)', () => {
@@ -480,6 +481,201 @@ describe('TransactionsController (e2e)', () => {
       const response = await request(app.getHttpServer()).get('/transactions');
 
       expect(response.status).toBe(401);
+    });
+  });
+
+  // ──────────────────────────────────────────────────
+  // GET /transactions — date range filtering
+  // ──────────────────────────────────────────────────
+  describe('GET /transactions (date range filtering)', () => {
+    let dateFilterAccountId: string;
+    let dateFilterCategoryId: string;
+
+    beforeAll(async () => {
+      // Create a dedicated account and category for date filter tests
+      dateFilterAccountId = await seedAccount(app, {
+        name: 'Date Filter Account',
+        balance: 10000,
+        currencyCode: 'USD',
+        accountType: accountTypeId,
+        user: userId,
+      });
+      dateFilterCategoryId = await seedCategory(app, {
+        name: 'Date Filter Cat',
+        icon: 'calendar',
+        categoryType: 'EXPENSE',
+        user: userId,
+      });
+
+      // Seed transactions at known dates (direct DB insert to avoid balance side-effects)
+      await seedTransaction(app, {
+        amount: -10,
+        date: new Date('2025-01-15'),
+        description: 'Jan 2025 tx',
+        category: dateFilterCategoryId,
+        account: dateFilterAccountId,
+        user: userId,
+      });
+      await seedTransaction(app, {
+        amount: -20,
+        date: new Date('2025-02-10'),
+        description: 'Feb 2025 tx',
+        category: dateFilterCategoryId,
+        account: dateFilterAccountId,
+        user: userId,
+      });
+      await seedTransaction(app, {
+        amount: -30,
+        date: new Date('2025-03-05'),
+        description: 'Mar 2025 tx',
+        category: dateFilterCategoryId,
+        account: dateFilterAccountId,
+        user: userId,
+      });
+    });
+
+    it('should return only transactions within the specified date range', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/transactions')
+        .query({
+          dateFrom: '2025-01-01',
+          dateTo: '2025-02-01',
+        })
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      const descriptions = response.body.data.map((t: any) => t.description);
+      expect(descriptions).toContain('Jan 2025 tx');
+      expect(descriptions).not.toContain('Feb 2025 tx');
+      expect(descriptions).not.toContain('Mar 2025 tx');
+    });
+
+    it('should return transactions across multiple months when range spans them', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/transactions')
+        .query({
+          dateFrom: '2025-01-01',
+          dateTo: '2025-04-01',
+        })
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      const descriptions = response.body.data.map((t: any) => t.description);
+      expect(descriptions).toContain('Jan 2025 tx');
+      expect(descriptions).toContain('Feb 2025 tx');
+      expect(descriptions).toContain('Mar 2025 tx');
+    });
+
+    it('should return empty data when no transactions exist in range', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/transactions')
+        .query({
+          dateFrom: '2020-01-01',
+          dateTo: '2020-02-01',
+        })
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(0);
+      expect(response.body.total).toBe(0);
+    });
+
+    it('should treat dateTo as exclusive (upper bound)', async () => {
+      // dateTo is the exact date of the Feb transaction — should NOT include it
+      const response = await request(app.getHttpServer())
+        .get('/transactions')
+        .query({
+          dateFrom: '2025-02-10',
+          dateTo: '2025-03-05',
+        })
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      const descriptions = response.body.data.map((t: any) => t.description);
+      expect(descriptions).toContain('Feb 2025 tx');
+      expect(descriptions).not.toContain('Mar 2025 tx');
+    });
+
+    it('should default to last 30 days when no date params are provided', async () => {
+      // Create a transaction dated today so we know at least one exists in the default window
+      const todayTxId = await seedTransaction(app, {
+        amount: -5,
+        date: new Date(),
+        description: 'Today tx for default range',
+        category: dateFilterCategoryId,
+        account: dateFilterAccountId,
+        user: userId,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get('/transactions')
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      const descriptions = response.body.data.map((t: any) => t.description);
+      expect(descriptions).toContain('Today tx for default range');
+      // Old transactions from 2025 should NOT appear in the default 30-day window
+      expect(descriptions).not.toContain('Jan 2025 tx');
+    });
+
+    it('should work with only dateFrom provided', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/transactions')
+        .query({ dateFrom: '2025-03-01' })
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      const descriptions = response.body.data.map((t: any) => t.description);
+      expect(descriptions).toContain('Mar 2025 tx');
+      expect(descriptions).not.toContain('Jan 2025 tx');
+      expect(descriptions).not.toContain('Feb 2025 tx');
+    });
+
+    it('should work with only dateTo provided', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/transactions')
+        .query({ dateTo: '2025-02-01' })
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      const descriptions = response.body.data.map((t: any) => t.description);
+      expect(descriptions).toContain('Jan 2025 tx');
+      expect(descriptions).not.toContain('Feb 2025 tx');
+      expect(descriptions).not.toContain('Mar 2025 tx');
+    });
+
+    it('should combine date range with categoryId filter', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/transactions')
+        .query({
+          dateFrom: '2025-01-01',
+          dateTo: '2025-04-01',
+          categoryId: dateFilterCategoryId,
+        })
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(3);
+      // Every returned transaction should belong to the date filter category
+      response.body.data.forEach((t: any) => {
+        expect(t.category.id).toBe(dateFilterCategoryId);
+      });
+    });
+
+    it('should sort results by date descending', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/transactions')
+        .query({
+          dateFrom: '2025-01-01',
+          dateTo: '2025-04-01',
+        })
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(response.status).toBe(200);
+      const dates = response.body.data.map((t: any) => new Date(t.date).getTime());
+      for (let i = 1; i < dates.length; i++) {
+        expect(dates[i - 1]).toBeGreaterThanOrEqual(dates[i]);
+      }
     });
   });
 

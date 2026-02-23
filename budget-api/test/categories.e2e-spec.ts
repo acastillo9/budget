@@ -280,7 +280,11 @@ describe('CategoriesController (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/categories')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ name: 'Coffee Shops', icon: 'coffee', parent: parentCategoryId });
+        .send({
+          name: 'Coffee Shops',
+          icon: 'coffee',
+          parent: parentCategoryId,
+        });
 
       expect(response.status).toBe(201);
       expect(response.body.categoryType).toBe('EXPENSE');

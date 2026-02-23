@@ -203,11 +203,25 @@ export class TransactionsService {
     userId: string,
     paginationDto: PaginationDto,
     categoryId?: string,
+    dateFrom?: Date,
+    dateTo?: Date,
   ): Promise<PaginatedDataDto<TransactionDto>> {
     const filter: any = { user: userId };
     const skip = paginationDto.offset || 0;
     const limit = paginationDto.limit || 10; // Default limit to 10 if not provided
-    const sort = { createdAt: -1 }; // Sort by date descending
+    const sort = { date: -1 }; // Sort by date descending
+
+    // Apply date range filter (default to last 30 days)
+    if (!dateFrom && !dateTo) {
+      const now = new Date();
+      dateFrom = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      dateTo = now;
+    }
+    if (dateFrom || dateTo) {
+      filter.date = {};
+      if (dateFrom) filter.date.$gte = dateFrom;
+      if (dateTo) filter.date.$lt = dateTo;
+    }
 
     // If categoryId is provided, expand to include subcategories
     if (categoryId) {
