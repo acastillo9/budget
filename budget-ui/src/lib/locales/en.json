@@ -429,6 +429,7 @@
 		"amountPlaceholder": "0.00",
 		"chooseCategory": "Choose Category",
 		"chooseCategoryWithType": "Choose {categoryType} category",
+		"searchCategories": "Search categories...",
 		"date": "Date",
 		"datePlaceholder": "Select date",
 		"deleteTransactionDescription": "Are you sure you want to delete this transaction \"{description}\"? This action cannot be undone.",

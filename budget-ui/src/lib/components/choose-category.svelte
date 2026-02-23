@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge';
+	import { Input } from '$lib/components/ui/input';
 	import { iconMap } from '$lib/utils/icons';
 	import { t } from 'svelte-i18n';
+	import SearchIcon from '@lucide/svelte/icons/search';
 	import Button from './ui/button/button.svelte';
 	import CreateCategoryDialog from './create-category-dialog.svelte';
 	import type { Category } from '$lib/types/category.types';
@@ -23,6 +25,14 @@
 		selectedCategories?: Category[];
 		multiSelect?: boolean;
 	} = $props();
+
+	let search = $state('');
+
+	let filteredCategories = $derived(
+		search
+			? categories.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
+			: categories
+	);
 
 	function isSelected(item: Category): boolean {
 		if (multiSelect) {
@@ -64,15 +74,27 @@
 		</div>
 	</div>
 
+	<div class="relative">
+		<SearchIcon class="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+		<Input
+			type="text"
+			placeholder={$t('transactions.searchCategories')}
+			bind:value={search}
+			class="pl-9"
+		/>
+	</div>
+
 	<div class="grid max-h-64 grid-cols-3 gap-4 overflow-y-auto">
-		{#each categories as categoryItem (categoryItem.id)}
+		<CreateCategoryDialog {categoryType} data={createCategoryForm} />
+
+		{#each filteredCategories as categoryItem (categoryItem.id)}
 			{@const Icon = iconMap[categoryItem.icon as keyof typeof iconMap]}
 			<div class="flex flex-col items-center py-2">
 				<Button
 					variant="outline"
 					size="icon"
 					class={[
-						'h-16 w-16 rounded-full transition-transform hover:scale-105 hover:dark:bg-blue-800/10 [&.selected]:bg-blue-800/10 [&.selected]:text-blue-700 [&.selected]:dark:text-blue-400',
+						'h-16 w-16 rounded-full mb-2 transition-transform hover:scale-105 hover:dark:bg-blue-800/10 [&.selected]:bg-blue-800/10 [&.selected]:text-blue-700 [&.selected]:dark:text-blue-400',
 						{
 							'selected border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400':
 								isSelected(categoryItem),
@@ -89,7 +111,5 @@
 				</div>
 			</div>
 		{/each}
-
-		<CreateCategoryDialog {categoryType} data={createCategoryForm} />
 	</div>
 </div>

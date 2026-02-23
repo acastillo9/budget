@@ -429,6 +429,7 @@
 		"amountPlaceholder": "0.00",
 		"chooseCategory": "Elegir categoría",
 		"chooseCategoryWithType": "Elegir categoria de {categoryType}",
+		"searchCategories": "Buscar categorías...",
 		"date": "Fecha",
 		"datePlaceholder": "Selecciona una fecha",
 		"deleteTransactionDescription": "¿Estás seguro de que deseas eliminar esta transacción \"{description}\"? Esta acción no se puede deshacer.",

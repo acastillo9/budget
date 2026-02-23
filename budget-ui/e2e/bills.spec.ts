@@ -611,13 +611,13 @@ test.describe('Bills — Recurring Bill Instances', () => {
 		// Verify bill is visible in current month
 		await expect(billsPage.getBillItem(billName)).toBeVisible();
 
-		// Navigate to next month — bill should also appear there
+		// Navigate to next month — bill should also appear in the upcoming section
 		await billsPage.goToNextMonth();
-		await expect(billsPage.getBillItem(billName)).toBeVisible({ timeout: 15_000 });
+		await expect(billsPage.getUpcomingBillItem(billName)).toBeVisible({ timeout: 15_000 });
 
-		// Navigate to the month after that — bill should still appear
+		// Navigate to the month after that — bill should still appear in the upcoming section
 		await billsPage.goToNextMonth();
-		await expect(billsPage.getBillItem(billName)).toBeVisible({ timeout: 15_000 });
+		await expect(billsPage.getUpcomingBillItem(billName)).toBeVisible({ timeout: 15_000 });
 	});
 
 	test('should show a yearly bill only in the same month of the following year', async ({
@@ -646,9 +646,10 @@ test.describe('Bills — Recurring Bill Instances', () => {
 		// Verify bill is visible in current month
 		await expect(billsPage.getBillItem(billName)).toBeVisible();
 
-		// Navigate to next month — yearly bill should NOT appear
+		// Navigate to next month — yearly bill should NOT appear in the upcoming section
+		// (it may still appear as overdue from the current month)
 		await billsPage.goToNextMonth();
-		await expect(billsPage.getBillItem(billName)).not.toBeVisible({ timeout: 5_000 });
+		await expect(billsPage.getUpcomingBillItem(billName)).not.toBeVisible({ timeout: 5_000 });
 	});
 
 	test('should show a weekly bill multiple times when navigating to next month', async ({
@@ -714,10 +715,10 @@ test.describe('Bills — Recurring Bill Instances', () => {
 		await billsPage.expectSuccessToast(/bill edited successfully/i);
 		await billsPage.toast.waitFor({ state: 'hidden', timeout: 10_000 });
 
-		// Navigate to next month — bill should show with the new name
+		// Navigate to next month — bill should show with the new name in the upcoming section
 		await billsPage.goToNextMonth();
-		await expect(billsPage.getBillItem(newName)).toBeVisible({ timeout: 15_000 });
-		await expect(billsPage.getBillItem(billName)).not.toBeVisible();
+		await expect(billsPage.getUpcomingBillItem(newName)).toBeVisible({ timeout: 15_000 });
+		await expect(billsPage.getUpcomingBillItem(billName)).not.toBeVisible();
 	});
 
 	test('deleting a monthly bill series should remove it from next month', async ({ page }) => {

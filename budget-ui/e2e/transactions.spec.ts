@@ -177,6 +177,50 @@ test.describe('Transactions — Wizard Navigation', () => {
 		await expect(transactionsPage.nextButton).toBeEnabled();
 	});
 
+	test('should filter categories when typing in the search field', async () => {
+		await transactionsPage.openAddDialog();
+		await transactionsPage.selectTransactionType('EXPENSE');
+		await transactionsPage.goToNextStep();
+
+		// Verify the search input is visible
+		await expect(transactionsPage.categorySearchInput).toBeVisible();
+
+		// Verify the category appears before searching
+		const categoryContainer = transactionsPage.dialog.locator('.flex.flex-col.items-center', {
+			hasText: categoryName
+		});
+		await expect(categoryContainer).toBeVisible();
+
+		// Search with the category name — it should still be visible
+		await transactionsPage.searchCategory(categoryName);
+		await expect(categoryContainer).toBeVisible();
+
+		// Search with a non-matching term — the category should disappear
+		await transactionsPage.searchCategory('zzz_no_match_zzz');
+		await expect(categoryContainer).not.toBeVisible();
+
+		// Clear search — the category should reappear
+		await transactionsPage.searchCategory('');
+		await expect(categoryContainer).toBeVisible();
+	});
+
+	test('should select a category found via search and proceed to next step', async () => {
+		await transactionsPage.openAddDialog();
+		await transactionsPage.selectTransactionType('EXPENSE');
+		await transactionsPage.goToNextStep();
+
+		// Search for the category
+		await transactionsPage.searchCategory(categoryName);
+		await transactionsPage.selectCategory(categoryName);
+
+		// Should be able to proceed to step 3
+		await expect(transactionsPage.nextButton).toBeEnabled();
+		await transactionsPage.goToNextStep();
+		await expect(
+			transactionsPage.dialog.getByRole('heading', { name: /transaction details/i })
+		).toBeVisible();
+	});
+
 	test('should create a category from step 2 and use it to complete a transaction', async ({
 		page
 	}) => {

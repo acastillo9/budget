@@ -134,6 +134,29 @@ export class TransactionsPage {
 	}
 
 	/**
+	 * Returns the search input in the choose-category step.
+	 */
+	get categorySearchInput(): Locator {
+		return this.dialog.getByPlaceholder(/search categories/i);
+	}
+
+	/**
+	 * Returns all visible category items in the choose-category grid (excludes "Create New").
+	 */
+	getCategoryItems(): Locator {
+		return this.dialog.locator('.grid .flex.flex-col.items-center').filter({
+			hasNot: this.dialog.locator('text=Create New')
+		});
+	}
+
+	/**
+	 * Type a search term in the category search field.
+	 */
+	async searchCategory(term: string) {
+		await this.categorySearchInput.fill(term);
+	}
+
+	/**
 	 * Click the "Create New" category button on step 2 to open the nested category creation dialog.
 	 */
 	async clickCreateNewCategory() {
