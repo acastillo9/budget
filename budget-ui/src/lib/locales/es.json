@@ -471,6 +471,14 @@
 		"toAccountPlaceholder": "Selecciona la cuenta de destino",
 		"transactionDetails": "Detalles de la transacción",
 		"transfer": "Transferencia",
-		"whatTypeOfTransaction": "¿Qué tipo de transacción es esta?"
+		"whatTypeOfTransaction": "¿Qué tipo de transacción es esta?",
+		"filters": {
+			"allCategories": "Todas las categorías",
+			"category": "Categoría",
+			"clearFilters": "Limpiar filtros",
+			"dateFrom": "Desde",
+			"dateTo": "Hasta",
+			"pickDate": "Elige una fecha"
+		}
 	}
 }

@@ -46,6 +46,9 @@ export class TransactionsPage {
 	// Empty state
 	readonly emptyState: Locator;
 
+	// Filter bar
+	readonly clearFiltersButton: Locator;
+
 	constructor(page: Page) {
 		this.page = page;
 
@@ -93,10 +96,50 @@ export class TransactionsPage {
 
 		// Empty state
 		this.emptyState = page.getByText(/no transactions yet/i);
+
+		// Filter bar
+		this.clearFiltersButton = page.getByRole('button', { name: /clear filters/i });
 	}
 
 	async goto() {
 		await this.page.goto('/transactions');
+	}
+
+	/**
+	 * Navigate to the transactions page and ensure a specific transaction is visible.
+	 * Handles race conditions from parallel test workers by retrying once if needed.
+	 */
+	/**
+	 * Navigate to transactions page and wait for a specific transaction to be visible.
+	 * After a form submission, the data may not yet be refreshed on the current page,
+	 * so this does a full page.goto() to get fresh server-rendered data.
+	 */
+	async gotoAndWaitForTransaction(description: string) {
+		// Wait for any pending invalidateAll() to complete before navigating
+		await this.page.waitForLoadState('networkidle');
+		await this.goto();
+		await expect(this.heading).toBeVisible({ timeout: 10_000 });
+		const item = this.getTransactionItem(description);
+		try {
+			await expect(item).toBeVisible({ timeout: 5_000 });
+			return;
+		} catch {
+			// Item might be on a later page due to parallel test workers.
+			for (let pg = 1; pg < 5; pg++) {
+				await this.page.goto(`/transactions?offset=${pg * 10}`);
+				await expect(this.heading).toBeVisible({ timeout: 5_000 });
+				try {
+					await expect(item).toBeVisible({ timeout: 2_000 });
+					return;
+				} catch {
+					// Not on this page, try next
+				}
+			}
+		}
+		// Final assertion on page 1
+		await this.goto();
+		await expect(this.heading).toBeVisible({ timeout: 10_000 });
+		await expect(this.getTransactionItem(description)).toBeVisible({ timeout: 10_000 });
 	}
 
 	// ---------------------------------------------------------------------------
@@ -396,6 +439,63 @@ export class TransactionsPage {
 			await this.fillNotes(newData.notes);
 		}
 		await this.submitSave();
+	}
+
+	// ---------------------------------------------------------------------------
+	// Filter interactions
+	// ---------------------------------------------------------------------------
+
+	/**
+	 * Get the filter "From" date picker trigger button.
+	 */
+	getFilterDateFromTrigger(): Locator {
+		return this.page
+			.getByText('From', { exact: true })
+			.locator('..')
+			.locator('[data-popover-trigger]');
+	}
+
+	/**
+	 * Get the filter "To" date picker trigger button.
+	 */
+	getFilterDateToTrigger(): Locator {
+		return this.page
+			.getByText('To', { exact: true })
+			.locator('..')
+			.locator('[data-popover-trigger]');
+	}
+
+	/**
+	 * Get the filter category select trigger.
+	 */
+	getFilterCategoryTrigger(): Locator {
+		return this.page.locator('[data-slot="select-trigger"]').first();
+	}
+
+	/**
+	 * Select a category in the filter bar by its visible name.
+	 */
+	async selectFilterCategory(categoryName: string) {
+		await this.page.waitForLoadState('networkidle');
+		const trigger = this.getFilterCategoryTrigger();
+		await expect(trigger).toBeVisible({ timeout: 10_000 });
+		await trigger.click();
+		await this.page
+			.locator('[data-slot="select-content"][data-state="open"]')
+			.getByRole('option', { name: new RegExp(categoryName) })
+			.click();
+	}
+
+	/**
+	 * Navigate to the transactions page with filter query params.
+	 */
+	async gotoWithFilters(filters: { dateFrom?: string; dateTo?: string; categoryId?: string }) {
+		const params = new URLSearchParams();
+		if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
+		if (filters.dateTo) params.set('dateTo', filters.dateTo);
+		if (filters.categoryId) params.set('categoryId', filters.categoryId);
+		const qs = params.toString();
+		await this.page.goto(`/transactions${qs ? `?${qs}` : ''}`);
 	}
 
 	// ---------------------------------------------------------------------------

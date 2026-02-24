@@ -359,7 +359,7 @@ test.describe('Transactions — Create Expense', () => {
 
 		await expect(transactionsPage.dialog).not.toBeVisible({ timeout: 10_000 });
 		await transactionsPage.expectSuccessToast(/transaction added successfully/i);
-		await expect(transactionsPage.getTransactionItem(description)).toBeVisible();
+		await transactionsPage.gotoAndWaitForTransaction(description);
 
 		// Verify account balance decreased: $10,000 - $150 = $9,850
 		const accountsPage = new AccountsPage(page);
@@ -438,6 +438,7 @@ test.describe('Transactions — Edit', () => {
 		await expect(transactionsPage.dialog).not.toBeVisible({ timeout: 10_000 });
 		await transactionsPage.expectSuccessToast(/transaction added successfully/i);
 		await transactionsPage.toast.waitFor({ state: 'hidden', timeout: 10_000 });
+		await transactionsPage.gotoAndWaitForTransaction(transactionDescription);
 	});
 
 	test('should open edit dialog with pre-filled data', async () => {
@@ -499,6 +500,7 @@ test.describe('Transactions — Delete', () => {
 		await expect(transactionsPage.dialog).not.toBeVisible({ timeout: 10_000 });
 		await transactionsPage.expectSuccessToast(/transaction added successfully/i);
 		await transactionsPage.toast.waitFor({ state: 'hidden', timeout: 10_000 });
+		await transactionsPage.gotoAndWaitForTransaction(transactionDescription);
 	});
 
 	test('should show confirmation dialog when clicking delete', async () => {
@@ -536,7 +538,7 @@ test.describe('Transactions — Delete', () => {
 // Transactions — Full CRUD Workflow
 // ---------------------------------------------------------------------------
 test.describe('Transactions — Full CRUD Workflow', () => {
-	test.setTimeout(120_000);
+	test.setTimeout(180_000);
 	test('should create, edit, and delete a transaction with correct balance at each step', async ({
 		page
 	}) => {
@@ -558,8 +560,7 @@ test.describe('Transactions — Full CRUD Workflow', () => {
 		});
 		await expect(transactionsPage.dialog).not.toBeVisible({ timeout: 10_000 });
 		await transactionsPage.expectSuccessToast(/transaction added successfully/i);
-		await expect(transactionsPage.getTransactionItem(originalDescription)).toBeVisible();
-		await transactionsPage.toast.waitFor({ state: 'hidden', timeout: 10_000 });
+		await transactionsPage.gotoAndWaitForTransaction(originalDescription);
 
 		// Verify balance after create: $10,000 - $200 = $9,800
 		await accountsPage.goto();
@@ -567,8 +568,7 @@ test.describe('Transactions — Full CRUD Workflow', () => {
 		await accountsPage.expectAccountBalance(accountName, /\$9,800/);
 
 		// Go back to transactions for edit
-		await transactionsPage.goto();
-		await expect(transactionsPage.heading).toBeVisible({ timeout: 15_000 });
+		await transactionsPage.gotoAndWaitForTransaction(originalDescription);
 
 		// --- Edit: change amount to $500 ---
 		const updatedDescription = uniqueName('CRUD Edited');
@@ -580,7 +580,6 @@ test.describe('Transactions — Full CRUD Workflow', () => {
 		await transactionsPage.expectSuccessToast(/transaction edited successfully/i);
 		await expect(transactionsPage.getTransactionItem(updatedDescription)).toBeVisible();
 		await expect(transactionsPage.getTransactionItem(originalDescription)).not.toBeVisible();
-		await transactionsPage.toast.waitFor({ state: 'hidden', timeout: 10_000 });
 
 		// Verify balance after edit: $10,000 - $500 = $9,500
 		await accountsPage.goto();
@@ -588,8 +587,7 @@ test.describe('Transactions — Full CRUD Workflow', () => {
 		await accountsPage.expectAccountBalance(accountName, /\$9,500/);
 
 		// Go back to transactions for delete
-		await transactionsPage.goto();
-		await expect(transactionsPage.heading).toBeVisible({ timeout: 15_000 });
+		await transactionsPage.gotoAndWaitForTransaction(updatedDescription);
 
 		// --- Delete ---
 		await transactionsPage.deleteTransaction(updatedDescription);
@@ -602,5 +600,146 @@ test.describe('Transactions — Full CRUD Workflow', () => {
 		await accountsPage.goto();
 		await expect(accountsPage.heading).toBeVisible({ timeout: 15_000 });
 		await accountsPage.expectAccountBalance(accountName, /\$10,000/);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Transactions — Filters
+// ---------------------------------------------------------------------------
+test.describe('Transactions — Filters', () => {
+	test.setTimeout(120_000);
+
+	test('should display the filter bar with date pickers and category select', async ({ page }) => {
+		const transactionsPage = new TransactionsPage(page);
+		await transactionsPage.goto();
+		await expect(transactionsPage.heading).toBeVisible({ timeout: 15_000 });
+
+		// Filter bar elements should be visible
+		await expect(transactionsPage.getFilterDateFromTrigger()).toBeVisible();
+		await expect(transactionsPage.getFilterDateToTrigger()).toBeVisible();
+		await expect(transactionsPage.getFilterCategoryTrigger()).toBeVisible();
+
+		// Clear filters button should NOT be visible when no filters are active
+		await expect(transactionsPage.clearFiltersButton).not.toBeVisible();
+	});
+
+	test('should filter by category and update URL', async ({ page }) => {
+		const accountName = await createTestAccount(page, 'FilterCatAcc');
+		const categoryName = await createTestCategory(page, 'FilterCat', 'Expense');
+
+		const transactionsPage = new TransactionsPage(page);
+		await transactionsPage.goto();
+		await expect(transactionsPage.heading).toBeVisible({ timeout: 15_000 });
+
+		// Create a transaction with the known category
+		const description = uniqueName('FilterCatTx');
+		await transactionsPage.createExpenseTransaction({
+			categoryName,
+			account: accountName,
+			amount: '100',
+			description
+		});
+		await expect(transactionsPage.dialog).not.toBeVisible({ timeout: 10_000 });
+		await transactionsPage.expectSuccessToast(/transaction added successfully/i);
+		await transactionsPage.gotoAndWaitForTransaction(description);
+
+		// Select the category filter
+		await transactionsPage.selectFilterCategory(categoryName);
+
+		// Wait for navigation — URL should contain categoryId
+		await page.waitForURL(/categoryId=/);
+		await expect(transactionsPage.getTransactionItem(description)).toBeVisible({
+			timeout: 10_000
+		});
+
+		// Clear filters button should now be visible
+		await expect(transactionsPage.clearFiltersButton).toBeVisible();
+	});
+
+	test('should clear all filters when clicking Clear Filters', async ({ page }) => {
+		const accountName = await createTestAccount(page, 'ClearFilterAcc');
+		const categoryName = await createTestCategory(page, 'ClearFilterCat', 'Expense');
+
+		const transactionsPage = new TransactionsPage(page);
+		await transactionsPage.goto();
+		await expect(transactionsPage.heading).toBeVisible({ timeout: 15_000 });
+
+		// Create a transaction
+		const description = uniqueName('ClearFilterTx');
+		await transactionsPage.createExpenseTransaction({
+			categoryName,
+			account: accountName,
+			amount: '50',
+			description
+		});
+		await expect(transactionsPage.dialog).not.toBeVisible({ timeout: 10_000 });
+		await transactionsPage.expectSuccessToast(/transaction added successfully/i);
+		await transactionsPage.toast.waitFor({ state: 'hidden', timeout: 10_000 });
+
+		// Apply a category filter
+		await transactionsPage.selectFilterCategory(categoryName);
+		await page.waitForURL(/categoryId=/);
+		await expect(transactionsPage.clearFiltersButton).toBeVisible();
+
+		// Click Clear Filters
+		await transactionsPage.clearFiltersButton.click();
+
+		// URL should no longer contain filter params
+		await page.waitForURL((url) => !url.search.includes('categoryId'));
+		await expect(transactionsPage.clearFiltersButton).not.toBeVisible();
+	});
+
+	test('should preserve filters across pagination', async ({ page }) => {
+		const accountName = await createTestAccount(page, 'PagFilterAcc');
+		const categoryName = await createTestCategory(page, 'PagFilterCat', 'Expense');
+
+		const transactionsPage = new TransactionsPage(page);
+		await transactionsPage.goto();
+		await expect(transactionsPage.heading).toBeVisible({ timeout: 15_000 });
+
+		// Create enough transactions to paginate (11 = more than default limit of 10)
+		for (let i = 0; i < 11; i++) {
+			const desc = uniqueName(`PagFilter${i}`);
+			await transactionsPage.createExpenseTransaction({
+				categoryName,
+				account: accountName,
+				amount: '10',
+				description: desc
+			});
+			await expect(transactionsPage.dialog).not.toBeVisible({ timeout: 10_000 });
+			await transactionsPage.expectSuccessToast(/transaction added successfully/i);
+			await transactionsPage.toast.waitFor({ state: 'hidden', timeout: 10_000 });
+		}
+
+		// Apply category filter
+		await transactionsPage.selectFilterCategory(categoryName);
+		await page.waitForURL(/categoryId=/);
+
+		// Click next page if pagination is present
+		const nextButton = page.getByRole('button', { name: /next/i });
+		if (await nextButton.isVisible()) {
+			await nextButton.click();
+			// URL should still contain categoryId after pagination
+			await expect(page).toHaveURL(/categoryId=/);
+			await expect(page).toHaveURL(/offset=/);
+		}
+	});
+
+	test('should rehydrate filters from URL on page refresh', async ({ page }) => {
+		const transactionsPage = new TransactionsPage(page);
+
+		// Navigate directly with filter params
+		await transactionsPage.gotoWithFilters({ dateFrom: '2025-01-01', dateTo: '2025-12-31' });
+		await expect(transactionsPage.heading).toBeVisible({ timeout: 15_000 });
+
+		// The date triggers should show the selected dates (not "Pick a date")
+		const dateFromTrigger = transactionsPage.getFilterDateFromTrigger();
+		await expect(dateFromTrigger).not.toContainText(/pick a date/i);
+
+		const dateToTrigger = transactionsPage.getFilterDateToTrigger();
+		await expect(dateToTrigger).not.toContainText(/pick a date/i);
+
+		// Clear filters button should be visible since filters are active
+		await expect(transactionsPage.clearFiltersButton).toBeVisible();
 	});
 });

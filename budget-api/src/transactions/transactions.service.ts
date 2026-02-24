@@ -28,7 +28,7 @@ export class TransactionsService {
     @InjectModel(Transaction.name)
     private readonly transactionModel: Model<Transaction>,
     private readonly i18n: I18nService,
-  ) {}
+  ) { }
 
   /**
    * Create a new transaction.
@@ -209,7 +209,7 @@ export class TransactionsService {
     const filter: any = { user: userId };
     const skip = paginationDto.offset || 0;
     const limit = paginationDto.limit || 10; // Default limit to 10 if not provided
-    const sort = { date: -1 }; // Sort by date descending
+    const sort = { createdAt: -1 }; // Sort by date descending
 
     // Apply date range filter (default to last 30 days)
     if (!dateFrom && !dateTo) {

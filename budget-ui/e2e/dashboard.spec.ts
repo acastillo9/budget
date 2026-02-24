@@ -348,6 +348,8 @@ test.describe('Dashboard — Create Transaction from Dashboard', () => {
 
 		await expect(dashboardPage.dialog).not.toBeVisible({ timeout: 10_000 });
 		await dashboardPage.expectSuccessToast(/transaction added successfully/i);
+		await dashboardPage.goto();
+		await _page.waitForLoadState('networkidle');
 
 		await expect(dashboardPage.getTransactionItem(description)).toBeVisible({ timeout: 10_000 });
 	});

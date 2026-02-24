@@ -3,6 +3,7 @@
 	import { t } from 'svelte-i18n';
 	import CreateTransactionDialog from '$lib/components/create-transaction-wizard/create-transaction-dialog.svelte';
 	import TransactionList from '$lib/components/transaction-list.svelte';
+	import TransactionFilters from '$lib/components/transaction-filters.svelte';
 	import type { Transaction } from '$lib/types/transactions.types';
 	import ConfirmationDialog from '$lib/components/confirmation-dialog.svelte';
 	import { toast } from 'svelte-sonner';
@@ -23,6 +24,21 @@
 		description: '',
 		onConfirm: () => {}
 	});
+
+	function buildTransactionsUrl(params: {
+		dateFrom?: string;
+		dateTo?: string;
+		categoryId?: string;
+		offset?: number;
+	}): string {
+		const searchParams = new URLSearchParams();
+		if (params.offset) searchParams.set('offset', String(params.offset));
+		if (params.dateFrom) searchParams.set('dateFrom', params.dateFrom);
+		if (params.dateTo) searchParams.set('dateTo', params.dateTo);
+		if (params.categoryId) searchParams.set('categoryId', params.categoryId);
+		const qs = searchParams.toString();
+		return `/transactions${qs ? `?${qs}` : ''}`;
+	}
 
 	const confirmDeleteTransaction = (transaction: Transaction) => {
 		confirmationDialog = {
@@ -101,6 +117,24 @@
 	</div>
 
 	<div class="container mx-auto">
+		<TransactionFilters
+			categories={data.categories}
+			dateFrom={data.filters.dateFrom}
+			dateTo={data.filters.dateTo}
+			categoryId={data.filters.categoryId}
+			onFilterChange={(filters) => {
+				goto(
+					buildTransactionsUrl({
+						...filters,
+						offset: 0
+					}),
+					{ replaceState: true }
+				);
+			}}
+		/>
+	</div>
+
+	<div class="container mx-auto">
 		<TransactionList
 			transactions={data.transactions.data}
 			rates={userState.currencyRates?.rates || {}}
@@ -123,10 +157,11 @@
 						<Pagination.PrevButton
 							onclick={() => {
 								goto(
-									`/transactions?offset=${Math.max(data.transactions.offset - data.transactions.limit, 0)}`,
-									{
-										replaceState: true
-									}
+									buildTransactionsUrl({
+										...data.filters,
+										offset: Math.max(data.transactions.offset - data.transactions.limit, 0)
+									}),
+									{ replaceState: true }
 								);
 							}}
 						/>
@@ -142,9 +177,13 @@
 									{page}
 									isActive={currentPage === page.value}
 									onclick={() => {
-										goto(`/transactions?offset=${(page.value - 1) * data.transactions.limit}`, {
-											replaceState: true
-										});
+										goto(
+											buildTransactionsUrl({
+												...data.filters,
+												offset: (page.value - 1) * data.transactions.limit
+											}),
+											{ replaceState: true }
+										);
 									}}
 								>
 									{page.value}
@@ -155,9 +194,13 @@
 					<Pagination.Item>
 						<Pagination.NextButton
 							onclick={() => {
-								goto(`/transactions?offset=${data.transactions.offset + data.transactions.limit}`, {
-									replaceState: true
-								});
+								goto(
+									buildTransactionsUrl({
+										...data.filters,
+										offset: data.transactions.offset + data.transactions.limit
+									}),
+									{ replaceState: true }
+								);
 							}}
 						/>
 					</Pagination.Item>

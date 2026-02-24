@@ -13,6 +13,9 @@ export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
 	const offset = url.searchParams.get('offset')
 		? parseInt(url.searchParams.get('offset') as string, 10)
 		: 0;
+	const dateFrom = url.searchParams.get('dateFrom') || undefined;
+	const dateTo = url.searchParams.get('dateTo') || undefined;
+	const categoryId = url.searchParams.get('categoryId') || undefined;
 
 	// Load accounts from the API
 	let accounts = [];
@@ -47,19 +50,21 @@ export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
 		nextPage: null
 	};
 	try {
-		const response = await fetch(
-			`${API_URL}/transactions${transactions.offset ? `?offset=${transactions.offset}` : ''}`
-		);
+		const params = new URLSearchParams();
+		if (offset) params.set('offset', String(offset));
+		if (dateFrom) params.set('dateFrom', `${dateFrom}T00:00:00.000Z`);
+		if (dateTo) params.set('dateTo', `${dateTo}T00:00:00.000Z`);
+		if (categoryId) params.set('categoryId', categoryId);
+		const qs = params.toString();
+		const response = await fetch(`${API_URL}/transactions${qs ? `?${qs}` : ''}`);
 		if (!response.ok) {
 			throw new Error('Failed to load transactions');
 		}
-		// fetch the transactions from the API and parsing the date fields on the
-		// result from string to date
-		const { data, total, limit, offset, nextPage } = await response.json();
+		const { data, total, limit, offset: resOffset, nextPage } = await response.json();
 		transactions.data = data;
 		transactions.total = total;
 		transactions.limit = limit;
-		transactions.offset = offset;
+		transactions.offset = resOffset;
 		transactions.nextPage = nextPage;
 	} catch {
 		setFlash({ type: 'error', message: $t('transactions.loadTransactionsError') }, cookies);
@@ -71,7 +76,8 @@ export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
 		addTransferForm: await superValidate(zod4(createTransferSchema)),
 		transactions: transactions,
 		accounts,
-		categories
+		categories,
+		filters: { dateFrom, dateTo, categoryId }
 	};
 };
 

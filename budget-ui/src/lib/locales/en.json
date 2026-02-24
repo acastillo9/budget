@@ -471,6 +471,14 @@
 		"toAccountPlaceholder": "Select account to transfer to",
 		"transactionDetails": "Transaction Details",
 		"transfer": "Transfer",
-		"whatTypeOfTransaction": "What type of transaction is this?"
+		"whatTypeOfTransaction": "What type of transaction is this?",
+		"filters": {
+			"allCategories": "All categories",
+			"category": "Category",
+			"clearFilters": "Clear filters",
+			"dateFrom": "From",
+			"dateTo": "To",
+			"pickDate": "Pick a date"
+		}
 	}
 }
