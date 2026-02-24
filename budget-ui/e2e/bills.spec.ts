@@ -1,4 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from './fixtures';
+import type { Page } from '@playwright/test';
 import { BillsPage, type BillFrequency } from './pages/bills.page';
 import { TransactionsPage } from './pages/transactions.page';
 import { AccountsPage } from './pages/accounts.page';

@@ -13,16 +13,10 @@ export default defineConfig({
 		screenshot: 'only-on-failure'
 	},
 	projects: [
-		// Auth setup project — runs first to store authenticated state
-		{ name: 'setup', testMatch: /.*\.setup\.ts/ },
 		{
 			name: 'authenticated',
-			use: {
-				...devices['Desktop Chrome'],
-				storageState: 'e2e/.auth/user.json'
-			},
-			dependencies: ['setup'],
-			testIgnore: /.*\.unauth\.spec\.ts/
+			use: { ...devices['Desktop Chrome'] },
+			testIgnore: /.*\.(unauth\.spec|setup)\.ts/
 		},
 		{
 			name: 'unauthenticated',
