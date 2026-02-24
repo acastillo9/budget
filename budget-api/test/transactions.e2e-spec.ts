@@ -532,6 +532,14 @@ describe('TransactionsController (e2e)', () => {
         account: dateFilterAccountId,
         user: userId,
       });
+      await seedTransaction(app, {
+        amount: -5,
+        date: new Date(),
+        description: 'Today tx for default range',
+        category: dateFilterCategoryId,
+        account: dateFilterAccountId,
+        user: userId,
+      });
     });
 
     it('should return only transactions within the specified date range', async () => {
@@ -597,16 +605,6 @@ describe('TransactionsController (e2e)', () => {
     });
 
     it('should default to last 30 days when no date params are provided', async () => {
-      // Create a transaction dated today so we know at least one exists in the default window
-      const todayTxId = await seedTransaction(app, {
-        amount: -5,
-        date: new Date(),
-        description: 'Today tx for default range',
-        category: dateFilterCategoryId,
-        account: dateFilterAccountId,
-        user: userId,
-      });
-
       const response = await request(app.getHttpServer())
         .get('/transactions')
         .set('Authorization', `Bearer ${authToken}`);
@@ -672,7 +670,9 @@ describe('TransactionsController (e2e)', () => {
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
-      const dates = response.body.data.map((t: any) => new Date(t.date).getTime());
+      const dates = response.body.data.map((t: any) =>
+        new Date(t.date).getTime(),
+      );
       for (let i = 1; i < dates.length; i++) {
         expect(dates[i - 1]).toBeGreaterThanOrEqual(dates[i]);
       }
@@ -698,7 +698,7 @@ describe('TransactionsController (e2e)', () => {
       );
       expect(usdSummary).toBeDefined();
       expect(usdSummary.totalIncome).toBe(3000);
-      expect(usdSummary.totalExpenses).toBe(50); // absolute value
+      expect(usdSummary.totalExpenses).toBe(55); // absolute value (50 original + 5 from date-range seed)
     });
 
     it('should return 401 without auth token', async () => {

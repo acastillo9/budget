@@ -28,7 +28,7 @@ export class TransactionsService {
     @InjectModel(Transaction.name)
     private readonly transactionModel: Model<Transaction>,
     private readonly i18n: I18nService,
-  ) { }
+  ) {}
 
   /**
    * Create a new transaction.
