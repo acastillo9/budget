@@ -8,7 +8,7 @@ register('es', () => import('./locales/es.json'));
 // Initialize
 init({
 	fallbackLocale: 'en',
-	initialLocale: getLocaleFromNavigator(),
+	initialLocale: getLocaleFromNavigator()?.split('-')[0] ?? 'en',
 	loadingDelay: 200,
 	warnOnMissingMessages: true
 });
