@@ -60,15 +60,15 @@
 			<div class="flex flex-col gap-1">
 				<p class="font-medium">{description}</p>
 				<div class="flex flex-wrap gap-1">
+					<Badge variant="outline">
+						{formatUTCStringDateWithLocal(transaction.date)}
+					</Badge>
 					<Badge>
 						{transaction.account.name}
 					</Badge>
 					{#if transaction.category}
 						<CategoryBadge category={transaction.category} />
 					{/if}
-					<Badge variant="outline">
-						{formatUTCStringDateWithLocal(transaction.date)}
-					</Badge>
 				</div>
 			</div>
 
