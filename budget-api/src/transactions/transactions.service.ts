@@ -28,7 +28,7 @@ export class TransactionsService {
     @InjectModel(Transaction.name)
     private readonly transactionModel: Model<Transaction>,
     private readonly i18n: I18nService,
-  ) { }
+  ) {}
 
   /**
    * Create a new transaction.
@@ -677,16 +677,13 @@ export class TransactionsService {
       totalExpenses: number;
     }[]
   > {
-    // Get the start and end of the current month
+    // Rolling 30-day window
     const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth(); // 0-indexed (e.g., 6 for July)
-
-    const startDate = new Date(year, month, 1);
-    const endDate = new Date(year, month + 1, 1);
+    const startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const endDate = now;
     try {
       const transactions = await this.transactionModel.aggregate([
-        // Stage 1: Filter documents for the current month 🗓️
+        // Stage 1: Filter documents within the rolling 30-day window 🗓️
         {
           $match: {
             user: new ObjectId(userId),
@@ -726,8 +723,6 @@ export class TransactionsService {
         {
           $project: {
             _id: 0,
-            year: year,
-            month: month + 1, // Convert to 1-indexed month (e.g., 7 for July)
             currencyCode: '$_id',
             totalIncome: '$totalIncome',
             totalExpenses: { $abs: '$totalExpenses' },

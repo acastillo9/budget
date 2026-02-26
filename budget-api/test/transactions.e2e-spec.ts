@@ -683,7 +683,7 @@ describe('TransactionsController (e2e)', () => {
   // GET /transactions/summary
   // ──────────────────────────────────────────────────
   describe('GET /transactions/summary', () => {
-    it('should return the monthly summary for current month', async () => {
+    it('should return the rolling 30-day summary', async () => {
       const response = await request(app.getHttpServer())
         .get('/transactions/summary')
         .set('Authorization', `Bearer ${authToken}`);
