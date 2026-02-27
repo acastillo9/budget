@@ -1,12 +1,15 @@
 import { $t } from '$lib/i18n';
 import { z } from 'zod/v4';
 
+export const currencyCodes = ['USD', 'COP'] as const;
+
 export const signupFormSchema = z.object({
 	name: z
 		.string()
 		.min(1, { error: () => $t('signUp.validation.nameIsRequired') })
 		.max(200),
-	email: z.string().email()
+	email: z.string().email(),
+	currencyCode: z.enum(currencyCodes)
 });
 
 export type SignupFormSchema = z.infer<typeof signupFormSchema>;

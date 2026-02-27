@@ -125,9 +125,19 @@ test.describe('Sign Up Page', () => {
 		await expect(signUpPage.description).toBeVisible();
 		await expect(signUpPage.nameInput).toBeVisible();
 		await expect(signUpPage.emailInput).toBeVisible();
+		await expect(signUpPage.currencyTrigger).toBeVisible();
 		await expect(signUpPage.nextButton).toBeVisible();
 		await expect(signUpPage.googleButton).toBeVisible();
 		await expect(signUpPage.signInLink).toBeVisible();
+	});
+
+	test('should show USD as the default currency', async () => {
+		await expect(signUpPage.currencyTrigger).toContainText('USD');
+	});
+
+	test('should allow selecting a different currency', async () => {
+		await signUpPage.selectCurrency('COP');
+		await expect(signUpPage.currencyTrigger).toContainText('COP');
 	});
 
 	test('should keep next button disabled when fields are empty', async () => {
@@ -278,6 +288,8 @@ test.describe('Complete Registration Flow', () => {
 		await expect(signUpPage.description).toBeVisible();
 
 		await signUpPage.fillBasicInfo(testName, testEmail);
+		await signUpPage.selectCurrency('COP');
+		await expect(signUpPage.currencyTrigger).toContainText('COP');
 		await expect(signUpPage.nextButton).toBeEnabled();
 		await signUpPage.submitBasicInfo();
 

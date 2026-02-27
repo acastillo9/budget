@@ -136,6 +136,36 @@ describe('AuthController (e2e)', () => {
       expect(response.status).toBe(409);
     });
 
+    it('should register a new user with explicit currencyCode', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/auth/register')
+        .set('Accept-Language', 'en-US')
+        .send({
+          name: 'COP User',
+          email: 'cop-user@example.com',
+          currencyCode: 'COP',
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body).toMatchObject({
+        name: 'COP User',
+        email: 'cop-user@example.com',
+      });
+    });
+
+    it('should return 400 when currencyCode is invalid', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/auth/register')
+        .set('Accept-Language', 'en-US')
+        .send({
+          name: 'Bad Currency',
+          email: 'bad-currency@example.com',
+          currencyCode: 'INVALID',
+        });
+
+      expect(response.status).toBe(400);
+    });
+
     it('should return 429 when re-registering before resend cooldown expires', async () => {
       // Register a new user (sets a cooldown)
       await request(app.getHttpServer())
@@ -680,11 +710,15 @@ describe('AuthController (e2e)', () => {
     });
 
     it('should complete: Register → Verify Email → Set Password → Login → Me → Refresh → Logout', async () => {
-      // ── Step 1: Register ──
+      // ── Step 1: Register with explicit COP currency ──
       const registerRes = await request(app.getHttpServer())
         .post('/auth/register')
         .set('Accept-Language', 'en-US')
-        .send({ name: 'Flow User', email: 'flow@example.com' });
+        .send({
+          name: 'Flow User',
+          email: 'flow@example.com',
+          currencyCode: 'COP',
+        });
 
       expect(registerRes.status).toBe(201);
       expect(registerRes.body.email).toBe('flow@example.com');
@@ -735,7 +769,7 @@ describe('AuthController (e2e)', () => {
       expect(meRes.status).toBe(200);
       expect(meRes.body.name).toBe('Flow User');
       expect(meRes.body.email).toBe('flow@example.com');
-      expect(meRes.body.currencyCode).toBe('USD');
+      expect(meRes.body.currencyCode).toBe('COP');
 
       // ── Step 7: Refresh tokens ──
       const refreshRes = await request(app.getHttpServer())

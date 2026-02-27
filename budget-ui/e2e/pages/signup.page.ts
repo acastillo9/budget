@@ -8,6 +8,7 @@ export class SignUpPage {
 	readonly description: Locator;
 	readonly nameInput: Locator;
 	readonly emailInput: Locator;
+	readonly currencyTrigger: Locator;
 	readonly nextButton: Locator;
 	readonly googleButton: Locator;
 	readonly signInLink: Locator;
@@ -37,6 +38,7 @@ export class SignUpPage {
 		this.description = page.getByText(/create a new account to get started/i);
 		this.nameInput = page.getByLabel(/name/i);
 		this.emailInput = page.getByLabel(/email/i);
+		this.currencyTrigger = page.locator('[data-slot="select-trigger"]');
 		this.nextButton = page.getByRole('button', { name: /next/i });
 		this.googleButton = page.getByRole('link', { name: /google/i });
 		this.signInLink = page.getByRole('link', { name: /sign in/i });
@@ -74,6 +76,12 @@ export class SignUpPage {
 	async fillBasicInfo(name: string, email: string) {
 		await this.nameInput.fill(name);
 		await this.emailInput.fill(email);
+	}
+
+	async selectCurrency(code: string) {
+		await this.page.waitForLoadState('networkidle');
+		await this.currencyTrigger.click();
+		await this.page.getByRole('option', { name: new RegExp(code, 'i') }).click();
 	}
 
 	async submitBasicInfo() {

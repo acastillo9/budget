@@ -417,6 +417,7 @@
 		"setPasswordError": "Error setting password. Please check your details and try again.",
 		"setPasswordSuccess": "Password set successfully.",
 		"title": "Create an Account",
+		"currency": "Currency",
 		"tooManyRequests": "Too many requests. Please try again later.",
 		"validation": {
 			"activationCodeMinLength": "Your one-time password must be at least 6 digits.",

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import * as Form from '$lib/components/ui/form';
+	import * as Select from '$lib/components/ui/select';
 	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
 	import { Button } from '$lib/components/ui/button';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4 } from 'sveltekit-superforms/adapters';
@@ -8,6 +10,7 @@
 	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
 	import { t } from 'svelte-i18n';
 	import { signupFormSchema } from '$lib/schemas/auth.schema';
+	import { currencies } from '$lib/utils/currency';
 	import type { SuperValidated, Infer } from 'sveltekit-superforms';
 
 	let {
@@ -34,6 +37,10 @@
 		}
 	});
 	const { form: formData, enhance, errors, isTainted, tainted, allErrors, delayed } = form;
+
+	if (!$formData.currencyCode) {
+		$formData.currencyCode = 'USD';
+	}
 
 	const checkEmailForm = superForm(
 		{ email: '' },
@@ -90,6 +97,26 @@
 		</Form.Control>
 		<Form.FieldErrors />
 	</Form.Field>
+	<div>
+		<Label>{$t('signUp.currency')}</Label>
+		<Select.Root type="single" bind:value={$formData.currencyCode} name="currencyCode">
+			<Select.Trigger class="w-full">
+				{#each currencies as c (c.code)}
+					{#if c.code === $formData.currencyCode}
+						<span>{c.flag} {c.code} - {c.name}</span>
+					{/if}
+				{/each}
+			</Select.Trigger>
+			<Select.Content>
+				{#each currencies as currency (currency.code)}
+					<Select.Item value={currency.code}>
+						{currency.flag}
+						{currency.code} - {currency.name}
+					</Select.Item>
+				{/each}
+			</Select.Content>
+		</Select.Root>
+	</div>
 
 	<Button
 		class="mt-5 w-full"

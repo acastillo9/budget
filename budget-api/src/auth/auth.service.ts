@@ -130,7 +130,9 @@ export class AuthService {
           const createUserDto: CreateUserDto = {
             name: registerDto.name,
             email: registerDto.email,
-            currencyCode: this.getCurrencyCodeFromLocale(locale),
+            currencyCode:
+              registerDto.currencyCode ??
+              this.getCurrencyCodeFromLocale(locale),
           };
           const newUser = await this.usersService.create(
             createUserDto,

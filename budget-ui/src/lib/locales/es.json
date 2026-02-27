@@ -417,6 +417,7 @@
 		"setPasswordError": "Error al establecer la contraseña. Verifica tus datos e inténtalo de nuevo.",
 		"setPasswordSuccess": "Contraseña establecida con éxito.",
 		"title": "Crear una cuenta",
+		"currency": "Moneda",
 		"tooManyRequests": "Demasiadas solicitudes. Inténtalo de nuevo más tarde.",
 		"validation": {
 			"activationCodeMinLength": "Tu código de activación debe tener al menos 6 dígitos.",
