@@ -22,10 +22,7 @@
     "migrate:create": "migrate-mongo create",
     "migrate:status": "migrate-mongo status",
     "migrate:up": "migrate-mongo up",
-    "migrate:down": "migrate-mongo down",
-    "migrate:status:test": "ENV_FILE=.env.test migrate-mongo status",
-    "migrate:up:test": "ENV_FILE=.env.test migrate-mongo up",
-    "migrate:down:test": "ENV_FILE=.env.test migrate-mongo down"
+    "migrate:down": "migrate-mongo down"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",
