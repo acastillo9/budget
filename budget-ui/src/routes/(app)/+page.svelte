@@ -6,6 +6,7 @@
 	import type { PageProps } from './$types';
 	import { formatCurrencyWithSymbol } from '$lib/utils/currency';
 	import { getUserContext } from '$lib/context';
+	import { canEdit } from '$lib/utils/permissions';
 	import TotalCard from '$lib/components/total-card.svelte';
 	import CurrencyRatesCard from '$lib/components/currency-rates-card.svelte';
 	import { toast } from 'svelte-sonner';
@@ -16,6 +17,7 @@
 	let { data }: PageProps = $props();
 
 	const userState = getUserContext();
+	let editable = $derived(canEdit(userState.workspaceRole!));
 
 	// svelte-ignore state_referenced_locally
 	let usdExchangeRates = $state(data.usdExchangeRates);
@@ -73,8 +75,8 @@
 				<p class="text-muted-foreground">{$t('dashboard.description')}</p>
 			</div>
 
-			<div class="flex items-center space-x-2">
-				{#if data.accounts.length > 0}
+			{#if editable && data.accounts.length > 0}
+				<div class="flex items-center space-x-2">
 					<CreateTransactionDialog
 						addTransactionForm={data.addTransactionForm}
 						addTransferForm={data.addTransferForm}
@@ -82,8 +84,8 @@
 						categories={data.categories}
 						accounts={data.accounts}
 					/>
-				{/if}
-			</div>
+				</div>
+			{/if}
 		</div>
 	</div>
 

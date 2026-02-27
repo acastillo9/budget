@@ -10,12 +10,14 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import * as Pagination from '$lib/components/ui/pagination/index.js';
 	import { getUserContext } from '$lib/context';
+	import { canEdit } from '$lib/utils/permissions';
 
 	let { data }: PageProps = $props();
 
 	let isEditTransactionDialogOpen = $state(false);
 	let selectedTransaction: Transaction | undefined = $state(undefined);
 	const userState = getUserContext();
+	let editable = $derived(canEdit(userState.workspaceRole!));
 
 	let confirmationDialog = $state({
 		open: false,
@@ -97,8 +99,8 @@
 				<p class="text-muted-foreground">{$t('transactions.description')}</p>
 			</div>
 
-			<div class="flex items-center space-x-2">
-				{#if data.accounts.length > 0}
+			{#if editable && data.accounts.length > 0}
+				<div class="flex items-center space-x-2">
 					<CreateTransactionDialog
 						addTransactionForm={data.addTransactionForm}
 						addTransferForm={data.addTransferForm}
@@ -111,8 +113,8 @@
 							selectedTransaction = undefined;
 						}}
 					/>
-				{/if}
-			</div>
+				</div>
+			{/if}
 		</div>
 	</div>
 
@@ -139,7 +141,7 @@
 			transactions={data.transactions.data}
 			rates={userState.currencyRates?.rates || {}}
 			headless
-			editable
+			{editable}
 			onEdit={(event) => {
 				selectedTransaction = event;
 				isEditTransactionDialogOpen = true;
@@ -210,14 +212,16 @@
 	</div>
 </section>
 
-<ConfirmationDialog
-	open={confirmationDialog.open}
-	onOpenChange={(open: boolean) => (confirmationDialog.open = open)}
-	title={confirmationDialog.title}
-	description={confirmationDialog.description}
-	confirmText={$t('common.delete')}
-	cancelText={$t('common.cancel')}
-	variant="destructive"
-	onConfirm={confirmationDialog.onConfirm}
-	loading={confirmationDialog.loading}
-/>
+{#if editable}
+	<ConfirmationDialog
+		open={confirmationDialog.open}
+		onOpenChange={(open: boolean) => (confirmationDialog.open = open)}
+		title={confirmationDialog.title}
+		description={confirmationDialog.description}
+		confirmText={$t('common.delete')}
+		cancelText={$t('common.cancel')}
+		variant="destructive"
+		onConfirm={confirmationDialog.onConfirm}
+		loading={confirmationDialog.loading}
+	/>
+{/if}

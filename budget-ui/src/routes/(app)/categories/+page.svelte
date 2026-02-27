@@ -7,11 +7,16 @@
 	import { toast } from 'svelte-sonner';
 	import { invalidateAll } from '$app/navigation';
 	import ConfirmationDialog from '$lib/components/confirmation-dialog.svelte';
+	import { getUserContext } from '$lib/context';
+	import { canEdit } from '$lib/utils/permissions';
 
 	let { data }: PageProps = $props();
 	let selectedCategory: Category | undefined = $state(undefined);
 	let isEditCategoryDialogOpen = $state(false);
 	let preSelectedParent: Category | undefined = $state(undefined);
+
+	const userState = getUserContext();
+	let editable = $derived(canEdit(userState.workspaceRole!));
 
 	// Top-level categories (those without a parent) for the parent dropdown
 	let parentCategories = $derived(data.categories.filter((c) => !c.parent));
@@ -90,25 +95,28 @@
 				<p class="text-muted-foreground">{$t('categories.description')}</p>
 			</div>
 
-			<div class="flex items-center space-x-2">
-				<CreateCategoryDialog
-					data={data.createCategoryForm}
-					category={selectedCategory}
-					{parentCategories}
-					{preSelectedParent}
-					bind:open={isEditCategoryDialogOpen}
-					onClose={() => {
-						selectedCategory = undefined;
-						preSelectedParent = undefined;
-					}}
-				/>
-			</div>
+			{#if editable}
+				<div class="flex items-center space-x-2">
+					<CreateCategoryDialog
+						data={data.createCategoryForm}
+						category={selectedCategory}
+						{parentCategories}
+						{preSelectedParent}
+						bind:open={isEditCategoryDialogOpen}
+						onClose={() => {
+							selectedCategory = undefined;
+							preSelectedParent = undefined;
+						}}
+					/>
+				</div>
+			{/if}
 		</div>
 	</div>
 
 	<div class="container mx-auto">
 		<CategoryList
 			categories={data.categories}
+			{editable}
 			onEdit={(event) => {
 				selectedCategory = event;
 				preSelectedParent = undefined;
@@ -120,14 +128,16 @@
 	</div>
 </section>
 
-<ConfirmationDialog
-	open={confirmationDialog.open}
-	onOpenChange={(open: boolean) => (confirmationDialog.open = open)}
-	title={confirmationDialog.title}
-	description={confirmationDialog.description}
-	confirmText={$t('common.delete')}
-	cancelText={$t('common.cancel')}
-	variant="destructive"
-	onConfirm={confirmationDialog.onConfirm}
-	loading={confirmationDialog.loading}
-/>
+{#if editable}
+	<ConfirmationDialog
+		open={confirmationDialog.open}
+		onOpenChange={(open: boolean) => (confirmationDialog.open = open)}
+		title={confirmationDialog.title}
+		description={confirmationDialog.description}
+		confirmText={$t('common.delete')}
+		cancelText={$t('common.cancel')}
+		variant="destructive"
+		onConfirm={confirmationDialog.onConfirm}
+		loading={confirmationDialog.loading}
+	/>
+{/if}

@@ -8,6 +8,7 @@
 	import { toast } from 'svelte-sonner';
 	import { invalidateAll } from '$app/navigation';
 	import { getUserContext } from '$lib/context';
+	import { canEdit } from '$lib/utils/permissions';
 	import * as Pagination from '$lib/components/ui/pagination';
 
 	const PER_PAGE = 10;
@@ -16,6 +17,7 @@
 	let isEditAccountDialogOpen = $state(false);
 	let selectedAccount: Account | undefined = $state(undefined);
 	const userState = getUserContext();
+	let editable = $derived(canEdit(userState.workspaceRole!));
 	let page = $state(1);
 
 	let confirmationDialog = $state({
@@ -81,17 +83,19 @@
 				<p class="text-muted-foreground">{$t('accounts.description')}</p>
 			</div>
 
-			<div class="flex items-center space-x-2">
-				<AddAccountDialog
-					data={data.addAccountForm}
-					account={selectedAccount}
-					accountTypes={data.accountTypes}
-					bind:open={isEditAccountDialogOpen}
-					onClose={() => {
-						selectedAccount = undefined;
-					}}
-				/>
-			</div>
+			{#if editable}
+				<div class="flex items-center space-x-2">
+					<AddAccountDialog
+						data={data.addAccountForm}
+						account={selectedAccount}
+						accountTypes={data.accountTypes}
+						bind:open={isEditAccountDialogOpen}
+						onClose={() => {
+							selectedAccount = undefined;
+						}}
+					/>
+				</div>
+			{/if}
 		</div>
 	</div>
 
@@ -99,7 +103,7 @@
 		<AccountList
 			accounts={data.accounts.slice((page - 1) * PER_PAGE, page * PER_PAGE)}
 			rates={userState.currencyRates?.rates || {}}
-			editable
+			{editable}
 			headless
 			onDelete={confirmDeleteAccount}
 			onEdit={(event) => {
@@ -135,14 +139,16 @@
 	</div>
 </section>
 
-<ConfirmationDialog
-	open={confirmationDialog.open}
-	onOpenChange={(open: boolean) => (confirmationDialog.open = open)}
-	title={confirmationDialog.title}
-	description={confirmationDialog.description}
-	confirmText={$t('common.delete')}
-	cancelText={$t('common.cancel')}
-	variant="destructive"
-	onConfirm={confirmationDialog.onConfirm}
-	loading={confirmationDialog.loading}
-/>
+{#if editable}
+	<ConfirmationDialog
+		open={confirmationDialog.open}
+		onOpenChange={(open: boolean) => (confirmationDialog.open = open)}
+		title={confirmationDialog.title}
+		description={confirmationDialog.description}
+		confirmText={$t('common.delete')}
+		cancelText={$t('common.cancel')}
+		variant="destructive"
+		onConfirm={confirmationDialog.onConfirm}
+		loading={confirmationDialog.loading}
+	/>
+{/if}

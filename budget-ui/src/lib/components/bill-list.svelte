@@ -9,6 +9,7 @@
 	type Props = {
 		bills: Bill[];
 		headless?: boolean;
+		editable?: boolean;
 		isCurrentMonth?: boolean;
 		isPayingBill?: string | undefined;
 		isUnpayingBill?: string | undefined;
@@ -20,6 +21,7 @@
 	let {
 		bills,
 		headless = false,
+		editable = true,
 		isCurrentMonth = true,
 		isPayingBill = undefined,
 		isUnpayingBill = undefined,
@@ -66,6 +68,7 @@
 							{#each overdueBills as bill (bill.id + bill.targetDate)}
 								<BillItem
 									{bill}
+									{editable}
 									pay={(event: Bill) => payBill(event)}
 									isPaying={bill.id === isPayingBill}
 									onEdit={() => onEdit(bill)}
@@ -92,6 +95,7 @@
 								{#each pendingBills as bill (bill.id + bill.targetDate)}
 									<BillItem
 										{bill}
+										{editable}
 										{isCurrentMonth}
 										pay={(event: Bill) => payBill(event)}
 										isPaying={bill.id === isPayingBill}
@@ -117,6 +121,7 @@
 								{#each pendingBills as bill (bill.id + bill.targetDate)}
 									<BillItem
 										{bill}
+										{editable}
 										{isCurrentMonth}
 										pay={(event: Bill) => payBill(event)}
 										isPaying={bill.id === isPayingBill}
@@ -143,6 +148,7 @@
 							{#each paidBills as bill (bill.id + bill.targetDate)}
 								<BillItem
 									{bill}
+									{editable}
 									onEdit={() => onEdit(bill)}
 									unpay={(event: Bill) => unpayBill(event)}
 									isUnpaying={bill.id === isUnpayingBill}

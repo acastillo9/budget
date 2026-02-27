@@ -10,8 +10,13 @@
 	import * as Card from '$lib/components/ui/card';
 	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
+	import { getUserContext } from '$lib/context';
+	import { canEdit } from '$lib/utils/permissions';
 
 	let { data }: PageProps = $props();
+
+	const userState = getUserContext();
+	let editable = $derived(canEdit(userState.workspaceRole!));
 
 	// Month navigation
 	let selectedMonth = $derived(data.selectedMonth);
@@ -106,18 +111,20 @@
 				<p class="text-muted-foreground">{$t('budgets.description')}</p>
 			</div>
 
-			<div class="flex items-center space-x-2">
-				<CreateBudgetDialog
-					addBudgetForm={data.createBudgetForm}
-					createCategoryForm={data.createCategoryForm}
-					categories={data.categories}
-					budget={selectedBudget}
-					bind:open={isEditBudgetDialogOpen}
-					onClose={() => {
-						selectedBudget = undefined;
-					}}
-				/>
-			</div>
+			{#if editable}
+				<div class="flex items-center space-x-2">
+					<CreateBudgetDialog
+						addBudgetForm={data.createBudgetForm}
+						createCategoryForm={data.createCategoryForm}
+						categories={data.categories}
+						budget={selectedBudget}
+						bind:open={isEditBudgetDialogOpen}
+						onClose={() => {
+							selectedBudget = undefined;
+						}}
+					/>
+				</div>
+			{/if}
 		</div>
 	</div>
 
@@ -165,6 +172,7 @@
 	<div class="container mx-auto">
 		<BudgetList
 			budgets={data.budgets}
+			{editable}
 			onEdit={(budget) => {
 				selectedBudget = budget;
 				isEditBudgetDialogOpen = true;
@@ -174,14 +182,16 @@
 	</div>
 </section>
 
-<ConfirmationDialog
-	open={confirmationDialog.open}
-	onOpenChange={(open: boolean) => (confirmationDialog.open = open)}
-	title={confirmationDialog.title}
-	description={confirmationDialog.description}
-	confirmText={$t('common.delete')}
-	cancelText={$t('common.cancel')}
-	variant="destructive"
-	onConfirm={confirmationDialog.onConfirm}
-	loading={confirmationDialog.loading}
-/>
+{#if editable}
+	<ConfirmationDialog
+		open={confirmationDialog.open}
+		onOpenChange={(open: boolean) => (confirmationDialog.open = open)}
+		title={confirmationDialog.title}
+		description={confirmationDialog.description}
+		confirmText={$t('common.delete')}
+		cancelText={$t('common.cancel')}
+		variant="destructive"
+		onConfirm={confirmationDialog.onConfirm}
+		loading={confirmationDialog.loading}
+	/>
+{/if}

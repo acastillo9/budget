@@ -12,6 +12,7 @@
 	type Props = {
 		bill: Bill;
 		isCurrentMonth?: boolean;
+		editable?: boolean;
 		isPaying?: boolean;
 		isUnpaying?: boolean;
 		pay?: (bill: Bill) => void;
@@ -23,6 +24,7 @@
 	let {
 		bill,
 		isCurrentMonth = true,
+		editable = true,
 		isPaying = false,
 		isUnpaying = false,
 		pay = () => {},
@@ -205,37 +207,39 @@
 			</div>
 		</div>
 	</div>
-	<div class="flex items-center gap-3">
-		<div class="flex items-center gap-2">
-			{#if bill.status !== BillStatus.PAID}
+	{#if editable}
+		<div class="flex items-center gap-3">
+			<div class="flex items-center gap-2">
+				{#if bill.status !== BillStatus.PAID}
+					<Button
+						variant={bill.status === BillStatus.OVERDUE ? 'destructive' : 'default'}
+						size="sm"
+						disabled={isPaying}
+						onclick={() => pay(bill)}
+					>
+						{#if isPaying}<LoaderCircle class="mr-1 animate-spin" />{/if}
+						<Check class="mr-1 h-3 w-3" />
+						{$t('bills.payNow')}
+					</Button>
+				{:else}
+					<Button variant="default" size="sm" disabled={isUnpaying} onclick={() => unpay(bill)}>
+						{#if isUnpaying}<LoaderCircle class="mr-1 animate-spin" />{/if}
+						<Undo2 className="h-3 w-3" />
+						{$t('bills.unpay')}
+					</Button>
+				{/if}
+				<Button variant="ghost" size="icon" onclick={onEdit}>
+					<Edit class="h-4 w-4" />
+				</Button>
 				<Button
-					variant={bill.status === BillStatus.OVERDUE ? 'destructive' : 'default'}
-					size="sm"
-					disabled={isPaying}
-					onclick={() => pay(bill)}
+					variant="ghost"
+					size="icon"
+					onclick={onDelete}
+					class="text-destructive hover:text-destructive"
 				>
-					{#if isPaying}<LoaderCircle class="mr-1 animate-spin" />{/if}
-					<Check class="mr-1 h-3 w-3" />
-					{$t('bills.payNow')}
+					<Trash2 class="h-4 w-4" />
 				</Button>
-			{:else}
-				<Button variant="default" size="sm" disabled={isUnpaying} onclick={() => unpay(bill)}>
-					{#if isUnpaying}<LoaderCircle class="mr-1 animate-spin" />{/if}
-					<Undo2 className="h-3 w-3" />
-					{$t('bills.unpay')}
-				</Button>
-			{/if}
-			<Button variant="ghost" size="icon" onclick={onEdit}>
-				<Edit class="h-4 w-4" />
-			</Button>
-			<Button
-				variant="ghost"
-				size="icon"
-				onclick={onDelete}
-				class="text-destructive hover:text-destructive"
-			>
-				<Trash2 class="h-4 w-4" />
-			</Button>
+			</div>
 		</div>
-	</div>
+	{/if}
 </div>

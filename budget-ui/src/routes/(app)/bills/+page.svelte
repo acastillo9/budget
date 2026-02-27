@@ -12,8 +12,13 @@
 	import Label from '$lib/components/ui/label/label.svelte';
 	import Switch from '$lib/components/ui/switch/switch.svelte';
 	import { Button } from '$lib/components/ui/button';
+	import { getUserContext } from '$lib/context';
+	import { canEdit } from '$lib/utils/permissions';
 
 	let { data }: PageProps = $props();
+
+	const userState = getUserContext();
+	let editable = $derived(canEdit(userState.workspaceRole!));
 
 	// Month navigation
 	let selectedMonth = $derived(data.selectedMonth);
@@ -165,19 +170,21 @@
 				<p class="text-muted-foreground">{$t('bills.description')}</p>
 			</div>
 
-			<div class="flex items-center space-x-2">
-				<CreateBillDialog
-					addBillForm={data.createBillForm}
-					createCategoryForm={data.createCategoryForm}
-					accounts={data.accounts}
-					categories={data.categories}
-					bill={selectedBillItem}
-					bind:open={isEditBillDialogOpen}
-					onClose={() => {
-						selectedBillItem = undefined;
-					}}
-				/>
-			</div>
+			{#if editable}
+				<div class="flex items-center space-x-2">
+					<CreateBillDialog
+						addBillForm={data.createBillForm}
+						createCategoryForm={data.createCategoryForm}
+						accounts={data.accounts}
+						categories={data.categories}
+						bill={selectedBillItem}
+						bind:open={isEditBillDialogOpen}
+						onClose={() => {
+							selectedBillItem = undefined;
+						}}
+					/>
+				</div>
+			{/if}
 		</div>
 	</div>
 
@@ -225,6 +232,7 @@
 		<BillList
 			bills={data.bills}
 			headless
+			{editable}
 			{isCurrentMonth}
 			payBill={(e) => payBill(e)}
 			unpayBill={(e) => unpayBill(e)}
@@ -239,39 +247,41 @@
 	</div>
 </section>
 
-<ConfirmationDialog
-	open={confirmationDialog.open}
-	onOpenChange={(open: boolean) => (confirmationDialog.open = open)}
-	title={confirmationDialog.title}
-	description={confirmationDialog.description}
-	confirmText={$t('common.delete')}
-	cancelText={$t('common.cancel')}
-	variant="destructive"
-	onConfirm={confirmationDialog.onConfirm}
-	loading={confirmationDialog.loading}
->
-	<Card.Root class="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
-		<Card.Header>
-			<Card.Title class="flex items-center gap-2 text-sm">
-				<Calendar1 class="h-4 w-4" />
-				{$t('bills.deleteScope')}
-			</Card.Title>
-			<Card.Description class="text-xs">{$t('bills.deleteScopeDescription')}</Card.Description>
-		</Card.Header>
-		<Card.Content class="pt-0">
-			<div class="flex items-center justify-between space-x-4">
-				<div class="flex-1">
-					<Label class="text-sm font-medium">
-						{!deleteSeries ? $t('bills.deleteSingleLabel') : $t('bills.deleteSeriesLabel')}
-					</Label>
-					<p class="text-muted-foreground mt-1 text-xs">
-						{!deleteSeries
-							? $t('bills.deleteSingleDescription')
-							: $t('bills.deleteSeriesDescription')}
-					</p>
+{#if editable}
+	<ConfirmationDialog
+		open={confirmationDialog.open}
+		onOpenChange={(open: boolean) => (confirmationDialog.open = open)}
+		title={confirmationDialog.title}
+		description={confirmationDialog.description}
+		confirmText={$t('common.delete')}
+		cancelText={$t('common.cancel')}
+		variant="destructive"
+		onConfirm={confirmationDialog.onConfirm}
+		loading={confirmationDialog.loading}
+	>
+		<Card.Root class="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+			<Card.Header>
+				<Card.Title class="flex items-center gap-2 text-sm">
+					<Calendar1 class="h-4 w-4" />
+					{$t('bills.deleteScope')}
+				</Card.Title>
+				<Card.Description class="text-xs">{$t('bills.deleteScopeDescription')}</Card.Description>
+			</Card.Header>
+			<Card.Content class="pt-0">
+				<div class="flex items-center justify-between space-x-4">
+					<div class="flex-1">
+						<Label class="text-sm font-medium">
+							{!deleteSeries ? $t('bills.deleteSingleLabel') : $t('bills.deleteSeriesLabel')}
+						</Label>
+						<p class="text-muted-foreground mt-1 text-xs">
+							{!deleteSeries
+								? $t('bills.deleteSingleDescription')
+								: $t('bills.deleteSeriesDescription')}
+						</p>
+					</div>
+					<Switch bind:checked={deleteSeries} />
 				</div>
-				<Switch bind:checked={deleteSeries} />
-			</div>
-		</Card.Content>
-	</Card.Root>
-</ConfirmationDialog>
+			</Card.Content>
+		</Card.Root>
+	</ConfirmationDialog>
+{/if}

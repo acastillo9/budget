@@ -18,15 +18,9 @@
 
 	let { data, children } = $props();
 
-	// Synchronous initial assignment (needed for SSR/hydration)
-	userState.user = data.user;
-	userState.currencyRates = data.currencyRates;
-	userState.workspaces = data.workspaces ?? [];
-	userState.currentWorkspace = data.currentWorkspace;
-	userState.workspaceRole = data.workspaceRole;
 	setUserContext(userState);
 
-	// Reactive sync for when data changes (e.g. after invalidateAll)
+	// Reactive sync (runs before first render and on data changes e.g. after invalidateAll)
 	$effect.pre(() => {
 		userState.user = data.user;
 		userState.currencyRates = data.currencyRates;

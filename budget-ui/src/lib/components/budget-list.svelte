@@ -6,11 +6,12 @@
 
 	type Props = {
 		budgets: BudgetProgress[];
+		editable?: boolean;
 		onEdit?: (budget: BudgetProgress) => void;
 		onDelete?: (budget: BudgetProgress) => void;
 	};
 
-	let { budgets, onEdit = () => {}, onDelete = () => {} }: Props = $props();
+	let { budgets, editable = true, onEdit = () => {}, onDelete = () => {} }: Props = $props();
 </script>
 
 {#if budgets.length === 0}
@@ -21,7 +22,12 @@
 {:else}
 	<div class="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
 		{#each budgets as budget (budget.budgetId)}
-			<BudgetItem {budget} onEdit={() => onEdit(budget)} onDelete={() => onDelete(budget)} />
+			<BudgetItem
+				{budget}
+				{editable}
+				onEdit={() => onEdit(budget)}
+				onDelete={() => onDelete(budget)}
+			/>
 		{/each}
 	</div>
 {/if}

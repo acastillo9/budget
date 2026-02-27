@@ -10,6 +10,7 @@
 
 	interface Props {
 		categories: Category[];
+		editable?: boolean;
 		onEdit?: (category: Category) => void;
 		onDelete?: (category: Category) => void;
 		onAddSubcategory?: (parent: Category) => void;
@@ -17,6 +18,7 @@
 
 	let {
 		categories,
+		editable = true,
 		onEdit = () => {},
 		onDelete = () => {},
 		onAddSubcategory = () => {}
@@ -62,35 +64,37 @@
 											</div>
 										</div>
 									</Collapsible.Trigger>
-									<div class="flex shrink-0 items-center gap-1">
-										<Button
-											variant="ghost"
-											size="icon"
-											class="h-8 w-8"
-											title={$t('categories.addSubcategory')}
-											onclick={() => onAddSubcategory(category)}
-										>
-											<Plus class="h-4 w-4" />
-										</Button>
-										<Button
-											variant="ghost"
-											size="icon"
-											class="h-8 w-8"
-											title="Edit"
-											onclick={() => onEdit(category)}
-										>
-											<Edit class="h-4 w-4" />
-										</Button>
-										<Button
-											variant="ghost"
-											size="icon"
-											class="text-destructive hover:text-destructive h-8 w-8"
-											title="Delete"
-											onclick={() => onDelete(category)}
-										>
-											<Trash2 class="h-4 w-4" />
-										</Button>
-									</div>
+									{#if editable}
+										<div class="flex shrink-0 items-center gap-1">
+											<Button
+												variant="ghost"
+												size="icon"
+												class="h-8 w-8"
+												title={$t('categories.addSubcategory')}
+												onclick={() => onAddSubcategory(category)}
+											>
+												<Plus class="h-4 w-4" />
+											</Button>
+											<Button
+												variant="ghost"
+												size="icon"
+												class="h-8 w-8"
+												title="Edit"
+												onclick={() => onEdit(category)}
+											>
+												<Edit class="h-4 w-4" />
+											</Button>
+											<Button
+												variant="ghost"
+												size="icon"
+												class="text-destructive hover:text-destructive h-8 w-8"
+												title="Delete"
+												onclick={() => onDelete(category)}
+											>
+												<Trash2 class="h-4 w-4" />
+											</Button>
+										</div>
+									{/if}
 								</div>
 								<Collapsible.Content>
 									<div class="border-t px-4 pt-2 pb-3">
@@ -102,26 +106,28 @@
 														<ChildIcon class="h-5 w-5" />
 														<p class="text-sm font-medium">{child.name}</p>
 													</div>
-													<div class="flex items-center gap-1">
-														<Button
-															variant="ghost"
-															size="icon"
-															class="h-7 w-7"
-															title="Edit"
-															onclick={() => onEdit(child)}
-														>
-															<Edit class="h-3.5 w-3.5" />
-														</Button>
-														<Button
-															variant="ghost"
-															size="icon"
-															class="text-destructive hover:text-destructive h-7 w-7"
-															title="Delete"
-															onclick={() => onDelete(child)}
-														>
-															<Trash2 class="h-3.5 w-3.5" />
-														</Button>
-													</div>
+													{#if editable}
+														<div class="flex items-center gap-1">
+															<Button
+																variant="ghost"
+																size="icon"
+																class="h-7 w-7"
+																title="Edit"
+																onclick={() => onEdit(child)}
+															>
+																<Edit class="h-3.5 w-3.5" />
+															</Button>
+															<Button
+																variant="ghost"
+																size="icon"
+																class="text-destructive hover:text-destructive h-7 w-7"
+																title="Delete"
+																onclick={() => onDelete(child)}
+															>
+																<Trash2 class="h-3.5 w-3.5" />
+															</Button>
+														</div>
+													{/if}
 												</div>
 											{/each}
 										</div>
@@ -145,35 +151,37 @@
 									</div>
 								</div>
 							</div>
-							<div class="flex items-center gap-1">
-								<Button
-									variant="ghost"
-									size="icon"
-									class="h-8 w-8"
-									title={$t('categories.addSubcategory')}
-									onclick={() => onAddSubcategory(category)}
-								>
-									<Plus class="h-4 w-4" />
-								</Button>
-								<Button
-									variant="ghost"
-									size="icon"
-									class="h-8 w-8"
-									title="Edit"
-									onclick={() => onEdit(category)}
-								>
-									<Edit class="h-4 w-4" />
-								</Button>
-								<Button
-									variant="ghost"
-									size="icon"
-									class="text-destructive hover:text-destructive h-8 w-8"
-									title="Delete"
-									onclick={() => onDelete(category)}
-								>
-									<Trash2 class="h-4 w-4" />
-								</Button>
-							</div>
+							{#if editable}
+								<div class="flex items-center gap-1">
+									<Button
+										variant="ghost"
+										size="icon"
+										class="h-8 w-8"
+										title={$t('categories.addSubcategory')}
+										onclick={() => onAddSubcategory(category)}
+									>
+										<Plus class="h-4 w-4" />
+									</Button>
+									<Button
+										variant="ghost"
+										size="icon"
+										class="h-8 w-8"
+										title="Edit"
+										onclick={() => onEdit(category)}
+									>
+										<Edit class="h-4 w-4" />
+									</Button>
+									<Button
+										variant="ghost"
+										size="icon"
+										class="text-destructive hover:text-destructive h-8 w-8"
+										title="Delete"
+										onclick={() => onDelete(category)}
+									>
+										<Trash2 class="h-4 w-4" />
+									</Button>
+								</div>
+							{/if}
 						</div>
 					{/if}
 				{/each}

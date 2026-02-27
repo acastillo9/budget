@@ -11,11 +11,12 @@
 
 	type Props = {
 		budget: BudgetProgress;
+		editable?: boolean;
 		onEdit?: () => void;
 		onDelete?: () => void;
 	};
 
-	let { budget, onEdit = () => {}, onDelete = () => {} }: Props = $props();
+	let { budget, editable = true, onEdit = () => {}, onDelete = () => {} }: Props = $props();
 
 	const userState = getUserContext();
 	const currencyCode = $derived(userState.user?.currencyCode ?? 'USD');
@@ -40,20 +41,22 @@
 				</span>
 			</p>
 		</div>
-		<div class="flex shrink-0 items-center gap-1">
-			<Button variant="ghost" size="icon" onclick={onEdit} aria-label={$t('budgets.editBudget')}>
-				<Edit class="h-4 w-4" />
-			</Button>
-			<Button
-				variant="ghost"
-				size="icon"
-				onclick={onDelete}
-				class="text-destructive hover:text-destructive"
-				aria-label={$t('budgets.deleteBudget')}
-			>
-				<Trash2 class="h-4 w-4" />
-			</Button>
-		</div>
+		{#if editable}
+			<div class="flex shrink-0 items-center gap-1">
+				<Button variant="ghost" size="icon" onclick={onEdit} aria-label={$t('budgets.editBudget')}>
+					<Edit class="h-4 w-4" />
+				</Button>
+				<Button
+					variant="ghost"
+					size="icon"
+					onclick={onDelete}
+					class="text-destructive hover:text-destructive"
+					aria-label={$t('budgets.deleteBudget')}
+				>
+					<Trash2 class="h-4 w-4" />
+				</Button>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Progress bar -->
