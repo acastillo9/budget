@@ -13,6 +13,7 @@ describe('CategoriesController (e2e)', () => {
   let app: INestApplication;
   let authToken: string;
   let userId: string;
+  let workspaceId: string;
   let createdCategoryId: string;
 
   beforeAll(async () => {
@@ -24,6 +25,7 @@ describe('CategoriesController (e2e)', () => {
       password: 'Password123',
     });
     userId = result.userId;
+    workspaceId = result.workspaceId;
     authToken = getAuthToken(app, {
       authId: result.authProviderId,
       userId,
@@ -116,6 +118,7 @@ describe('CategoriesController (e2e)', () => {
         icon: 'star',
         categoryType: 'INCOME',
         user: user2.userId,
+        workspace: user2.workspaceId,
       });
 
       // First user should NOT see the second user's category
@@ -219,6 +222,7 @@ describe('CategoriesController (e2e)', () => {
         icon: 'trash',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
       });
     });
 
@@ -260,6 +264,7 @@ describe('CategoriesController (e2e)', () => {
         icon: 'utensils',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
       });
     });
 
@@ -364,12 +369,14 @@ describe('CategoriesController (e2e)', () => {
         icon: 'car',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
       });
       await seedCategory(app, {
         name: 'Gas',
         icon: 'fuel',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
         parent: parentWithChildrenId,
       });
       await seedCategory(app, {
@@ -377,6 +384,7 @@ describe('CategoriesController (e2e)', () => {
         icon: 'parking',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
         parent: parentWithChildrenId,
       });
 
@@ -385,6 +393,7 @@ describe('CategoriesController (e2e)', () => {
         icon: 'film',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
       });
     });
 
@@ -435,18 +444,21 @@ describe('CategoriesController (e2e)', () => {
         icon: 'shirt',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
       });
       anotherTopLevelId = await seedCategory(app, {
         name: 'Health',
         icon: 'heart',
         categoryType: 'INCOME',
         user: userId,
+        workspace: workspaceId,
       });
       subCategoryId = await seedCategory(app, {
         name: 'Shoes',
         icon: 'shoe',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
         parent: topLevelId,
       });
       parentWithKidsId = await seedCategory(app, {
@@ -454,12 +466,14 @@ describe('CategoriesController (e2e)', () => {
         icon: 'home',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
       });
       childOfParentId = await seedCategory(app, {
         name: 'Rent',
         icon: 'key',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
         parent: parentWithKidsId,
       });
     });
@@ -483,6 +497,7 @@ describe('CategoriesController (e2e)', () => {
         icon: 'leaf',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
       });
 
       const response = await request(app.getHttpServer())
@@ -534,12 +549,14 @@ describe('CategoriesController (e2e)', () => {
         icon: 'bolt',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
       });
       await seedCategory(app, {
         name: 'Electricity',
         icon: 'zap',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
         parent: parentId,
       });
     });

@@ -16,6 +16,9 @@ export type UserSession = {
 export type UserState = {
 	user: UserSession | undefined;
 	currencyRates: CurrencyRates | undefined;
+	workspaces: import('./workspace.types').Workspace[];
+	currentWorkspace: import('./workspace.types').Workspace | undefined;
+	workspaceRole: import('./workspace.types').WorkspaceRole | undefined;
 };
 
 export type CountdownData = {

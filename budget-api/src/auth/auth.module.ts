@@ -17,6 +17,9 @@ import {
 } from './entities/authentication-provider.entity';
 import { SharedModule } from 'src/shared/shared.module';
 import { JwtRefreshStrategy } from './jwt-refresh.strategy';
+import { WorkspacesModule } from 'src/workspaces/workspaces.module';
+import { WorkspaceGuard } from 'src/workspaces/guards/workspace.guard';
+import { RolesGuard } from 'src/workspaces/guards/roles.guard';
 
 @Module({
   imports: [
@@ -25,6 +28,7 @@ import { JwtRefreshStrategy } from './jwt-refresh.strategy';
     PassportModule,
     JwtModule.register({}),
     MailModule,
+    WorkspacesModule,
     MongooseModule.forFeature([
       {
         name: AuthenticationProvider.name,
@@ -42,6 +46,14 @@ import { JwtRefreshStrategy } from './jwt-refresh.strategy';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: WorkspaceGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })

@@ -45,6 +45,7 @@ import { UpdateAuthenticationProviderDto } from './dto/update-authentication-pro
 import { I18nService } from 'nestjs-i18n';
 import { CurrencyCode } from 'src/shared/entities/currency-code.enum';
 import { GoogleLoginDto } from './dto/google-login.dto';
+import { WorkspacesService } from 'src/workspaces/workspaces.service';
 
 @Injectable()
 export class AuthService {
@@ -59,6 +60,7 @@ export class AuthService {
     private readonly authenticationProviderModel: Model<AuthenticationProvider>,
     private dbTransactionService: DbTransactionService,
     private readonly i18n: I18nService,
+    private readonly workspacesService: WorkspacesService,
   ) {}
 
   /**
@@ -132,6 +134,11 @@ export class AuthService {
           };
           const newUser = await this.usersService.create(
             createUserDto,
+            session,
+          );
+          await this.workspacesService.createDefaultWorkspace(
+            newUser.id,
+            `${newUser.name}'s Workspace`,
             session,
           );
           const emailActivationData =
@@ -771,6 +778,11 @@ export class AuthService {
                 currencyCode: this.getCurrencyCodeFromLocale(locale),
               };
               user = await this.usersService.create(createUserDto, session);
+              await this.workspacesService.createDefaultWorkspace(
+                user.id,
+                `${user.name}'s Workspace`,
+                session,
+              );
             }
 
             // create the google authentication provider

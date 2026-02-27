@@ -480,5 +480,45 @@
 			"dateTo": "Hasta",
 			"pickDate": "Elige una fecha"
 		}
+	},
+	"workspaces": {
+		"title": "Espacio de trabajo",
+		"description": "Administra los miembros e invitaciones del espacio de trabajo",
+		"workspace": "Espacio de trabajo",
+		"workspaces": "Espacios de trabajo",
+		"settings": "Configuración del espacio",
+		"members": "Miembros",
+		"membersDescription": "Personas que tienen acceso a este espacio de trabajo",
+		"pendingInvitations": "Invitaciones pendientes",
+		"pendingInvitationsDescription": "Invitaciones que aún no han sido aceptadas",
+		"role": "Rol",
+		"roles": {
+			"OWNER": "Propietario",
+			"CONTRIBUTOR": "Colaborador",
+			"VIEWER": "Espectador"
+		},
+		"inviteMember": "Invitar miembro",
+		"inviteMemberDescription": "Envía una invitación para unirse a este espacio de trabajo",
+		"sendInvitation": "Enviar invitación",
+		"inviteSuccess": "Invitación enviada exitosamente.",
+		"inviteError": "Error al enviar la invitación. Por favor, inténtalo de nuevo.",
+		"inviteInvalidEmail": "Por favor, ingresa una dirección de correo válida.",
+		"inviteInvalid": "Esta invitación es inválida o ha expirado.",
+		"acceptInvite": "Aceptar invitación",
+		"invitedToWorkspace": "Has sido invitado a unirte al espacio de trabajo \"{workspace}\".",
+		"signInToAccept": "Por favor, inicia sesión para aceptar esta invitación.",
+		"acceptInviteSuccess": "¡Te has unido al espacio de trabajo exitosamente!",
+		"acceptInviteError": "Error al aceptar la invitación. Por favor, inténtalo de nuevo.",
+		"updateRoleSuccess": "Rol del miembro actualizado exitosamente.",
+		"updateRoleError": "Error al actualizar el rol del miembro. Por favor, inténtalo de nuevo.",
+		"removeMemberTitle": "Eliminar miembro",
+		"removeMemberDescription": "¿Estás seguro de que deseas eliminar a \"{name}\" de este espacio de trabajo?",
+		"removeMemberSuccess": "Miembro eliminado exitosamente.",
+		"removeMemberError": "Error al eliminar al miembro. Por favor, inténtalo de nuevo.",
+		"revokeInviteTitle": "Revocar invitación",
+		"revokeInviteDescription": "¿Estás seguro de que deseas revocar la invitación para \"{email}\"?",
+		"revokeInviteSuccess": "Invitación revocada exitosamente.",
+		"revokeInviteError": "Error al revocar la invitación. Por favor, inténtalo de nuevo.",
+		"loadMembersError": "Error al cargar los miembros del espacio de trabajo. Por favor, inténtalo de nuevo."
 	}
 }

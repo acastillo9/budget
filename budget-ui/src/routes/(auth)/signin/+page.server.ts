@@ -6,11 +6,12 @@ import { loginFormSchema } from '$lib/schemas/auth.schema';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { $t } from '$lib/i18n';
+import { getRedirectTo } from '$lib/utils/redirect';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, cookies }) => {
 	const { user } = locals;
 	if (user) {
-		throw redirect(302, '/');
+		throw redirect(302, getRedirectTo(cookies));
 	}
 
 	return {
@@ -64,6 +65,6 @@ export const actions: Actions = {
 			return fail(401, { form });
 		}
 
-		throw redirect(302, '/');
+		throw redirect(302, getRedirectTo(cookies));
 	}
 };

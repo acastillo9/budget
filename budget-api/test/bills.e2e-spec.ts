@@ -16,6 +16,7 @@ describe('BillsController (e2e)', () => {
   let app: INestApplication;
   let authToken: string;
   let userId: string;
+  let workspaceId: string;
 
   let accountId: string;
   let categoryId: string;
@@ -31,6 +32,7 @@ describe('BillsController (e2e)', () => {
       password: 'Password123',
     });
     userId = result.userId;
+    workspaceId = result.workspaceId;
     authToken = getAuthToken(app, {
       authId: result.authProviderId,
       userId,
@@ -45,6 +47,7 @@ describe('BillsController (e2e)', () => {
       currencyCode: 'USD',
       accountType: accountTypeId,
       user: userId,
+      workspace: workspaceId,
     });
 
     categoryId = await seedCategory(app, {
@@ -52,6 +55,7 @@ describe('BillsController (e2e)', () => {
       icon: 'bolt',
       categoryType: 'EXPENSE',
       user: userId,
+      workspace: workspaceId,
     });
   });
 

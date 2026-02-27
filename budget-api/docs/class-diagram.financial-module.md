@@ -13,6 +13,11 @@ classDiagram
         +String email
     }
 
+    class Workspace {
+        +String id
+        +String name
+    }
+
     %% ─────────────────────────────────────────────
     %% Accounts Module
     %% ─────────────────────────────────────────────
@@ -24,6 +29,7 @@ classDiagram
         +CurrencyCode currencyCode
         +AccountType accountType
         +User user
+        +Workspace workspace
         +Date createdAt
         +Date updatedAt
     }
@@ -49,6 +55,7 @@ classDiagram
         +Account account
         +Transaction transfer
         +User user
+        +Workspace workspace
         +Date createdAt
         +Date updatedAt
     }
@@ -64,6 +71,7 @@ classDiagram
         +CategoryType categoryType
         +Category parent
         +User user
+        +Workspace workspace
         +Date createdAt
         +Date updatedAt
     }
@@ -96,6 +104,7 @@ classDiagram
 
     %% Accounts
     Account "*" --> "1" User : owned by
+    Account "*" --> "0..1" Workspace : scoped to
     Account "*" --> "1" AccountType : typed as
     Account --> CurrencyCode : currencyCode
 
@@ -107,9 +116,11 @@ classDiagram
     Transaction "*" --> "0..1" Category : categorized by
     Transaction "1" --> "0..1" Transaction : transfers to
     Transaction "*" --> "1" User : owned by
+    Transaction "*" --> "0..1" Workspace : scoped to
 
     %% Categories
     Category "*" --> "1" User : owned by
+    Category "*" --> "0..1" Workspace : scoped to
     Category --> CategoryType : categoryType
     Category "0..*" --> "0..1" Category : parent (1-level nesting)
 ```

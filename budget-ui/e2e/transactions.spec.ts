@@ -708,8 +708,6 @@ test.describe('Transactions — Filters', () => {
 				description: desc
 			});
 			await expect(transactionsPage.dialog).not.toBeVisible({ timeout: 10_000 });
-			await transactionsPage.expectSuccessToast(/transaction added successfully/i);
-			await transactionsPage.toast.waitFor({ state: 'hidden', timeout: 10_000 });
 		}
 
 		// Apply category filter

@@ -1,0 +1,13 @@
+{
+  "button": "Aceptar invitación",
+  "expiry": "Este enlace de invitación expira en 7 días.",
+  "greeting": "Hola,",
+  "heading": "¡Te han invitado!",
+  "ignoreIfNotYou": "Si no esperabas esta invitación, puedes ignorar este correo con seguridad.",
+  "instruction": "Te han invitado a unirte a un espacio de trabajo en Budget App. Haz clic en el botón de abajo para aceptar:",
+  "preheader": "Te han invitado a unirte a un espacio de trabajo en Budget App.",
+  "regards": "Un saludo,",
+  "rightsReserved": "Todos los derechos reservados.",
+  "signature": "El equipo de Budget App.",
+  "subject": "Te han invitado a un espacio de trabajo"
+}

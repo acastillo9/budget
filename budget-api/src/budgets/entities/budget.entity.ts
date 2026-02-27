@@ -4,6 +4,7 @@ import { AuditableSchema } from 'src/shared/schemas';
 import { UserDocument } from 'src/users/entities/user.entity';
 import { CategoryDocument } from 'src/categories/entities/category.entity';
 import { BudgetPeriod } from './budget-period.enum';
+import { WorkspaceDocument } from 'src/workspaces/entities/workspace.entity';
 
 export type BudgetDocument = HydratedDocument<Budget>;
 
@@ -38,6 +39,12 @@ export class Budget {
     autopopulate: true,
   })
   user: UserDocument;
+
+  @Prop({
+    type: SchemaTypes.ObjectId,
+    ref: 'Workspace',
+  })
+  workspace?: WorkspaceDocument;
 }
 
 export const BudgetSchema =

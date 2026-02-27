@@ -4,6 +4,7 @@ import { UserDocument } from 'src/users/entities/user.entity';
 import { AuditableSchema } from 'src/shared/schemas';
 import { CurrencyCode } from 'src/shared/entities/currency-code.enum';
 import { AccountTypeDocument } from '../../account-types/entities/account-type.entity';
+import { WorkspaceDocument } from 'src/workspaces/entities/workspace.entity';
 
 export type AccountDocument = HydratedDocument<Account>;
 
@@ -33,6 +34,12 @@ export class Account {
     autopopulate: true,
   })
   user: UserDocument;
+
+  @Prop({
+    type: SchemaTypes.ObjectId,
+    ref: 'Workspace',
+  })
+  workspace?: WorkspaceDocument;
 }
 
 export const AccountSchema =

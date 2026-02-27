@@ -14,6 +14,7 @@ describe('AccountsController (e2e)', () => {
   let app: INestApplication;
   let authToken: string;
   let userId: string;
+  let workspaceId: string;
   let checkingTypeId: string;
   let savingsTypeId: string;
   let creditCardTypeId: string;
@@ -28,6 +29,7 @@ describe('AccountsController (e2e)', () => {
       password: 'Password123',
     });
     userId = result.userId;
+    workspaceId = result.workspaceId;
     authToken = getAuthToken(app, {
       authId: result.authProviderId,
       userId,
@@ -44,6 +46,7 @@ describe('AccountsController (e2e)', () => {
       icon: 'cart',
       categoryType: 'EXPENSE',
       user: userId,
+      workspace: workspaceId,
     });
   });
 

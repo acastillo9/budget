@@ -23,6 +23,8 @@ import { BudgetDto } from './dto/budget.dto';
 import { BudgetProgressDto } from './dto/budget-progress.dto';
 import { BudgetProgressQueryDto } from './dto/budget-progress-query.dto';
 import { AuthenticatedRequest } from 'src/shared/types';
+import { Roles } from 'src/workspaces/decorators/roles.decorator';
+import { WorkspaceRole } from 'src/workspaces/entities/workspace-role.enum';
 
 @ApiTags('Budgets')
 @ApiBearerAuth('JWT')
@@ -30,13 +32,6 @@ import { AuthenticatedRequest } from 'src/shared/types';
 export class BudgetsController {
   constructor(private readonly budgetsService: BudgetsService) {}
 
-  /**
-   * Create a new budget.
-   * @param req The request object.
-   * @param createBudgetDto The data to create the budget.
-   * @returns The budget created.
-   * @async
-   */
   @ApiOperation({ summary: 'Create a new budget' })
   @ApiResponse({ status: 201, description: 'Budget created', type: BudgetDto })
   @ApiResponse({
@@ -44,20 +39,19 @@ export class BudgetsController {
     description: 'Validation error or category uniqueness conflict',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Post()
   create(
     @Request() req: AuthenticatedRequest,
     @Body() createBudgetDto: CreateBudgetDto,
   ): Promise<BudgetDto> {
-    return this.budgetsService.create(createBudgetDto, req.user.userId);
+    return this.budgetsService.create(
+      createBudgetDto,
+      req.user.userId,
+      req.user.workspaceId,
+    );
   }
 
-  /**
-   * Find all budgets of the authenticated user.
-   * @param req The request object.
-   * @returns The budgets found.
-   * @async
-   */
   @ApiOperation({ summary: 'List all budgets for the authenticated user' })
   @ApiResponse({
     status: 200,
@@ -67,16 +61,9 @@ export class BudgetsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @Get()
   findAll(@Request() req: AuthenticatedRequest): Promise<BudgetDto[]> {
-    return this.budgetsService.findAll(req.user.userId);
+    return this.budgetsService.findAll(req.user.workspaceId);
   }
 
-  /**
-   * Find a budget by id.
-   * @param req The request object.
-   * @param id The id of the budget to find.
-   * @returns The budget found.
-   * @async
-   */
   @ApiOperation({ summary: 'Get a budget by ID' })
   @ApiParam({
     name: 'id',
@@ -91,18 +78,9 @@ export class BudgetsController {
     @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
   ): Promise<BudgetDto> {
-    return this.budgetsService.findById(id, req.user.userId);
+    return this.budgetsService.findById(id, req.user.workspaceId);
   }
 
-  /**
-   * Get budget progress for a specific budget.
-   * Returns progress for each period window within the queried range.
-   * @param req The request object.
-   * @param id The id of the budget.
-   * @param query Optional date range (from, to) for historical progress.
-   * @returns Array of budget progress per period window.
-   * @async
-   */
   @ApiOperation({
     summary: 'Get budget progress',
     description:
@@ -128,20 +106,12 @@ export class BudgetsController {
   ): Promise<BudgetProgressDto[]> {
     return this.budgetsService.getProgress(
       id,
-      req.user.userId,
+      req.user.workspaceId,
       query.from,
       query.to,
     );
   }
 
-  /**
-   * Update a budget by id.
-   * @param req The request object.
-   * @param id The id of the budget to update.
-   * @param updateBudgetDto The data to update the budget.
-   * @returns The budget updated.
-   * @async
-   */
   @ApiOperation({ summary: 'Update a budget' })
   @ApiParam({
     name: 'id',
@@ -155,22 +125,20 @@ export class BudgetsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Budget not found' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Patch(':id')
   update(
     @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Body() updateBudgetDto: UpdateBudgetDto,
   ): Promise<BudgetDto> {
-    return this.budgetsService.update(id, updateBudgetDto, req.user.userId);
+    return this.budgetsService.update(
+      id,
+      updateBudgetDto,
+      req.user.workspaceId,
+    );
   }
 
-  /**
-   * Delete a budget by id.
-   * @param req The request object.
-   * @param id The id of the budget to remove.
-   * @returns The budget removed.
-   * @async
-   */
   @ApiOperation({ summary: 'Delete a budget' })
   @ApiParam({
     name: 'id',
@@ -180,11 +148,12 @@ export class BudgetsController {
   @ApiResponse({ status: 200, description: 'Budget deleted', type: BudgetDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Budget not found' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Delete(':id')
   remove(
     @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
   ): Promise<BudgetDto> {
-    return this.budgetsService.remove(id, req.user.userId);
+    return this.budgetsService.remove(id, req.user.workspaceId);
   }
 }

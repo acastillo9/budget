@@ -14,6 +14,11 @@ classDiagram
         +CurrencyCode currencyCode
     }
 
+    class Workspace {
+        +string id
+        +string name
+    }
+
     class Category {
         +string id
         +string name
@@ -52,6 +57,7 @@ classDiagram
         +Date endDate
         +Category[] categories
         +User user
+        +Workspace workspace
         +Date createdAt
         +Date updatedAt
     }
@@ -90,6 +96,7 @@ classDiagram
 
     Budget "1" --> "*" Category : tracks spending of (incl. subcategories)
     Budget "*" --> "1" User : belongs to
+    Budget "*" --> "0..1" Workspace : scoped to
     Category "1" --> "1" CategoryType : classified by
     Category "0..*" --> "0..1" Category : parent (1-level nesting)
     Transaction "*" --> "1" Category : tagged with

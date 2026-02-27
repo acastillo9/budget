@@ -3,6 +3,7 @@ import { HydratedDocument, SchemaTypes } from 'mongoose';
 import { AuditableSchema } from 'src/shared/schemas';
 import { UserDocument } from 'src/users/entities/user.entity';
 import { CategoryType } from './category-type.enum';
+import { WorkspaceDocument } from 'src/workspaces/entities/workspace.entity';
 
 export type CategoryDocument = HydratedDocument<Category>;
 
@@ -32,6 +33,12 @@ export class Category {
     autopopulate: true,
   })
   user: UserDocument;
+
+  @Prop({
+    type: SchemaTypes.ObjectId,
+    ref: 'Workspace',
+  })
+  workspace?: WorkspaceDocument;
 }
 
 export const CategorySchema =

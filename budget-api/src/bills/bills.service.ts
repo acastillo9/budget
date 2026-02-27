@@ -26,17 +26,15 @@ export class BillsService {
     private readonly transactionsService: TransactionsService,
   ) {}
 
-  /**
-   * Create a new bill.
-   * @param createBillDto The data to create the bill.
-   * @param userId The id of the user to create the bill.
-   * @return The bill created.
-   * @async
-   */
-  async create(createBillDto: CreateBillDto, userId: string): Promise<BillDto> {
+  async create(
+    createBillDto: CreateBillDto,
+    userId: string,
+    workspaceId: string,
+  ): Promise<BillDto> {
     const newBill = {
       ...createBillDto,
       user: userId,
+      workspace: workspaceId,
     };
 
     try {
@@ -52,19 +50,14 @@ export class BillsService {
     }
   }
 
-  /**
-   * Fetch all bills.
-   * @return An array of bills.
-   * @async
-   */
   async findAll(
-    userId: string,
+    workspaceId: string,
     dateStart: Date,
     dateEnd: Date,
   ): Promise<BillInstanceDto[]> {
     try {
       const bills = await this.billModel.find({
-        user: userId,
+        workspace: workspaceId,
         $or: [
           { endDate: { $exists: false } },
           { endDate: { $gte: dateStart } },
@@ -85,22 +78,17 @@ export class BillsService {
     }
   }
 
-  /**
-   * Pay a bill for a specific date.
-   * @param id The id of the bill to pay.
-   * @param targetDate The date of the bill instance to pay.
-   * @param payBillDto The data to pay the bill.
-   * @param userId The id of the user paying the bill.
-   * @return The updated bill instance.
-   * @async
-   */
   async payBill(
     id: string,
     targetDate: Date,
     payBillDto: PayBillDto,
     userId: string,
+    workspaceId: string,
   ): Promise<BillInstanceDto> {
-    const bill = await this.billModel.findOne({ _id: id, user: userId });
+    const bill = await this.billModel.findOne({
+      _id: id,
+      workspace: workspaceId,
+    });
 
     if (!bill) {
       throw new HttpException('Bill not found', HttpStatus.NOT_FOUND);
@@ -126,6 +114,7 @@ export class BillsService {
             bill: bill.id,
           },
           userId,
+          workspaceId,
           session,
         );
 
@@ -155,20 +144,16 @@ export class BillsService {
     }
   }
 
-  /**
-   * Cancel a bill payment for a specific date.
-   * @param id The id of the bill to cancel payment.
-   * @param targetDate The date of the bill instance to cancel payment.
-   * @param userId The id of the user cancelling the payment.
-   * @return The updated bill instance.
-   * @async
-   */
   async cancelPayment(
     id: string,
     targetDate: Date,
     userId: string,
+    workspaceId: string,
   ): Promise<BillInstanceDto> {
-    const bill = await this.billModel.findOne({ _id: id, user: userId });
+    const bill = await this.billModel.findOne({
+      _id: id,
+      workspace: workspaceId,
+    });
 
     if (!bill) {
       throw new HttpException('Bill not found', HttpStatus.NOT_FOUND);
@@ -187,6 +172,7 @@ export class BillsService {
         await this.transactionsService.remove(
           override.transactionId,
           userId,
+          workspaceId,
           session,
         );
 
@@ -210,23 +196,17 @@ export class BillsService {
     }
   }
 
-  /**
-   * Update a bill for a specific date.
-   * @param id The id of the bill to update.
-   * @param targetDate The date of the bill instance to update.
-   * @param updateBillDto The data to update the bill.
-   * @param userId The id of the user updating the bill.
-   * @return The updated bill instance.
-   * @async
-   */
   async update(
     id: string,
-
     targetDate: Date,
     updateBillDto: UpdateBillDto,
     userId: string,
+    workspaceId: string,
   ): Promise<BillInstanceDto> {
-    const bill = await this.billModel.findOne({ _id: id, user: userId });
+    const bill = await this.billModel.findOne({
+      _id: id,
+      workspace: workspaceId,
+    });
 
     if (!bill) {
       throw new HttpException('Bill not found', HttpStatus.NOT_FOUND);
@@ -280,6 +260,7 @@ export class BillsService {
                 : {}),
             },
             userId,
+            workspaceId,
             session,
           );
         }
@@ -295,21 +276,17 @@ export class BillsService {
     }
   }
 
-  /**
-   * Delete a bill.
-   * @param id The id of the bill to delete.
-   * @param targetDate The date of the bill to delete.
-   * @param deleteBillDto The data to delete the bill.
-   * @param userId The id of the user deleting the bill.
-   * @async
-   */
   async delete(
     id: string,
     targetDate: Date,
     deleteBillDto: DeleteBillDto,
     userId: string,
+    workspaceId: string,
   ): Promise<BillInstanceDto> {
-    const bill = await this.billModel.findOne({ _id: id, user: userId });
+    const bill = await this.billModel.findOne({
+      _id: id,
+      workspace: workspaceId,
+    });
 
     if (!bill) {
       throw new HttpException('Bill not found', HttpStatus.NOT_FOUND);
@@ -336,6 +313,7 @@ export class BillsService {
           await this.transactionsService.remove(
             updatedInstance.transactionId,
             userId,
+            workspaceId,
             session,
           );
         }

@@ -24,27 +24,22 @@ export class BudgetsService {
     private readonly categoriesService: CategoriesService,
   ) {}
 
-  /**
-   * Create a new budget.
-   * @param createBudgetDto The data to create the budget.
-   * @param userId The id of the user creating the budget.
-   * @returns The budget created.
-   * @async
-   */
   async create(
     createBudgetDto: CreateBudgetDto,
     userId: string,
+    workspaceId: string,
   ): Promise<BudgetDto> {
     await this.validateCategoryUniqueness(
       createBudgetDto.categories,
       createBudgetDto.period,
-      userId,
+      workspaceId,
     );
 
     try {
       const budgetModel = new this.budgetModel({
         ...createBudgetDto,
         user: userId,
+        workspace: workspaceId,
       });
       const savedBudget = await budgetModel.save();
       return plainToClass(BudgetDto, savedBudget.toObject());
@@ -60,16 +55,10 @@ export class BudgetsService {
     }
   }
 
-  /**
-   * Find all budgets of a user.
-   * @param userId The id of the user.
-   * @returns The budgets found.
-   * @async
-   */
-  async findAll(userId: string): Promise<BudgetDto[]> {
+  async findAll(workspaceId: string): Promise<BudgetDto[]> {
     try {
       const budgets = await this.budgetModel
-        .find({ user: userId })
+        .find({ workspace: workspaceId })
         .sort({ createdAt: -1 });
       return budgets.map((budget) =>
         plainToClass(BudgetDto, budget.toObject()),
@@ -86,18 +75,11 @@ export class BudgetsService {
     }
   }
 
-  /**
-   * Find a budget by id.
-   * @param id The id of the budget.
-   * @param userId The id of the user.
-   * @returns The budget found.
-   * @async
-   */
-  async findById(id: string, userId: string): Promise<BudgetDto> {
+  async findById(id: string, workspaceId: string): Promise<BudgetDto> {
     try {
       const budget = await this.budgetModel.findOne({
         _id: id,
-        user: userId,
+        workspace: workspaceId,
       });
       if (!budget) {
         throw new HttpException('Budget not found', HttpStatus.NOT_FOUND);
@@ -113,30 +95,27 @@ export class BudgetsService {
     }
   }
 
-  /**
-   * Update a budget by id.
-   * @param id The id of the budget to update.
-   * @param updateBudgetDto The data to update the budget.
-   * @param userId The id of the user.
-   * @returns The budget updated.
-   * @async
-   */
   async update(
     id: string,
     updateBudgetDto: UpdateBudgetDto,
-    userId: string,
+    workspaceId: string,
   ): Promise<BudgetDto> {
     if (updateBudgetDto.categories || updateBudgetDto.period) {
-      const existing = await this.findById(id, userId);
+      const existing = await this.findById(id, workspaceId);
       const categories =
         updateBudgetDto.categories || existing.categories.map((c) => c.id);
       const period = updateBudgetDto.period || existing.period;
-      await this.validateCategoryUniqueness(categories, period, userId, id);
+      await this.validateCategoryUniqueness(
+        categories,
+        period,
+        workspaceId,
+        id,
+      );
     }
 
     try {
       const updatedBudget = await this.budgetModel.findOneAndUpdate(
-        { _id: id, user: userId },
+        { _id: id, workspace: workspaceId },
         updateBudgetDto,
         { new: true },
       );
@@ -157,18 +136,11 @@ export class BudgetsService {
     }
   }
 
-  /**
-   * Remove a budget by id.
-   * @param id The id of the budget to remove.
-   * @param userId The id of the user.
-   * @returns The budget removed.
-   * @async
-   */
-  async remove(id: string, userId: string): Promise<BudgetDto> {
+  async remove(id: string, workspaceId: string): Promise<BudgetDto> {
     try {
       const deletedBudget = await this.budgetModel.findOneAndDelete({
         _id: id,
-        user: userId,
+        workspace: workspaceId,
       });
       if (!deletedBudget) {
         throw new HttpException('Budget not found', HttpStatus.NOT_FOUND);
@@ -187,30 +159,19 @@ export class BudgetsService {
     }
   }
 
-  /**
-   * Get the budget progress for a specific budget over a date range.
-   * Returns one BudgetProgressDto per period window within the range.
-   * @param id The id of the budget.
-   * @param userId The id of the user.
-   * @param from Optional start date for the range (defaults to budget startDate).
-   * @param to Optional end date for the range (defaults to now).
-   * @returns Array of budget progress for each period window.
-   * @async
-   */
   async getProgress(
     id: string,
-    userId: string,
+    workspaceId: string,
     from?: Date,
     to?: Date,
   ): Promise<BudgetProgressDto[]> {
-    const budget = await this.findById(id, userId);
+    const budget = await this.findById(id, workspaceId);
     const budgetStart = new Date(budget.startDate);
     const budgetEnd = budget.endDate ? new Date(budget.endDate) : null;
 
     const rangeStart = from && from > budgetStart ? from : budgetStart;
     const rangeEnd = to || new Date();
 
-    // Cap rangeEnd at budget endDate if set
     const effectiveEnd =
       budgetEnd && budgetEnd < rangeEnd ? budgetEnd : rangeEnd;
 
@@ -225,22 +186,20 @@ export class BudgetsService {
       return [];
     }
 
-    // Get category IDs for the aggregation query, expanding to include subcategories
     const baseCategoryIds = budget.categories.map((c) => c.id);
     const expandedIds =
       await this.categoriesService.findCategoryIdsWithChildren(
         baseCategoryIds,
-        userId,
+        workspaceId,
       );
     const categoryIds = expandedIds.map((id) => new ObjectId(id));
 
-    // Aggregate all spending in one query across the full range
     const globalStart = windows[0].start;
     const globalEnd = windows[windows.length - 1].end;
 
     const spentByPeriod = await this.aggregateSpentByWindows(
       categoryIds,
-      userId,
+      workspaceId,
       globalStart,
       globalEnd,
       windows,
@@ -269,29 +228,20 @@ export class BudgetsService {
     });
   }
 
-  /**
-   * Validate that no category appears in more than one budget
-   * for the same user and period.
-   * @param categoryIds Category IDs to validate.
-   * @param period The budget period.
-   * @param userId The user ID.
-   * @param excludeBudgetId Optional budget ID to exclude (for updates).
-   */
   private async validateCategoryUniqueness(
     categoryIds: string[],
     period: BudgetPeriod,
-    userId: string,
+    workspaceId: string,
     excludeBudgetId?: string,
   ): Promise<void> {
-    // Expand to include subcategories for conflict detection
     const expandedIds =
       await this.categoriesService.findCategoryIdsWithChildren(
         categoryIds,
-        userId,
+        workspaceId,
       );
 
     const filter: any = {
-      user: userId,
+      workspace: workspaceId,
       period,
       categories: { $in: expandedIds },
     };
@@ -308,15 +258,6 @@ export class BudgetsService {
     }
   }
 
-  /**
-   * Generate period windows between rangeStart and rangeEnd,
-   * aligned to the budget's startDate and period.
-   * @param budgetStart The budget start date (anchor).
-   * @param period The budget period.
-   * @param rangeStart Start of the query range.
-   * @param rangeEnd End of the query range.
-   * @returns Array of { start, end } period windows.
-   */
   private generatePeriodWindows(
     budgetStart: Date,
     period: BudgetPeriod,
@@ -326,7 +267,6 @@ export class BudgetsService {
     const windows: { start: Date; end: Date }[] = [];
     let windowStart = new Date(budgetStart);
 
-    // Advance windowStart to the first window that overlaps with rangeStart
     while (true) {
       const windowEnd = this.addPeriod(windowStart, period);
       if (windowEnd > rangeStart) {
@@ -335,7 +275,6 @@ export class BudgetsService {
       windowStart = windowEnd;
     }
 
-    // Generate windows until we pass rangeEnd
     while (windowStart < rangeEnd) {
       const windowEnd = this.addPeriod(windowStart, period);
       windows.push({
@@ -348,12 +287,6 @@ export class BudgetsService {
     return windows;
   }
 
-  /**
-   * Add one period to a date.
-   * @param date The starting date.
-   * @param period The budget period to add.
-   * @returns A new date advanced by one period.
-   */
   private addPeriod(date: Date, period: BudgetPeriod): Date {
     const result = new Date(date);
     switch (period) {
@@ -370,29 +303,18 @@ export class BudgetsService {
     return result;
   }
 
-  /**
-   * Aggregate the total spent amount for each period window.
-   * Uses a single MongoDB aggregation pipeline to compute all windows at once.
-   * @param categoryIds The category ObjectIds to match.
-   * @param userId The user ID.
-   * @param globalStart The earliest window start.
-   * @param globalEnd The latest window end.
-   * @param windows The period windows.
-   * @returns A map from window index to spent amount.
-   */
   private async aggregateSpentByWindows(
     categoryIds: ObjectId[],
-    userId: string,
+    workspaceId: string,
     globalStart: Date,
     globalEnd: Date,
     windows: { start: Date; end: Date }[],
   ): Promise<Record<number, number>> {
     try {
-      // Fetch all matching transactions in the date range
       const transactions = await this.transactionModel.aggregate([
         {
           $match: {
-            user: new ObjectId(userId),
+            workspace: new ObjectId(workspaceId),
             category: { $in: categoryIds },
             date: { $gte: globalStart, $lt: globalEnd },
             isTransfer: false,
@@ -406,12 +328,10 @@ export class BudgetsService {
         },
       ]);
 
-      // Distribute transactions into windows
       const spentByPeriod: Record<number, number> = {};
       for (const tx of transactions) {
         for (let i = 0; i < windows.length; i++) {
           if (tx.date >= windows[i].start && tx.date < windows[i].end) {
-            // Expenses are stored as negative amounts; take absolute value
             spentByPeriod[i] = (spentByPeriod[i] || 0) + Math.abs(tx.amount);
             break;
           }

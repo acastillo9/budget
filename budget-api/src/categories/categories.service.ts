@@ -15,13 +15,6 @@ export class CategoriesService {
     @InjectModel(Category.name) private categoryModel: Model<Category>,
   ) {}
 
-  /**
-   * Create a new category.
-   * @param createCategoryDto The data to create the category.
-   * @param userId The id of the user to create the category.
-   * @returns The category created.
-   * @async
-   */
   async create(
     createCategoryDto: CreateCategoryDto,
     session?: ClientSession,
@@ -29,11 +22,10 @@ export class CategoriesService {
     try {
       const data: any = { ...createCategoryDto };
 
-      // If parent is provided, validate and inherit categoryType
       if (createCategoryDto.parent) {
         const parent = await this.categoryModel.findOne({
           _id: createCategoryDto.parent,
-          user: (createCategoryDto as any).user,
+          workspace: (createCategoryDto as any).workspace,
         });
 
         if (!parent) {
@@ -50,7 +42,6 @@ export class CategoriesService {
           );
         }
 
-        // Inherit categoryType from parent
         data.categoryType = parent.categoryType;
       }
 
@@ -70,17 +61,11 @@ export class CategoriesService {
     }
   }
 
-  /**
-   * Find all categories of a user.
-   * @param userId The id of the user to find the categories.
-   * @returns The categories found.
-   * @async
-   */
-  async findAll(userId: string): Promise<CategoryDto[]> {
+  async findAll(workspaceId: string): Promise<CategoryDto[]> {
     try {
-      const categories = await this.categoryModel.find({ user: userId }).sort({
-        createdAt: -1,
-      });
+      const categories = await this.categoryModel
+        .find({ workspace: workspaceId })
+        .sort({ createdAt: -1 });
       return categories.map((category) =>
         plainToClass(CategoryDto, category.toObject()),
       );
@@ -96,23 +81,16 @@ export class CategoriesService {
     }
   }
 
-  /**
-   * Find all categories as a tree (parents with nested children).
-   * @param userId The id of the user.
-   * @returns Top-level categories with children populated.
-   * @async
-   */
-  async findTree(userId: string): Promise<CategoryDto[]> {
+  async findTree(workspaceId: string): Promise<CategoryDto[]> {
     try {
-      const categories = await this.categoryModel.find({ user: userId }).sort({
-        createdAt: -1,
-      });
+      const categories = await this.categoryModel
+        .find({ workspace: workspaceId })
+        .sort({ createdAt: -1 });
 
       const allDtos = categories.map((c) =>
         plainToClass(CategoryDto, c.toObject()),
       );
 
-      // Build a map of parent ID → children
       const childrenMap = new Map<string, CategoryDto[]>();
       const topLevel: CategoryDto[] = [];
 
@@ -128,7 +106,6 @@ export class CategoriesService {
         }
       }
 
-      // Attach children to parents
       for (const parent of topLevel) {
         parent.children = childrenMap.get(parent.id) || [];
       }
@@ -146,17 +123,13 @@ export class CategoriesService {
     }
   }
 
-  /**
-   * Find subcategories of a specific parent.
-   * @param parentId The id of the parent category.
-   * @param userId The id of the user.
-   * @returns The subcategories found.
-   * @async
-   */
-  async findByParent(parentId: string, userId: string): Promise<CategoryDto[]> {
+  async findByParent(
+    parentId: string,
+    workspaceId: string,
+  ): Promise<CategoryDto[]> {
     try {
       const categories = await this.categoryModel
-        .find({ parent: parentId, user: userId })
+        .find({ parent: parentId, workspace: workspaceId })
         .sort({ createdAt: -1 });
       return categories.map((category) =>
         plainToClass(CategoryDto, category.toObject()),
@@ -173,38 +146,23 @@ export class CategoriesService {
     }
   }
 
-  /**
-   * Expand category IDs to include all their subcategory IDs.
-   * @param categoryIds The category IDs to expand.
-   * @param userId The user ID.
-   * @returns Expanded set of category IDs including subcategories.
-   * @async
-   */
   async findCategoryIdsWithChildren(
     categoryIds: string[],
-    userId: string,
+    workspaceId: string,
   ): Promise<string[]> {
     const children = await this.categoryModel.find({
       parent: { $in: categoryIds },
-      user: userId,
+      workspace: workspaceId,
     });
     const childIds = children.map((c) => c.id as string);
-    // Return deduplicated union
     return [...new Set([...categoryIds, ...childIds])];
   }
 
-  /**
-   * Find a category by id.
-   * @param id The id of the category to find.
-   * @param userId The id of the user to find the category.
-   * @returns The category found.
-   * @async
-   */
-  async findById(id: string, userId: string): Promise<CategoryDto> {
+  async findById(id: string, workspaceId: string): Promise<CategoryDto> {
     try {
       const category = await this.categoryModel.findOne({
         _id: id,
-        user: userId,
+        workspace: workspaceId,
       });
       if (!category) {
         throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
@@ -223,25 +181,16 @@ export class CategoriesService {
     }
   }
 
-  /**
-   * Update a category.
-   * @param id The id of the category to update.
-   * @param updateCategoryDto The data to update the category.
-   * @param userId The id of the user to update the category.
-   * @returns The category updated.
-   * @async
-   */
   async update(
     id: string,
     updateCategoryDto: UpdateCategoryDto,
-    userId: string,
+    workspaceId: string,
   ): Promise<CategoryDto> {
     try {
-      // If setting a parent, validate hierarchy rules
       if (updateCategoryDto.parent) {
         const parent = await this.categoryModel.findOne({
           _id: updateCategoryDto.parent,
-          user: userId,
+          workspace: workspaceId,
         });
 
         if (!parent) {
@@ -258,10 +207,9 @@ export class CategoriesService {
           );
         }
 
-        // Prevent setting parent on a category that has children
         const childCount = await this.categoryModel.countDocuments({
           parent: id,
-          user: userId,
+          workspace: workspaceId,
         });
         if (childCount > 0) {
           throw new HttpException(
@@ -270,24 +218,20 @@ export class CategoriesService {
           );
         }
 
-        // Inherit categoryType from parent
         updateCategoryDto.categoryType = parent.categoryType;
       }
 
-      // If changing categoryType on a parent, cascade to children
       if (updateCategoryDto.categoryType && !updateCategoryDto.parent) {
         await this.categoryModel.updateMany(
-          { parent: id, user: userId },
+          { parent: id, workspace: workspaceId },
           { categoryType: updateCategoryDto.categoryType },
         );
       }
 
       const updatedCategory = await this.categoryModel.findOneAndUpdate(
-        { _id: id, user: userId },
+        { _id: id, workspace: workspaceId },
         updateCategoryDto,
-        {
-          new: true,
-        },
+        { new: true },
       );
       if (!updatedCategory) {
         throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
@@ -306,19 +250,11 @@ export class CategoriesService {
     }
   }
 
-  /**
-   * Remove a category.
-   * @param id The id of the category to remove.
-   * @param userId The id of the user to remove the category.
-   * @returns The category removed.
-   * @async
-   */
-  async remove(id: string, userId: string): Promise<CategoryDto> {
+  async remove(id: string, workspaceId: string): Promise<CategoryDto> {
     try {
-      // Check if category has children
       const childCount = await this.categoryModel.countDocuments({
         parent: id,
-        user: userId,
+        workspace: workspaceId,
       });
       if (childCount > 0) {
         throw new HttpException(
@@ -329,7 +265,7 @@ export class CategoriesService {
 
       const deletedCategory = await this.categoryModel.findOneAndDelete({
         _id: id,
-        user: userId,
+        workspace: workspaceId,
       });
       if (!deletedCategory) {
         throw new HttpException('Category not found', HttpStatus.NOT_FOUND);

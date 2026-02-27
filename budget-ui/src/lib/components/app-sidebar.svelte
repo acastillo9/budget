@@ -4,7 +4,6 @@
 	import ReceiptIcon from '@lucide/svelte/icons/receipt';
 	import TrendingDownIcon from '@lucide/svelte/icons/trending-down';
 	import CalendarIcon from '@lucide/svelte/icons/calendar';
-	import WalletIcon from '@lucide/svelte/icons/wallet';
 	import TagsIcon from '@lucide/svelte/icons/tags';
 
 	const data = {
@@ -52,6 +51,7 @@
 <script lang="ts">
 	import NavMain from './nav-main.svelte';
 	import NavUser from './nav-user.svelte';
+	import WorkspaceSwitcher from './workspace-switcher.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
 	import { getUserContext } from '$lib/context';
@@ -67,24 +67,10 @@
 
 <Sidebar.Root {collapsible} {...restProps}>
 	<Sidebar.Header>
-		<Sidebar.Menu>
-			<Sidebar.MenuItem>
-				<Sidebar.MenuButton size="lg">
-					{#snippet child({ props })}
-						<a href="/" {...props}>
-							<div
-								class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
-							>
-								<WalletIcon class="size-4" />
-							</div>
-							<div class="flex flex-col gap-0.5 leading-none">
-								<span class="font-cursive text-3xl font-medium">Budget</span>
-							</div>
-						</a>
-					{/snippet}
-				</Sidebar.MenuButton>
-			</Sidebar.MenuItem>
-		</Sidebar.Menu>
+		<WorkspaceSwitcher
+			workspaces={userState.workspaces}
+			currentWorkspace={userState.currentWorkspace}
+		/>
 	</Sidebar.Header>
 	<Sidebar.Content>
 		<NavMain items={data.navMain} />

@@ -25,6 +25,8 @@ import { CreateTransferDto } from './dto/create-transfer.dto';
 import { PaginationDto } from 'src/shared/dto/pagination.dto';
 import { UpdateTransferDto } from './dto/update-transfer.dto';
 import { TransactionsQueryDto } from './dto/transactions-query.dto';
+import { Roles } from 'src/workspaces/decorators/roles.decorator';
+import { WorkspaceRole } from 'src/workspaces/entities/workspace-role.enum';
 
 @ApiTags('Transactions')
 @ApiBearerAuth('JWT')
@@ -32,13 +34,6 @@ import { TransactionsQueryDto } from './dto/transactions-query.dto';
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
-  /**
-   * Create a new transaction.
-   * @param req The request object.
-   * @param createTransactionDto The data to create the transaction.
-   * @returns The transaction created.
-   * @async
-   */
   @ApiOperation({
     summary: 'Create a new transaction',
     description: 'Amount is automatically negated for expense categories.',
@@ -50,6 +45,7 @@ export class TransactionsController {
   })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Post()
   create(
     @Request() req: AuthenticatedRequest,
@@ -58,16 +54,10 @@ export class TransactionsController {
     return this.transactionsService.create(
       createTransactionDto,
       req.user.userId,
+      req.user.workspaceId,
     );
   }
 
-  /**
-   * Create a new transfer transaction.
-   * @param req The request object.
-   * @param createTransferDto The data to create the transfer transaction.
-   * @returns The transfer transaction created.
-   * @async
-   */
   @ApiOperation({
     summary: 'Create a transfer between two accounts',
     description:
@@ -80,6 +70,7 @@ export class TransactionsController {
   })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Post('transfer')
   createTransfer(
     @Request() req: AuthenticatedRequest,
@@ -88,16 +79,10 @@ export class TransactionsController {
     return this.transactionsService.createTransfer(
       createTransferDto,
       req.user.userId,
+      req.user.workspaceId,
     );
   }
 
-  /**
-   * Find all transactions of an user with pagination.
-   * @param req The request object.
-   * @param paginationDto The pagination parameters.
-   * @returns The transactions found.
-   * @async
-   */
   @ApiOperation({ summary: 'List transactions with pagination' })
   @ApiResponse({ status: 200, description: 'Paginated list of transactions' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -108,7 +93,7 @@ export class TransactionsController {
     @Query() queryDto: TransactionsQueryDto,
   ) {
     return this.transactionsService.findAll(
-      req.user.userId,
+      req.user.workspaceId,
       paginationDto,
       queryDto.categoryId,
       queryDto.dateFrom,
@@ -116,13 +101,6 @@ export class TransactionsController {
     );
   }
 
-  /**
-   * Get the summary of transactions for a user.
-   * It includes total income, total expenses, and balance.
-   * @param req The request object.
-   * @return The summary of transactions.
-   * @async
-   */
   @ApiOperation({
     summary: 'Get monthly income/expense summary grouped by currency',
   })
@@ -133,17 +111,9 @@ export class TransactionsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @Get('summary')
   getSummary(@Request() req: AuthenticatedRequest) {
-    return this.transactionsService.getSummary(req.user.userId);
+    return this.transactionsService.getSummary(req.user.workspaceId);
   }
 
-  /**
-   * update a transaction by id.
-   * @param req The request object.
-   * @param id The id of the transaction to update.
-   * @param updateTransactionDto The data to update the transaction.
-   * @returns The transaction updated.
-   * @async
-   */
   @ApiOperation({ summary: 'Update a transaction' })
   @ApiParam({
     name: 'id',
@@ -158,6 +128,7 @@ export class TransactionsController {
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Transaction not found' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Patch(':id')
   update(
     @Request() req: AuthenticatedRequest,
@@ -168,17 +139,10 @@ export class TransactionsController {
       id,
       updateTransactionDto,
       req.user.userId,
+      req.user.workspaceId,
     );
   }
 
-  /**
-   * Update a transfer transaction by id.
-   * @param req The request object.
-   * @param id The id of the transfer transaction to update.
-   * @param updateTransferDto The data to update the transfer transaction.
-   * @returns The transfer transaction updated.
-   * @async
-   */
   @ApiOperation({
     summary: 'Update a transfer transaction',
     description: 'Updates both sides of the transfer atomically.',
@@ -199,6 +163,7 @@ export class TransactionsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Transaction not found' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Patch('transfer/:id')
   updateTransfer(
     @Request() req: AuthenticatedRequest,
@@ -209,15 +174,10 @@ export class TransactionsController {
       id,
       updateTransferDto,
       req.user.userId,
+      req.user.workspaceId,
     );
   }
 
-  /**
-   * Remove a transaction by id.
-   * @param req The request object.
-   * @param id The id of the transaction to remove.
-   * @async
-   */
   @ApiOperation({ summary: 'Delete a transaction' })
   @ApiParam({
     name: 'id',
@@ -231,17 +191,16 @@ export class TransactionsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Transaction not found' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Delete(':id')
   remove(@Request() req: AuthenticatedRequest, @Param('id') id: string) {
-    return this.transactionsService.remove(id, req.user.userId);
+    return this.transactionsService.remove(
+      id,
+      req.user.userId,
+      req.user.workspaceId,
+    );
   }
 
-  /**
-   * Remove a transfer transaction by id.
-   * @param req The request object.
-   * @param id The id of the transfer transaction to remove.
-   * @async
-   */
   @ApiOperation({
     summary: 'Delete a transfer transaction',
     description:
@@ -260,11 +219,16 @@ export class TransactionsController {
   @ApiResponse({ status: 400, description: 'Transaction is not a transfer' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Transaction not found' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Delete('transfer/:id')
   removeTransfer(
     @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
   ) {
-    return this.transactionsService.removeTransfer(id, req.user.userId);
+    return this.transactionsService.removeTransfer(
+      id,
+      req.user.userId,
+      req.user.workspaceId,
+    );
   }
 }

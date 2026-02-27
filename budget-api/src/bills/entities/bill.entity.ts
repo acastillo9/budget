@@ -11,6 +11,7 @@ import {
   BillModificationSchema,
 } from './bill-modification.entity';
 import { CategoryDocument } from 'src/categories/entities/category.entity';
+import { WorkspaceDocument } from 'src/workspaces/entities/workspace.entity';
 
 export type BillDocument = HydratedDocument<Bill>;
 
@@ -61,6 +62,12 @@ export class Bill {
     autopopulate: true,
   })
   user: UserDocument;
+
+  @Prop({
+    type: SchemaTypes.ObjectId,
+    ref: 'Workspace',
+  })
+  workspace?: WorkspaceDocument;
 
   getInstances: (rangeStart: Date, rangeEnd: Date) => BillInstance[];
   getInstance: (targetDate: Date) => BillInstance | null;

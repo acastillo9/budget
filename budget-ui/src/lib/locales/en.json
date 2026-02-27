@@ -480,5 +480,45 @@
 			"dateTo": "To",
 			"pickDate": "Pick a date"
 		}
+	},
+	"workspaces": {
+		"title": "Workspace",
+		"description": "Manage workspace members and invitations",
+		"workspace": "Workspace",
+		"workspaces": "Workspaces",
+		"settings": "Workspace Settings",
+		"members": "Members",
+		"membersDescription": "People who have access to this workspace",
+		"pendingInvitations": "Pending Invitations",
+		"pendingInvitationsDescription": "Invitations that haven't been accepted yet",
+		"role": "Role",
+		"roles": {
+			"OWNER": "Owner",
+			"CONTRIBUTOR": "Contributor",
+			"VIEWER": "Viewer"
+		},
+		"inviteMember": "Invite Member",
+		"inviteMemberDescription": "Send an invitation to join this workspace",
+		"sendInvitation": "Send Invitation",
+		"inviteSuccess": "Invitation sent successfully.",
+		"inviteError": "Error sending invitation. Please try again.",
+		"inviteInvalidEmail": "Please enter a valid email address.",
+		"inviteInvalid": "This invitation is invalid or has expired.",
+		"acceptInvite": "Accept Invitation",
+		"invitedToWorkspace": "You've been invited to join the workspace \"{workspace}\".",
+		"signInToAccept": "Please sign in to accept this invitation.",
+		"acceptInviteSuccess": "You have joined the workspace successfully!",
+		"acceptInviteError": "Error accepting invitation. Please try again.",
+		"updateRoleSuccess": "Member role updated successfully.",
+		"updateRoleError": "Error updating member role. Please try again.",
+		"removeMemberTitle": "Remove Member",
+		"removeMemberDescription": "Are you sure you want to remove \"{name}\" from this workspace?",
+		"removeMemberSuccess": "Member removed successfully.",
+		"removeMemberError": "Error removing member. Please try again.",
+		"revokeInviteTitle": "Revoke Invitation",
+		"revokeInviteDescription": "Are you sure you want to revoke the invitation for \"{email}\"?",
+		"revokeInviteSuccess": "Invitation revoked successfully.",
+		"revokeInviteError": "Error revoking invitation. Please try again.",
+		"loadMembersError": "Error loading workspace members. Please try again."
 	}
 }

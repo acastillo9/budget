@@ -1,5 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { getRedirectTo } from '$lib/utils/redirect';
 
 export const load: PageServerLoad = ({ request, cookies }) => {
 	const url = new URL(request.url);
@@ -23,5 +24,5 @@ export const load: PageServerLoad = ({ request, cookies }) => {
 		maxAge: 60 * 60 * 24 * 30 // 30 days
 	});
 
-	throw redirect(302, '/');
+	throw redirect(302, getRedirectTo(cookies));
 };

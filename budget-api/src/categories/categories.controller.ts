@@ -20,6 +20,8 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryDto } from './dto/category.dto';
 import { AuthenticatedRequest } from 'src/shared/types';
+import { Roles } from 'src/workspaces/decorators/roles.decorator';
+import { WorkspaceRole } from 'src/workspaces/entities/workspace-role.enum';
 
 @ApiTags('Categories')
 @ApiBearerAuth('JWT')
@@ -27,13 +29,6 @@ import { AuthenticatedRequest } from 'src/shared/types';
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  /**
-   * Create a new category.
-   * @param req The request object.
-   * @param createCategoryDto The data to create the category.
-   * @returns The category created.
-   * @async
-   */
   @ApiOperation({ summary: 'Create a new category' })
   @ApiResponse({
     status: 201,
@@ -42,6 +37,7 @@ export class CategoriesController {
   })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Post()
   create(
     @Request() req: AuthenticatedRequest,
@@ -50,16 +46,11 @@ export class CategoriesController {
     const newCategory = {
       ...createCategoryDto,
       user: req.user.userId,
+      workspace: req.user.workspaceId,
     };
     return this.categoriesService.create(newCategory);
   }
 
-  /**
-   * Find all categories as a tree (parents with nested children).
-   * @param req The request object.
-   * @returns Top-level categories with children populated.
-   * @async
-   */
   @ApiOperation({
     summary: 'List categories as a tree (parents with nested children)',
   })
@@ -71,15 +62,9 @@ export class CategoriesController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @Get('tree')
   findTree(@Request() req: AuthenticatedRequest): Promise<CategoryDto[]> {
-    return this.categoriesService.findTree(req.user.userId);
+    return this.categoriesService.findTree(req.user.workspaceId);
   }
 
-  /**
-   * Find all categories of a user.
-   * @param req The request object.
-   * @returns The categories found.
-   * @async
-   */
   @ApiOperation({ summary: 'List all categories for the authenticated user' })
   @ApiResponse({
     status: 200,
@@ -89,16 +74,9 @@ export class CategoriesController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @Get()
   findAll(@Request() req: AuthenticatedRequest): Promise<CategoryDto[]> {
-    return this.categoriesService.findAll(req.user.userId);
+    return this.categoriesService.findAll(req.user.workspaceId);
   }
 
-  /**
-   * Find subcategories of a specific parent category.
-   * @param req The request object.
-   * @param id The id of the parent category.
-   * @returns The subcategories found.
-   * @async
-   */
   @ApiOperation({ summary: 'List subcategories of a parent category' })
   @ApiParam({
     name: 'id',
@@ -116,16 +94,9 @@ export class CategoriesController {
     @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
   ): Promise<CategoryDto[]> {
-    return this.categoriesService.findByParent(id, req.user.userId);
+    return this.categoriesService.findByParent(id, req.user.workspaceId);
   }
 
-  /**
-   * Find a category by id.
-   * @param req The request object.
-   * @param id The id of the category to find.
-   * @returns The category found.
-   * @async
-   */
   @ApiOperation({ summary: 'Get a category by ID' })
   @ApiParam({
     name: 'id',
@@ -144,17 +115,9 @@ export class CategoriesController {
     @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
   ): Promise<CategoryDto> {
-    return this.categoriesService.findById(id, req.user.userId);
+    return this.categoriesService.findById(id, req.user.workspaceId);
   }
 
-  /**
-   * Update a category by id.
-   * @param req The request object.
-   * @param id The id of the category to update.
-   * @param updateCategoryDto The data to update the category.
-   * @returns The category updated.
-   * @async
-   */
   @ApiOperation({ summary: 'Update a category' })
   @ApiParam({
     name: 'id',
@@ -169,6 +132,7 @@ export class CategoriesController {
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Category not found' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Patch(':id')
   update(
     @Request() req: AuthenticatedRequest,
@@ -178,17 +142,10 @@ export class CategoriesController {
     return this.categoriesService.update(
       id,
       updateCategoryDto,
-      req.user.userId,
+      req.user.workspaceId,
     );
   }
 
-  /**
-   * Remove a category by id.
-   * @param req The request object.
-   * @param id The id of the category to remove.
-   * @returns The category removed.
-   * @async
-   */
   @ApiOperation({ summary: 'Delete a category' })
   @ApiParam({
     name: 'id',
@@ -202,11 +159,12 @@ export class CategoriesController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Category not found' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Delete(':id')
   remove(
     @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
   ): Promise<CategoryDto> {
-    return this.categoriesService.remove(id, req.user.userId);
+    return this.categoriesService.remove(id, req.user.workspaceId);
   }
 }

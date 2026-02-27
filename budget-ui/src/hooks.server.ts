@@ -100,6 +100,11 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		request.headers.set('Authorization', `Bearer ${token}`);
 	}
 
+	const workspaceId = event.cookies.get('X-Workspace-Id');
+	if (workspaceId) {
+		request.headers.set('X-Workspace-Id', workspaceId);
+	}
+
 	request.headers.set('Accept-Language', event.request.headers.get('accept-language') || 'en');
 
 	return fetch(request);

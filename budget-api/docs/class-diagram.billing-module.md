@@ -13,6 +13,11 @@ classDiagram
         +String email
     }
 
+    class Workspace {
+        +String id
+        +String name
+    }
+
     class Account {
         +String id
         +String name
@@ -48,6 +53,7 @@ classDiagram
         +Category category
         +Account account
         +User user
+        +Workspace workspace
         +Date createdAt
         +Date updatedAt
         +getInstances(rangeStart, rangeEnd) BillInstance[]
@@ -121,6 +127,7 @@ classDiagram
 
     %% Bill core relationships
     Bill "*" --> "1" User : owned by
+    Bill "*" --> "0..1" Workspace : scoped to
     Bill "*" --> "1" Category : categorized by
     Bill "*" --> "1" Account : charged to
     Bill --> BillFrequency : frequency

@@ -5,6 +5,7 @@ import { AccountDocument } from 'src/accounts/entities/account.entity';
 import { UserDocument } from 'src/users/entities/user.entity';
 import { AuditableSchema } from 'src/shared/schemas';
 import { BillDocument } from 'src/bills/entities/bill.entity';
+import { WorkspaceDocument } from 'src/workspaces/entities/workspace.entity';
 
 export type TransactionDocument = HydratedDocument<Transaction>;
 
@@ -67,6 +68,12 @@ export class Transaction {
     autopopulate: true,
   })
   user: UserDocument;
+
+  @Prop({
+    type: SchemaTypes.ObjectId,
+    ref: 'Workspace',
+  })
+  workspace?: WorkspaceDocument;
 }
 
 export const TransactionSchema =

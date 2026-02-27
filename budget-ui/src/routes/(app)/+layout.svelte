@@ -18,11 +18,22 @@
 
 	let { data, children } = $props();
 
-	// svelte-ignore state_referenced_locally
+	// Synchronous initial assignment (needed for SSR/hydration)
 	userState.user = data.user;
-	// svelte-ignore state_referenced_locally
 	userState.currencyRates = data.currencyRates;
+	userState.workspaces = data.workspaces ?? [];
+	userState.currentWorkspace = data.currentWorkspace;
+	userState.workspaceRole = data.workspaceRole;
 	setUserContext(userState);
+
+	// Reactive sync for when data changes (e.g. after invalidateAll)
+	$effect.pre(() => {
+		userState.user = data.user;
+		userState.currencyRates = data.currencyRates;
+		userState.workspaces = data.workspaces ?? [];
+		userState.currentWorkspace = data.currentWorkspace;
+		userState.workspaceRole = data.workspaceRole;
+	});
 
 	let breadcrumbs = $derived(getBreadcrumbs(page.route.id || '/'));
 	let currencySelectorOpen = $state(false);

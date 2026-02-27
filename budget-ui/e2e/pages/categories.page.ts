@@ -85,6 +85,10 @@ export class CategoriesPage {
 		const typeTrigger = count > 1 ? triggers.nth(1) : triggers.first();
 		await typeTrigger.click();
 		await this.page.getByRole('option', { name: typeName, exact: true }).click();
+		// Wait for the select dropdown to fully close so it doesn't intercept pointer events
+		await this.page
+			.locator('[data-bits-floating-content-wrapper]')
+			.waitFor({ state: 'hidden', timeout: 5_000 });
 	}
 
 	async selectParentCategory(parentName: string) {
@@ -92,6 +96,10 @@ export class CategoriesPage {
 		const triggers = this.dialog.locator('[data-slot="select-trigger"]');
 		await triggers.first().click();
 		await this.page.getByRole('option', { name: parentName, exact: true }).click();
+		// Wait for the select dropdown to fully close so it doesn't intercept pointer events
+		await this.page
+			.locator('[data-bits-floating-content-wrapper]')
+			.waitFor({ state: 'hidden', timeout: 5_000 });
 	}
 
 	async selectIcon(iconTitle: string) {

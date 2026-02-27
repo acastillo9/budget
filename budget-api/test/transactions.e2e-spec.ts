@@ -17,6 +17,7 @@ describe('TransactionsController (e2e)', () => {
   let app: INestApplication;
   let authToken: string;
   let userId: string;
+  let workspaceId: string;
 
   // Shared prerequisite IDs
   let accountTypeId: string;
@@ -58,6 +59,7 @@ describe('TransactionsController (e2e)', () => {
       password: 'Password123',
     });
     userId = result.userId;
+    workspaceId = result.workspaceId;
     authToken = getAuthToken(app, {
       authId: result.authProviderId,
       userId,
@@ -72,6 +74,7 @@ describe('TransactionsController (e2e)', () => {
       currencyCode: 'USD',
       accountType: accountTypeId,
       user: userId,
+      workspace: workspaceId,
     });
 
     expectedSavingsBalance = 500;
@@ -81,6 +84,7 @@ describe('TransactionsController (e2e)', () => {
       currencyCode: 'USD',
       accountType: accountTypeId,
       user: userId,
+      workspace: workspaceId,
     });
 
     expenseCategoryId = await seedCategory(app, {
@@ -88,6 +92,7 @@ describe('TransactionsController (e2e)', () => {
       icon: 'cart',
       categoryType: 'EXPENSE',
       user: userId,
+      workspace: workspaceId,
     });
 
     incomeCategoryId = await seedCategory(app, {
@@ -95,6 +100,7 @@ describe('TransactionsController (e2e)', () => {
       icon: 'money',
       categoryType: 'INCOME',
       user: userId,
+      workspace: workspaceId,
     });
   });
 
@@ -499,12 +505,14 @@ describe('TransactionsController (e2e)', () => {
         currencyCode: 'USD',
         accountType: accountTypeId,
         user: userId,
+        workspace: workspaceId,
       });
       dateFilterCategoryId = await seedCategory(app, {
         name: 'Date Filter Cat',
         icon: 'calendar',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
       });
 
       // Seed transactions at known dates (direct DB insert to avoid balance side-effects)
@@ -515,6 +523,7 @@ describe('TransactionsController (e2e)', () => {
         category: dateFilterCategoryId,
         account: dateFilterAccountId,
         user: userId,
+        workspace: workspaceId,
       });
       await seedTransaction(app, {
         amount: -20,
@@ -523,6 +532,7 @@ describe('TransactionsController (e2e)', () => {
         category: dateFilterCategoryId,
         account: dateFilterAccountId,
         user: userId,
+        workspace: workspaceId,
       });
       await seedTransaction(app, {
         amount: -30,
@@ -531,6 +541,7 @@ describe('TransactionsController (e2e)', () => {
         category: dateFilterCategoryId,
         account: dateFilterAccountId,
         user: userId,
+        workspace: workspaceId,
       });
       await seedTransaction(app, {
         amount: -5,
@@ -539,6 +550,7 @@ describe('TransactionsController (e2e)', () => {
         category: dateFilterCategoryId,
         account: dateFilterAccountId,
         user: userId,
+        workspace: workspaceId,
       });
     });
 
@@ -888,12 +900,14 @@ describe('TransactionsController (e2e)', () => {
         icon: 'bag',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
       });
       subCatId = await seedCategory(app, {
         name: 'Online Shopping',
         icon: 'globe',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
         parent: parentCatId,
       });
 
@@ -958,6 +972,7 @@ describe('TransactionsController (e2e)', () => {
         currencyCode: 'USD',
         accountType: accountTypeId,
         user: userId,
+        workspace: workspaceId,
       });
       secondAccountId = await seedAccount(app, {
         name: 'Second Balance',
@@ -965,6 +980,7 @@ describe('TransactionsController (e2e)', () => {
         currencyCode: 'USD',
         accountType: accountTypeId,
         user: userId,
+        workspace: workspaceId,
       });
     });
 

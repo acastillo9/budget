@@ -205,4 +205,32 @@ export class MailpitClient {
 
 		return match[1];
 	}
+
+	/**
+	 * Wait for a workspace-invitation email and return the **token** from the link.
+	 *
+	 * The email contains a URL like `http://host/accept-invite/TOKEN`.
+	 *
+	 * @param knownCount Number of emails already present for this recipient
+	 *                   (so we wait for a *new* one).
+	 */
+	async getInvitationToken(
+		toEmail: string,
+		knownCount: number,
+		timeoutMs = 30_000
+	): Promise<string> {
+		const message = await this.waitForNewEmail(toEmail, knownCount, timeoutMs);
+
+		const body = message.HTML || message.Text;
+
+		// Match a URL containing /accept-invite/<token>
+		const match = body.match(/\/accept-invite\/([^\s"'<&]+)/);
+		if (!match) {
+			throw new Error(
+				`Could not find an accept-invite link in the email body.\nSubject: ${message.Subject}\nBody excerpt: ${body.slice(0, 500)}`
+			);
+		}
+
+		return match[1];
+	}
 }

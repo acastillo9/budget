@@ -14,6 +14,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { AccountTypesModule } from './account-types/account-types.module';
 import { BillsModule } from './bills/bills.module';
 import { BudgetsModule } from './budgets/budgets.module';
+import { WorkspacesModule } from './workspaces/workspaces.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -42,6 +43,7 @@ import { AppController } from './app.controller';
     AccountTypesModule,
     BillsModule,
     BudgetsModule,
+    WorkspacesModule,
   ],
   controllers: [AppController],
   providers: [],

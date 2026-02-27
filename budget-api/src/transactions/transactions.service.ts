@@ -30,16 +30,10 @@ export class TransactionsService {
     private readonly i18n: I18nService,
   ) {}
 
-  /**
-   * Create a new transaction.
-   * @param createTransactionDto The data to create the transaction.
-   * @param userId The id of the user to create the transaction.
-   * @returns The transaction created.
-   * @async
-   */
   async create(
     createTransactionDto: CreateTransactionDto,
     userId: string,
+    workspaceId?: string,
     session?: ClientSession,
   ): Promise<TransactionDto> {
     if (createTransactionDto.category && createTransactionDto.newCategory) {
@@ -50,17 +44,20 @@ export class TransactionsService {
     }
 
     const saveTransactionFn = async (session: ClientSession) => {
-      // Resolve category: use existing or create inline
       let category;
       if (createTransactionDto.newCategory) {
         category = await this.categoriesService.create(
-          { ...createTransactionDto.newCategory, user: userId } as any,
+          {
+            ...createTransactionDto.newCategory,
+            user: userId,
+            workspace: workspaceId,
+          } as any,
           session,
         );
       } else {
         category = await this.categoriesService.findById(
           createTransactionDto.category,
-          userId,
+          workspaceId,
         );
       }
 
@@ -75,13 +72,12 @@ export class TransactionsService {
             ? -createTransactionDto.amount
             : createTransactionDto.amount,
         user: userId,
+        workspace: workspaceId,
       };
 
-      // create the transaction
       const transactionModel = new this.transactionModel(newTransaction);
       const savedTransaction = await transactionModel.save({ session });
 
-      // add the transaction amount to the account balance
       await this.accountsService.addAccountBalance(
         savedTransaction.account.id,
         savedTransaction.amount,
@@ -107,17 +103,14 @@ export class TransactionsService {
     }
   }
 
-  /**
-   * Create a transfer transaction between two accounts.
-   * @param createTransferDto The data to create the transfer transaction.
-   * @param userId The id of the user to create the transfer transaction.
-   * @returns The transfer transaction created.
-   * @async
-   */
-  async createTransfer(createTransferDto: CreateTransferDto, userId: string) {
+  async createTransfer(
+    createTransferDto: CreateTransferDto,
+    userId: string,
+    workspaceId: string,
+  ) {
     const originAccount = await this.accountsService.findById(
       createTransferDto.originAccount,
-      userId,
+      workspaceId,
     );
 
     if (!originAccount) {
@@ -130,31 +123,30 @@ export class TransactionsService {
       notes: createTransferDto.notes,
       account: createTransferDto.account,
       user: userId,
+      workspace: workspaceId,
       amount: createTransferDto.amount,
     };
 
     try {
       return this.dbTransactionService.runTransaction(async (session) => {
-        // create the income transaction for the destination account
         const incomeTransactionModel = new this.transactionModel(newTransfer);
         const savedIncomeTransaction = await incomeTransactionModel.save({
           session,
         });
 
-        // add the income transaction amount to the destination account balance
         await this.accountsService.addAccountBalance(
           savedIncomeTransaction.account.id,
           savedIncomeTransaction.amount,
           session,
         );
 
-        // create the outcome transaction for the origin account
         const outcomeTransaction = {
           date: createTransferDto.date,
           description: createTransferDto.description,
           notes: createTransferDto.notes,
           account: createTransferDto.originAccount,
           user: userId,
+          workspace: workspaceId,
           amount: -createTransferDto.amount,
           transfer: savedIncomeTransaction.id,
           isTransfer: true,
@@ -166,14 +158,12 @@ export class TransactionsService {
           session,
         });
 
-        // add the outcome transaction amount to the origin account balance
         await this.accountsService.addAccountBalance(
           savedOutcomeTransaction.account.id,
           savedOutcomeTransaction.amount,
           session,
         );
 
-        // update the transfer field of the income transaction
         savedIncomeTransaction.transfer = savedOutcomeTransaction.id;
         savedIncomeTransaction.isTransfer = true;
         await savedIncomeTransaction.save({ session });
@@ -192,26 +182,18 @@ export class TransactionsService {
     }
   }
 
-  /**
-   * Find all transactions of a user with pagination.
-   * @param userId The id of the user to find the transactions.
-   * @param paginationDto The pagination parameters.
-   * @returns The transactions found.
-   * @async
-   */
   async findAll(
-    userId: string,
+    workspaceId: string,
     paginationDto: PaginationDto,
     categoryId?: string,
     dateFrom?: Date,
     dateTo?: Date,
   ): Promise<PaginatedDataDto<TransactionDto>> {
-    const filter: any = { user: userId };
+    const filter: any = { workspace: workspaceId };
     const skip = paginationDto.offset || 0;
-    const limit = paginationDto.limit || 10; // Default limit to 10 if not provided
-    const sort = { date: -1 }; // Sort by date descending
+    const limit = paginationDto.limit || 10;
+    const sort = { date: -1 };
 
-    // Apply date range filter (default to last 30 days)
     if (!dateFrom && !dateTo) {
       const now = new Date();
       dateFrom = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -223,12 +205,11 @@ export class TransactionsService {
       if (dateTo) filter.date.$lt = dateTo;
     }
 
-    // If categoryId is provided, expand to include subcategories
     if (categoryId) {
       const expandedIds =
         await this.categoriesService.findCategoryIdsWithChildren(
           [categoryId],
-          userId,
+          workspaceId,
         );
       filter.category = { $in: expandedIds };
     }
@@ -251,7 +232,7 @@ export class TransactionsService {
       };
     } catch (error) {
       this.logger.error(
-        `Failed to find transactions for user ${userId}: ${error.message}`,
+        `Failed to find transactions: ${error.message}`,
         error.stack,
       );
       throw new HttpException(
@@ -261,39 +242,30 @@ export class TransactionsService {
     }
   }
 
-  /**
-   * update a transaction by id.
-   * @param id The id of the transaction to update.
-   * @param updateTransactionDto The data to update the transaction.
-   * @param userId The id of the user to update the transaction.
-   * @param session Optional mongoose client session to use for transaction.
-   * @return The transaction updated.
-   * @async
-   */
   async update(
     id: string,
     updateTransactionDto: UpdateTransactionDto,
     userId: string,
+    workspaceId?: string,
     session?: ClientSession,
   ): Promise<TransactionDto> {
-    const oldTransaction = await this.findOne(id, userId);
+    const wsId = workspaceId;
+    const oldTransaction = await this.findOne(id, wsId);
 
     const dataToUpdate: UpdateTransactionDto = {
       ...updateTransactionDto,
     };
 
-    // if the category is changed, we need to find the new category
     if (
       updateTransactionDto.category &&
       updateTransactionDto.category !== oldTransaction.category.id
     ) {
       const category = await this.categoriesService.findById(
         updateTransactionDto.category,
-        userId,
+        wsId,
       );
 
       dataToUpdate.category = category.id;
-      // if the updateTrabsactionDto.amount is defined we need to update the amount
       if (
         updateTransactionDto.amount !== undefined &&
         updateTransactionDto.amount !== oldTransaction.amount
@@ -303,15 +275,12 @@ export class TransactionsService {
             ? -updateTransactionDto.amount
             : updateTransactionDto.amount;
       } else {
-        // if the amount is not defined, we need to keep the old amount but
-        // change the sign if the category type is changed
         dataToUpdate.amount = -oldTransaction.amount;
       }
     } else if (
       updateTransactionDto.amount !== undefined &&
       updateTransactionDto.amount !== oldTransaction.amount
     ) {
-      // if the category is not changed but the amount is defined, we need to update the amount
       dataToUpdate.amount =
         oldTransaction.category.categoryType === CategoryType.EXPENSE
           ? -updateTransactionDto.amount
@@ -319,7 +288,6 @@ export class TransactionsService {
     }
 
     const updateFn = async (session: ClientSession) => {
-      // if the account was changed, remove the old transaction amount from the old account balance
       if (
         updateTransactionDto.account &&
         updateTransactionDto.account !== oldTransaction.account.id
@@ -331,14 +299,12 @@ export class TransactionsService {
         );
 
         if (dataToUpdate.amount !== undefined) {
-          // add the new transaction amount to the new account balance
           await this.accountsService.addAccountBalance(
             updateTransactionDto.account,
             dataToUpdate.amount,
             session,
           );
         } else {
-          // add the old transaction amount to the new account balance
           await this.accountsService.addAccountBalance(
             updateTransactionDto.account,
             oldTransaction.amount,
@@ -346,10 +312,8 @@ export class TransactionsService {
           );
         }
       } else if (dataToUpdate.amount !== undefined) {
-        // calculate the amount difference to update the account balance
         const amountDiff = dataToUpdate.amount - oldTransaction.amount;
         if (amountDiff !== 0) {
-          // add the amount diff to the account balance
           await this.accountsService.addAccountBalance(
             oldTransaction.account.id,
             amountDiff,
@@ -359,7 +323,7 @@ export class TransactionsService {
       }
 
       const updatedTransaction = await this.transactionModel.findOneAndUpdate(
-        { _id: id, user: userId },
+        { _id: id, workspace: wsId },
         dataToUpdate,
         { new: true, session },
       );
@@ -371,20 +335,13 @@ export class TransactionsService {
       : this.dbTransactionService.runTransaction(updateFn);
   }
 
-  /**
-   * Update a transfer transaction by id.
-   * @param id The id of the transfer transaction to update.
-   * @param updateTransferDto The data to update the transfer transaction.
-   * @param userId The id of the user to update the transfer transaction.
-   * @return The transfer transaction updated.
-   * @async
-   */
   async updateTransfer(
     id: string,
     updateTransferDto: UpdateTransferDto,
     userId: string,
+    workspaceId: string,
   ): Promise<TransactionDto> {
-    const transactionToUpdate = await this.findOne(id, userId);
+    const transactionToUpdate = await this.findOne(id, workspaceId);
     if (!transactionToUpdate.isTransfer) {
       throw new HttpException(
         'Transaction is not a transfer',
@@ -402,7 +359,6 @@ export class TransactionsService {
     const originTransactionPayload: UpdateTransactionDto = {};
     const targetTransactionPayload: UpdateTransactionDto = {};
 
-    // Handle amount update
     const isAmountUpdate =
       updateTransferDto.amount !== undefined &&
       updateTransferDto.amount !== Math.abs(originTransaction.amount);
@@ -412,12 +368,10 @@ export class TransactionsService {
       targetTransactionPayload.amount = updateTransferDto.amount;
     }
 
-    // Handle origin account change
     if (
       updateTransferDto.originAccount &&
       updateTransferDto.originAccount !== originTransaction.account.id
     ) {
-      // throw an error if the new origin and target accounts are the same
       if (
         updateTransferDto.originAccount ===
         (updateTransferDto.account || targetTransaction.account.id)
@@ -429,12 +383,11 @@ export class TransactionsService {
       }
       const account = await this.accountsService.findById(
         updateTransferDto.originAccount,
-        userId,
-      ); // Validate account exists
+        workspaceId,
+      );
       originTransactionPayload.account = account.id;
     }
 
-    // Handle target account change
     if (
       updateTransferDto.account &&
       updateTransferDto.account !== targetTransaction.account.id
@@ -450,8 +403,8 @@ export class TransactionsService {
       }
       const account = await this.accountsService.findById(
         updateTransferDto.account,
-        userId,
-      ); // Validate account exists
+        workspaceId,
+      );
       targetTransactionPayload.account = account.id;
     }
 
@@ -472,14 +425,11 @@ export class TransactionsService {
 
     return this.dbTransactionService.runTransaction(async (session) => {
       if (originTransactionPayload.account) {
-        // If origin account is changed, remove the old transaction amount from the old account balance
         await this.accountsService.addAccountBalance(
           originTransaction.account.id,
           -originTransaction.amount,
           session,
         );
-
-        // Add the new transaction amount to the new account balance
         await this.accountsService.addAccountBalance(
           originTransactionPayload.account,
           originTransactionPayload.amount || originTransaction.amount,
@@ -487,21 +437,17 @@ export class TransactionsService {
         );
 
         if (targetTransactionPayload.account) {
-          // If target account is changed, remove the old transaction amount from the old account balance
           await this.accountsService.addAccountBalance(
             targetTransaction.account.id,
             -targetTransaction.amount,
             session,
           );
-
-          // Add the new transaction amount to the new account balance
           await this.accountsService.addAccountBalance(
             targetTransactionPayload.account,
             targetTransactionPayload.amount || targetTransaction.amount,
             session,
           );
         } else if (targetTransactionPayload.amount !== undefined) {
-          // If only origin account is changed and the amount changes change it on the target account
           const amountDiff =
             targetTransactionPayload.amount - targetTransaction.amount;
           await this.accountsService.addAccountBalance(
@@ -511,14 +457,11 @@ export class TransactionsService {
           );
         }
       } else if (targetTransactionPayload.account) {
-        // If only target account is changed, remove the old transaction amount from the old account balance
         await this.accountsService.addAccountBalance(
           targetTransaction.account.id,
           -targetTransaction.amount,
           session,
         );
-
-        // Add the new transaction amount to the new account balance
         await this.accountsService.addAccountBalance(
           targetTransactionPayload.account,
           targetTransactionPayload.amount || targetTransaction.amount,
@@ -526,7 +469,6 @@ export class TransactionsService {
         );
 
         if (originTransactionPayload.amount !== undefined) {
-          // If only target account is changed and the amount changes change it on the origin account
           const amountDiff =
             originTransactionPayload.amount - originTransaction.amount;
           await this.accountsService.addAccountBalance(
@@ -536,7 +478,6 @@ export class TransactionsService {
           );
         }
       } else if (isAmountUpdate) {
-        // If only the amount is changed, calculate the amount difference to update the account balance
         const originAmountDiff =
           originTransactionPayload.amount - originTransaction.amount;
         const targetAmountDiff =
@@ -547,7 +488,6 @@ export class TransactionsService {
           originAmountDiff,
           session,
         );
-
         await this.accountsService.addAccountBalance(
           targetTransaction.account.id,
           targetAmountDiff,
@@ -555,18 +495,16 @@ export class TransactionsService {
         );
       }
 
-      // Update the origin transaction
       const updatedOriginTransaction =
         await this.transactionModel.findOneAndUpdate(
-          { _id: originTransaction.id, user: userId },
+          { _id: originTransaction.id, workspace: workspaceId },
           originTransactionPayload,
           { new: true, session },
         );
 
-      // Update the target transaction
       const updatedTargetTransaction =
         await this.transactionModel.findOneAndUpdate(
-          { _id: targetTransaction.id, user: userId },
+          { _id: targetTransaction.id, workspace: workspaceId },
           targetTransactionPayload,
           { new: true, session },
         );
@@ -581,29 +519,22 @@ export class TransactionsService {
     });
   }
 
-  /**
-   * Remove a transaction by id.
-   * @param id The id of the transaction to remove.
-   * @param userId The id of the user to remove the transaction.
-   * @returns The transaction removed.
-   * @async
-   */
   async remove(
     id: string,
     userId: string,
+    workspaceId?: string,
     session?: ClientSession,
   ): Promise<TransactionDto> {
-    const transaction = await this.findOne(id, userId);
+    const wsId = workspaceId;
+    const transaction = await this.findOne(id, wsId);
     const removeFn = async (session: ClientSession) => {
-      // Remove the transaction amount from the account balance
       await this.accountsService.addAccountBalance(
         transaction.account.id,
         -transaction.amount,
         session,
       );
-      // Delete the transaction
       const deletedTransaction = await this.transactionModel.findOneAndDelete(
-        { _id: id, user: userId },
+        { _id: id, workspace: wsId },
         { session },
       );
       if (!deletedTransaction) {
@@ -617,15 +548,12 @@ export class TransactionsService {
       : this.dbTransactionService.runTransaction(removeFn);
   }
 
-  /**
-   * Remove a transfer transaction by id.
-   * @param id The id of the transfer transaction to remove.
-   * @param userId The id of the user to remove the transfer transaction.
-   * @returns The transfer transaction removed.
-   * @async
-   */
-  async removeTransfer(id: string, userId: string): Promise<TransactionDto> {
-    const transaction = await this.findOne(id, userId);
+  async removeTransfer(
+    id: string,
+    userId: string,
+    workspaceId: string,
+  ): Promise<TransactionDto> {
+    const transaction = await this.findOne(id, workspaceId);
     if (!transaction.isTransfer) {
       throw new HttpException(
         'Transaction is not a transfer',
@@ -633,7 +561,6 @@ export class TransactionsService {
       );
     }
     return this.dbTransactionService.runTransaction(async (session) => {
-      // Remove the transfer amount from both accounts involved in the transfer
       await this.accountsService.addAccountBalance(
         transaction.account.id,
         -transaction.amount,
@@ -644,13 +571,12 @@ export class TransactionsService {
         -transaction.transfer.amount,
         session,
       );
-      // Delete both transactions
       const deletedTransaction = await this.transactionModel.findOneAndDelete(
-        { _id: id, user: userId },
+        { _id: id, workspace: workspaceId },
         { session },
       );
       const deletedTransfer = await this.transactionModel.findOneAndDelete(
-        { _id: transaction.transfer.id, user: userId },
+        { _id: transaction.transfer.id, workspace: workspaceId },
         { session },
       );
       if (!deletedTransaction || !deletedTransfer) {
@@ -663,54 +589,37 @@ export class TransactionsService {
     });
   }
 
-  /**
-   * Get the summary of transactions for a user.
-   * It includes the month total income and month total expenses.
-   * @param userId The id of the user to get the summary.
-   * @return The summary of transactions.
-   * @async
-   */
-  async getSummary(userId: string): Promise<
+  async getSummary(workspaceId: string): Promise<
     {
       currencyCode: string;
       totalIncome: number;
       totalExpenses: number;
     }[]
   > {
-    // Rolling 30-day window
     const now = new Date();
     const startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const endDate = now;
     try {
       const transactions = await this.transactionModel.aggregate([
-        // Stage 1: Filter documents within the rolling 30-day window 🗓️
         {
           $match: {
-            user: new ObjectId(userId),
-            date: {
-              $gte: startDate,
-              $lt: endDate,
-            },
+            workspace: new ObjectId(workspaceId),
+            date: { $gte: startDate, $lt: endDate },
             isTransfer: false,
           },
         },
-        // Stage 2: Join with the 'accounts' collection to get currencyCode 🔗
         {
           $lookup: {
-            from: 'accounts', // The name of your accounts collection
-            localField: 'account', // Field in 'transactions' with the account ObjectId
-            foreignField: '_id', // Primary key in the 'accounts' collection
+            from: 'accounts',
+            localField: 'account',
+            foreignField: '_id',
             as: 'accountDetails',
           },
         },
-        // Stage 3: Deconstruct the accountDetails array to access its fields
-        {
-          $unwind: '$accountDetails',
-        },
-        // Stage 4: Group by currency code and calculate sums 💰
+        { $unwind: '$accountDetails' },
         {
           $group: {
-            _id: '$accountDetails.currencyCode', // Group by the currency code
+            _id: '$accountDetails.currencyCode',
             totalIncome: {
               $sum: { $cond: [{ $gt: ['$amount', 0] }, '$amount', 0] },
             },
@@ -719,7 +628,6 @@ export class TransactionsService {
             },
           },
         },
-        // Stage 5: Format the final output document ✨
         {
           $project: {
             _id: 0,
@@ -728,19 +636,11 @@ export class TransactionsService {
             totalExpenses: { $abs: '$totalExpenses' },
           },
         },
-        // Stage 6: Sort by currency code for consistent ordering
-        {
-          $sort: {
-            currencyCode: 1,
-          },
-        },
+        { $sort: { currencyCode: 1 } },
       ]);
       return transactions;
     } catch (error) {
-      this.logger.error(
-        `Failed to get summary for user ${userId}: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`Failed to get summary: ${error.message}`, error.stack);
       throw new HttpException(
         'Error getting the summary',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -748,18 +648,14 @@ export class TransactionsService {
     }
   }
 
-  /**
-   * Find a transaction by id.
-   * @param id The id of the transaction to find.
-   * @param userId The id of the user to find the transaction.
-   * @returns The transaction found.
-   * @async
-   */
-  private async findOne(id: string, userId: string): Promise<TransactionDto> {
+  private async findOne(
+    id: string,
+    workspaceId: string,
+  ): Promise<TransactionDto> {
     try {
       const transaction = await this.transactionModel.findOne({
         _id: id,
-        user: userId,
+        workspace: workspaceId,
       });
       if (!transaction) {
         throw new HttpException('Transaction not found', HttpStatus.NOT_FOUND);

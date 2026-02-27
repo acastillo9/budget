@@ -17,6 +17,7 @@ describe('BudgetsController (e2e)', () => {
   let app: INestApplication;
   let authToken: string;
   let userId: string;
+  let workspaceId: string;
 
   // Prerequisite IDs
   let expenseCategoryId1: string;
@@ -37,6 +38,7 @@ describe('BudgetsController (e2e)', () => {
       password: 'Password123',
     });
     userId = result.userId;
+    workspaceId = result.workspaceId;
     authToken = getAuthToken(app, {
       authId: result.authProviderId,
       userId,
@@ -48,18 +50,21 @@ describe('BudgetsController (e2e)', () => {
       icon: 'cart',
       categoryType: 'EXPENSE',
       user: userId,
+      workspace: workspaceId,
     });
     expenseCategoryId2 = await seedCategory(app, {
       name: 'Restaurants',
       icon: 'utensils',
       categoryType: 'EXPENSE',
       user: userId,
+      workspace: workspaceId,
     });
     incomeCategoryId = await seedCategory(app, {
       name: 'Salary',
       icon: 'briefcase',
       categoryType: 'INCOME',
       user: userId,
+      workspace: workspaceId,
     });
 
     // Look up migration-seeded account type
@@ -70,6 +75,7 @@ describe('BudgetsController (e2e)', () => {
       currencyCode: 'USD',
       accountType: accountTypeId,
       user: userId,
+      workspace: workspaceId,
     });
   });
 
@@ -343,6 +349,7 @@ describe('BudgetsController (e2e)', () => {
         startDate: new Date('2024-01-01T00:00:00.000Z'),
         categories: [incomeCategoryId],
         user: userId,
+        workspace: workspaceId,
       });
 
       // Seed expense transactions for January 2024
@@ -353,6 +360,7 @@ describe('BudgetsController (e2e)', () => {
         category: incomeCategoryId,
         account: accountId,
         user: userId,
+        workspace: workspaceId,
       });
       await seedTransaction(app, {
         amount: -124.5,
@@ -361,6 +369,7 @@ describe('BudgetsController (e2e)', () => {
         category: incomeCategoryId,
         account: accountId,
         user: userId,
+        workspace: workspaceId,
       });
 
       // Seed expense transaction for February 2024
@@ -371,6 +380,7 @@ describe('BudgetsController (e2e)', () => {
         category: incomeCategoryId,
         account: accountId,
         user: userId,
+        workspace: workspaceId,
       });
     });
 
@@ -428,6 +438,7 @@ describe('BudgetsController (e2e)', () => {
         startDate: new Date('2024-01-01T00:00:00.000Z'),
         categories: [expenseCategoryId2],
         user: userId,
+        workspace: workspaceId,
       });
 
       const response = await request(app.getHttpServer())
@@ -477,12 +488,14 @@ describe('BudgetsController (e2e)', () => {
         icon: 'bag',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
       });
       subCatId = await seedCategory(app, {
         name: 'Online Shopping',
         icon: 'globe',
         categoryType: 'EXPENSE',
         user: userId,
+        workspace: workspaceId,
         parent: parentCatId,
       });
 
@@ -494,6 +507,7 @@ describe('BudgetsController (e2e)', () => {
         startDate: new Date('2024-01-01T00:00:00.000Z'),
         categories: [parentCatId],
         user: userId,
+        workspace: workspaceId,
       });
 
       // Seed transactions: one on parent, one on subcategory
@@ -504,6 +518,7 @@ describe('BudgetsController (e2e)', () => {
         category: parentCatId,
         account: accountId,
         user: userId,
+        workspace: workspaceId,
       });
       await seedTransaction(app, {
         amount: -60,
@@ -512,6 +527,7 @@ describe('BudgetsController (e2e)', () => {
         category: subCatId,
         account: accountId,
         user: userId,
+        workspace: workspaceId,
       });
     });
 

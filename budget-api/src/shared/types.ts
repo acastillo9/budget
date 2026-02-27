@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import { WorkspaceRole } from 'src/workspaces/entities/workspace-role.enum';
 
 export interface Session {
   authId: string;
@@ -9,6 +10,8 @@ export interface Session {
   currencyCode?: string;
   refreshToken?: string;
   isLongLived?: boolean;
+  workspaceId?: string;
+  workspaceRole?: WorkspaceRole;
 }
 
 export interface AuthenticatedRequest extends Request {

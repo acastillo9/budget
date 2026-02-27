@@ -26,6 +26,8 @@ import { BillInstanceDto } from './dto/bill-instance.dto';
 import { UpdateBillDto } from './dto/update-bill.dto';
 import { PayBillDto } from './dto/pay-bill.dto';
 import { DeleteBillDto } from './dto/delete-bill.dto';
+import { Roles } from 'src/workspaces/decorators/roles.decorator';
+import { WorkspaceRole } from 'src/workspaces/entities/workspace-role.enum';
 
 @ApiTags('Bills')
 @ApiBearerAuth('JWT')
@@ -33,30 +35,23 @@ import { DeleteBillDto } from './dto/delete-bill.dto';
 export class BillsController {
   constructor(private readonly billsService: BillsService) {}
 
-  /**
-   * Create a new bill.
-   * @param req The request object.
-   * @param createBillDto The data to create the bill.
-   * @returns The bill created.
-   * @async
-   */
   @ApiOperation({ summary: 'Create a new bill' })
   @ApiResponse({ status: 201, description: 'Bill created', type: BillDto })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Post()
   create(
     @Request() req: AuthenticatedRequest,
     @Body() createBillDto: CreateBillDto,
   ): Promise<BillDto> {
-    return this.billsService.create(createBillDto, req.user.userId);
+    return this.billsService.create(
+      createBillDto,
+      req.user.userId,
+      req.user.workspaceId,
+    );
   }
 
-  /**
-   * Fetch all bills.
-   * @returns An array of bills.
-   * @async
-   */
   @ApiOperation({
     summary: 'List bill instances within a date range',
     description:
@@ -78,21 +73,12 @@ export class BillsController {
     @Query() dateRange: DateRangeDto,
   ): Promise<BillInstanceDto[]> {
     return this.billsService.findAll(
-      req.user.userId,
+      req.user.workspaceId,
       dateRange.dateStart,
       dateRange.dateEnd,
     );
   }
 
-  /**
-   * Pay a bill.
-   * @param id The id of the bill to pay.
-   * @param targetDate The date of the bill to pay.
-   * @param req The request object.
-   * @param payBillDto The data to pay the bill.
-   * @returns The bill paid.
-   * @async
-   */
   @ApiOperation({
     summary: 'Pay a bill instance',
     description:
@@ -112,6 +98,7 @@ export class BillsController {
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Bill not found' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Post(':id/:targetDate/pay')
   payBill(
     @Param('id') id: string,
@@ -125,17 +112,10 @@ export class BillsController {
       targetDate,
       payBillDto,
       req.user.userId,
+      req.user.workspaceId,
     );
   }
 
-  /**
-   * Cancel a payment for a bill.
-   * @param id The id of the bill to cancel the payment.
-   * @param targetDate The date of the bill instance to cancel the payment.
-   * @param req The request object.
-   * @return The bill instance with the payment canceled.
-   * @async
-   */
   @ApiOperation({
     summary: 'Cancel a bill payment',
     description:
@@ -158,6 +138,7 @@ export class BillsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Bill not found' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Post(':id/:targetDate/unpay')
   cancelPayment(
     @Param('id') id: string,
@@ -165,18 +146,14 @@ export class BillsController {
     targetDate: Date,
     @Request() req: AuthenticatedRequest,
   ): Promise<BillInstanceDto> {
-    return this.billsService.cancelPayment(id, targetDate, req.user.userId);
+    return this.billsService.cancelPayment(
+      id,
+      targetDate,
+      req.user.userId,
+      req.user.workspaceId,
+    );
   }
 
-  /**
-   * Update a bill.
-   * @param id The id of the bill to update.
-   * @param targetDate The date of the bill instance to update.
-   * @param req The request object.
-   * @param updateBillDto The data to update the bill.
-   * @returns The bill updated.
-   * @async
-   */
   @ApiOperation({
     summary: 'Update a bill instance',
     description:
@@ -200,6 +177,7 @@ export class BillsController {
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Bill not found' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Patch(':id/:targetDate')
   update(
     @Param('id') id: string,
@@ -213,17 +191,10 @@ export class BillsController {
       targetDate,
       updateBillDto,
       req.user.userId,
+      req.user.workspaceId,
     );
   }
 
-  /**
-   * Delete a bill.
-   * @param id The id of the bill to delete.
-   * @param targetDate The date of the bill to delete.
-   * @param req The request object.
-   * @returns A promise that resolves when the bill is deleted.
-   * @async
-   */
   @ApiOperation({
     summary: 'Delete a bill instance',
     description:
@@ -246,6 +217,7 @@ export class BillsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Bill not found' })
+  @Roles(WorkspaceRole.CONTRIBUTOR, WorkspaceRole.OWNER)
   @Delete(':id/:targetDate')
   delete(
     @Param('id') id: string,
@@ -256,10 +228,10 @@ export class BillsController {
   ): Promise<BillInstanceDto> {
     return this.billsService.delete(
       id,
-
       targetDate,
       deleteBillDto,
       req.user.userId,
+      req.user.workspaceId,
     );
   }
 }

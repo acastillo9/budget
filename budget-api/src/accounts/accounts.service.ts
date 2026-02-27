@@ -23,20 +23,15 @@ export class AccountsService {
     private readonly transactionModel: Model<Transaction>,
   ) {}
 
-  /**
-   * Create a new account.
-   * @param createAccountDto The data to create the account.
-   * @param userId The id of the user to create the account.
-   * @returns The account created.
-   * @async
-   */
   async create(
     createAccountDto: CreateAccountDto,
     userId: string,
+    workspaceId: string,
   ): Promise<AccountDto> {
     const newAccount = {
       ...createAccountDto,
       user: userId,
+      workspace: workspaceId,
     };
     try {
       const accountModel = new this.accountModel(newAccount);
@@ -47,7 +42,6 @@ export class AccountsService {
         `Failed to create account: ${error.message}`,
         error.stack,
       );
-
       throw new HttpException(
         'Error creating the account',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -55,26 +49,17 @@ export class AccountsService {
     }
   }
 
-  /**
-   * Find all accounts of a user.
-   * @param userId The id of the user to find the accounts.
-   * @param paginationDto The pagination data.
-   * @returns The accounts found.
-   * @async
-   */
   async findAll(
-    userId: string,
+    workspaceId: string,
     paginationDto: PaginationDto,
   ): Promise<AccountDto[]> {
-    const limit = paginationDto.limit; // Default limit to 10 if not provided
-
+    const limit = paginationDto.limit;
     try {
-      const accounts = await this.accountModel.find({ user: userId }, null, {
-        limit,
-        sort: {
-          createdAt: -1,
-        },
-      });
+      const accounts = await this.accountModel.find(
+        { workspace: workspaceId },
+        null,
+        { limit, sort: { createdAt: -1 } },
+      );
       return accounts.map((account) =>
         plainToClass(AccountDto, account.toObject()),
       );
@@ -90,18 +75,11 @@ export class AccountsService {
     }
   }
 
-  /**
-   * Find an account by id.
-   * @param id The id of the account to find.
-   * @param userId The id of the user to find the account.
-   * @returns The account found.
-   * @async
-   */
-  async findById(id: string, userId: string): Promise<AccountDto> {
+  async findById(id: string, workspaceId: string): Promise<AccountDto> {
     try {
       const account = await this.accountModel.findOne({
         _id: id,
-        user: userId,
+        workspace: workspaceId,
       });
       if (!account) {
         throw new HttpException('Account not found', HttpStatus.NOT_FOUND);
@@ -119,29 +97,16 @@ export class AccountsService {
     }
   }
 
-  /**
-   * Update an account.
-   * @param id The id of the account to update.
-   * @param updateAccountDto The data to update the account.
-   * @param userId The id of the user to update the account.
-   * @returns The account updated.
-   * @async
-   */
   async update(
     id: string,
     updateAccountDto: UpdateAccountDto,
-    userId: string,
+    workspaceId: string,
   ): Promise<AccountDto> {
     try {
       const updatedAccount = await this.accountModel.findOneAndUpdate(
-        {
-          _id: id,
-          user: userId,
-        },
+        { _id: id, workspace: workspaceId },
         updateAccountDto,
-        {
-          new: true,
-        },
+        { new: true },
       );
       if (!updatedAccount) {
         throw new HttpException('Account not found', HttpStatus.NOT_FOUND);
@@ -159,32 +124,17 @@ export class AccountsService {
     }
   }
 
-  /**
-   * Remove an account.
-   * @param id The id of the account to remove.
-   * @param userId The id of the user to remove the account.
-   * @returns The account removed.
-   * @async
-   */
-  async remove(id: string, userId: string): Promise<AccountDto> {
+  async remove(id: string, workspaceId: string): Promise<AccountDto> {
     try {
       return this.dbTransactionService.runTransaction(async (session) => {
         const deletedAccount = await this.accountModel.findOneAndDelete(
-          {
-            _id: id,
-            user: userId,
-          },
-          {
-            session,
-          },
+          { _id: id, workspace: workspaceId },
+          { session },
         );
         if (!deletedAccount) {
           throw new HttpException('Account not found', HttpStatus.NOT_FOUND);
         }
-
-        // delete all transactions related to the account
         await this.transactionModel.deleteMany({ account: id }, { session });
-
         return plainToClass(AccountDto, deletedAccount.toObject());
       });
     } catch (error) {
@@ -199,14 +149,6 @@ export class AccountsService {
     }
   }
 
-  /**
-   * Add balance to an account.
-   * @param id The id of the account to add balance.
-   * @param amount The amount to add to the account.
-   * @param session The MongoDB session to use for the transaction.
-   * @returns The account updated.
-   * @async
-   */
   async addAccountBalance(
     id: string,
     amount: number,
@@ -218,11 +160,9 @@ export class AccountsService {
         { $inc: { balance: amount } },
         { new: true, session },
       );
-
       if (!updatedAccount) {
         throw new HttpException('Account not found', HttpStatus.NOT_FOUND);
       }
-
       return plainToClass(AccountDto, updatedAccount.toObject());
     } catch (error) {
       this.logger.error(
@@ -236,17 +176,10 @@ export class AccountsService {
     }
   }
 
-  /**
-   * Get the total balance of all accounts for a user.
-   * @param userId The id of the user to get the total balance.
-   * @return The total balance of all accounts.
-   * @async
-   */
-  async getSummary(userId: string): Promise<AccountsSummary> {
+  async getSummary(workspaceId: string): Promise<AccountsSummary> {
     try {
-      // query the account balance discriminated by currency code
       const assetsAccountsBalance = await this.accountModel.aggregate([
-        { $match: { user: new ObjectId(userId) } },
+        { $match: { workspace: new ObjectId(workspaceId) } },
         {
           $lookup: {
             from: 'accounttypes',
@@ -257,9 +190,7 @@ export class AccountsService {
         },
         {
           $addFields: {
-            accountType: {
-              $arrayElemAt: ['$accountType', 0],
-            },
+            accountType: { $arrayElemAt: ['$accountType', 0] },
           },
         },
         {
@@ -268,12 +199,8 @@ export class AccountsService {
               currencyCode: '$currencyCode',
               accountCategory: '$accountType.accountCategory',
             },
-            totalBalance: {
-              $sum: '$balance',
-            },
-            accountsCount: {
-              $sum: 1,
-            },
+            totalBalance: { $sum: '$balance' },
+            accountsCount: { $sum: 1 },
           },
         },
         {

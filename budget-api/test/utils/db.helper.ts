@@ -22,7 +22,7 @@ export async function clearDatabase(app: INestApplication): Promise<void> {
 
 /**
  * Create a fully ACTIVE user with a hashed password, ready for login tests.
- * Seeds both User and AuthenticationProvider documents.
+ * Seeds User, AuthenticationProvider, Workspace, and WorkspaceMember documents.
  */
 export async function createActiveUser(
   app: INestApplication,
@@ -32,7 +32,7 @@ export async function createActiveUser(
     name?: string;
     currencyCode?: string;
   },
-): Promise<{ userId: string; authProviderId: string }> {
+): Promise<{ userId: string; authProviderId: string; workspaceId: string }> {
   const connection = app.get<Connection>(getConnectionToken());
   const hashedPassword = await hash(data.password, BCRYPT_SALT_ROUNDS);
 
@@ -52,9 +52,24 @@ export async function createActiveUser(
     user: user._id,
   });
 
+  // Create a default workspace and OWNER membership
+  const WorkspaceModel = connection.model('Workspace');
+  const workspace = await WorkspaceModel.create({
+    name: `${data.name ?? 'Test User'}'s Workspace`,
+    owner: user._id,
+  });
+
+  const WorkspaceMemberModel = connection.model('WorkspaceMember');
+  await WorkspaceMemberModel.create({
+    workspace: workspace._id,
+    user: user._id,
+    role: 'OWNER',
+  });
+
   return {
     userId: user._id.toString(),
     authProviderId: authProvider._id.toString(),
+    workspaceId: workspace._id.toString(),
   };
 }
 
@@ -197,6 +212,7 @@ export async function seedCategory(
     categoryType: string;
     user: string;
     parent?: string;
+    workspace?: string;
   },
 ): Promise<string> {
   const connection = app.get<Connection>(getConnectionToken());
@@ -216,6 +232,7 @@ export async function seedAccount(
     currencyCode: string;
     accountType: string;
     user: string;
+    workspace?: string;
   },
 ): Promise<string> {
   const connection = app.get<Connection>(getConnectionToken());
@@ -238,6 +255,7 @@ export async function seedBill(
     category: string;
     user: string;
     endDate?: Date;
+    workspace?: string;
   },
 ): Promise<string> {
   const connection = app.get<Connection>(getConnectionToken());
@@ -259,6 +277,7 @@ export async function seedBudget(
     endDate?: Date;
     categories: string[];
     user: string;
+    workspace?: string;
   },
 ): Promise<string> {
   const connection = app.get<Connection>(getConnectionToken());
@@ -281,6 +300,7 @@ export async function seedTransaction(
     account: string;
     user: string;
     isTransfer?: boolean;
+    workspace?: string;
   },
 ): Promise<string> {
   const connection = app.get<Connection>(getConnectionToken());

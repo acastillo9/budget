@@ -14,11 +14,12 @@ import {
 	type CheckEmailSchema
 } from '$lib/schemas/auth.schema';
 import { $t } from '$lib/i18n';
+import { getRedirectTo } from '$lib/utils/redirect';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, cookies }) => {
 	const { user } = locals;
 	if (user) {
-		throw redirect(302, '/');
+		throw redirect(302, getRedirectTo(cookies));
 	}
 
 	return {
@@ -171,6 +172,6 @@ export const actions: Actions = {
 			return fail(500, { form });
 		}
 
-		throw redirect(302, '/');
+		throw redirect(302, getRedirectTo(cookies));
 	}
 };
