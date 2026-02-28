@@ -1,9 +1,11 @@
-name: Deploy to EC2
+name: Deploy Budget API to EC2
 
 on:
   push:
     branches:
       - main
+    paths:
+      - 'budget-api/**'
 
 jobs:
   build-and-deploy:
@@ -22,7 +24,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./budget-api
           push: true
           platforms: linux/amd64
           tags: |
