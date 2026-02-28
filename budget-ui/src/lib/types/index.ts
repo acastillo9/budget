@@ -9,7 +9,7 @@ export type UserSession = {
 	id: string;
 	name: string;
 	email: string;
-	picture: string;
+	picture?: string;
 	currencyCode: string;
 };
 

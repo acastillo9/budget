@@ -13,20 +13,20 @@
 	import { toggleMode } from 'mode-watcher';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import CurrencySelector from '$lib/components/currency-selector.svelte';
-	import { userState } from '$lib/states/user.svelte';
+	import { untrack } from 'svelte';
+	import { userState, syncUserState } from '$lib/states/user.svelte';
 	import { toast } from 'svelte-sonner';
 
 	let { data, children } = $props();
 
+	// Sync data to userState immediately (works during SSR, unlike $effect.pre)
+	untrack(() => syncUserState(data));
+
 	setUserContext(userState);
 
-	// Reactive sync (runs before first render and on data changes e.g. after invalidateAll)
+	// Re-sync on client-side data changes (e.g. after invalidateAll)
 	$effect.pre(() => {
-		userState.user = data.user;
-		userState.currencyRates = data.currencyRates;
-		userState.workspaces = data.workspaces ?? [];
-		userState.currentWorkspace = data.currentWorkspace;
-		userState.workspaceRole = data.workspaceRole;
+		syncUserState(data);
 	});
 
 	let breadcrumbs = $derived(getBreadcrumbs(page.route.id || '/'));

@@ -76,7 +76,9 @@
 		<NavMain items={data.navMain} />
 	</Sidebar.Content>
 	<Sidebar.Footer>
-		<NavUser user={userState.user!} />
+		{#if userState.user}
+			<NavUser user={userState.user} />
+		{/if}
 	</Sidebar.Footer>
 	<Sidebar.Rail />
 </Sidebar.Root>
