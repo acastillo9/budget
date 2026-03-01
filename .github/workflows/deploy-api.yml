@@ -40,5 +40,5 @@ jobs:
           script: |
             cd ~/budget-api
             docker compose pull budget-api
-            docker compose up -d --no-deps budget-api
+            docker compose up -d --no-deps --force-recreate budget-api
             docker image prune -f
