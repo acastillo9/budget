@@ -20,6 +20,25 @@
 	} = $props();
 
 	const sidebar = useSidebar();
+
+	let touchStartX = 0;
+	let touchCurrentX = 0;
+
+	function handleTouchStart(e: TouchEvent) {
+		touchStartX = e.touches[0].clientX;
+		touchCurrentX = touchStartX;
+	}
+
+	function handleTouchMove(e: TouchEvent) {
+		touchCurrentX = e.touches[0].clientX;
+	}
+
+	function handleTouchEnd() {
+		const deltaX = touchStartX - touchCurrentX;
+		if (deltaX > 80) {
+			sidebar.setOpenMobile(false);
+		}
+	}
 </script>
 
 {#if collapsible === 'none'}
@@ -51,7 +70,13 @@
 				<Sheet.Title>Sidebar</Sheet.Title>
 				<Sheet.Description>Displays the mobile sidebar.</Sheet.Description>
 			</Sheet.Header>
-			<div class="flex h-full w-full flex-col">
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div
+				class="flex h-full w-full flex-col"
+				ontouchstart={handleTouchStart}
+				ontouchmove={handleTouchMove}
+				ontouchend={handleTouchEnd}
+			>
 				{@render children?.()}
 			</div>
 		</Sheet.Content>

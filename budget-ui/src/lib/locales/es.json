@@ -381,7 +381,13 @@
 		"title": "Restablecer contraseña"
 	},
 	"sidebar": {
-		"navigation": "Navegación"
+		"navigation": "Navegación",
+		"dashboard": "Tablero",
+		"accounts": "Cuentas",
+		"categories": "Categorías",
+		"transactions": "Transacciones",
+		"bills": "Facturas",
+		"budgets": "Presupuestos"
 	},
 	"signIn": {
 		"description": "Inicia sesión en tu cuenta para continuar",

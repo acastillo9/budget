@@ -10,37 +10,37 @@
 		navMain: [
 			{
 				id: 'dashboard',
-				title: 'Dashboard',
+				translationKey: 'sidebar.dashboard',
 				url: '/',
 				icon: CircleGaugeIcon
 			},
 			{
 				id: 'accounts',
-				title: 'Accounts',
+				translationKey: 'sidebar.accounts',
 				url: '/accounts',
 				icon: Building_2Icon
 			},
 			{
 				id: 'categories',
-				title: 'Categories',
+				translationKey: 'sidebar.categories',
 				url: '/categories',
 				icon: TagsIcon
 			},
 			{
 				id: 'transactions',
-				title: 'Transactions',
+				translationKey: 'sidebar.transactions',
 				url: '/transactions',
 				icon: ReceiptIcon
 			},
 			{
 				id: 'bills',
-				title: 'Bills',
+				translationKey: 'sidebar.bills',
 				url: '/bills',
 				icon: CalendarIcon
 			},
 			{
 				id: 'budgets',
-				title: 'Budgets',
+				translationKey: 'sidebar.budgets',
 				url: '/budgets',
 				icon: TrendingDownIcon
 			}

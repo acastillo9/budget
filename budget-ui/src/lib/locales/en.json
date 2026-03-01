@@ -381,7 +381,13 @@
 		"title": "Reset Password"
 	},
 	"sidebar": {
-		"navigation": "Navigation"
+		"navigation": "Navigation",
+		"dashboard": "Dashboard",
+		"accounts": "Accounts",
+		"categories": "Categories",
+		"transactions": "Transactions",
+		"bills": "Bills",
+		"budgets": "Budgets"
 	},
 	"signIn": {
 		"description": "Sign in to your account to continue",
