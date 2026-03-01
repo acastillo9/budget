@@ -192,7 +192,7 @@ export class TransactionsService {
     const filter: any = { workspace: workspaceId };
     const skip = paginationDto.offset || 0;
     const limit = paginationDto.limit || 10;
-    const sort = { date: -1 };
+    const sort = { date: -1, createdAt: -1 };
 
     if (!dateFrom && !dateTo) {
       const now = new Date();
