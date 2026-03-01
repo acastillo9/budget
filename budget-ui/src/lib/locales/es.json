@@ -526,6 +526,7 @@
 		"revokeInviteDescription": "¿Estás seguro de que deseas revocar la invitación para \"{email}\"?",
 		"revokeInviteSuccess": "Invitación revocada exitosamente.",
 		"revokeInviteError": "Error al revocar la invitación. Por favor, inténtalo de nuevo.",
-		"loadMembersError": "Error al cargar los miembros del espacio de trabajo. Por favor, inténtalo de nuevo."
+		"loadMembersError": "Error al cargar los miembros del espacio de trabajo. Por favor, inténtalo de nuevo.",
+		"ownerWorkspaceName": "Espacio de trabajo de {name}"
 	}
 }

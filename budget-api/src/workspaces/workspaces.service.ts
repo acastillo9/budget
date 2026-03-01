@@ -38,11 +38,9 @@ export class WorkspacesService {
 
   async createDefaultWorkspace(
     userId: string,
-    name: string,
     session?: ClientSession,
   ): Promise<WorkspaceDto> {
     const workspace = new this.workspaceModel({
-      name,
       owner: userId,
     });
     const savedWorkspace = await workspace.save({ session });
@@ -343,7 +341,7 @@ export class WorkspacesService {
         subject: this.i18n.t('workspaceInvitation.subject'),
         template: 'workspaceInvitation',
         context: {
-          workspaceName: workspace?.name || 'Workspace',
+          workspaceName: (workspace?.owner as any)?.name || 'Workspace',
           inviteLink,
           year: new Date().getFullYear(),
         },

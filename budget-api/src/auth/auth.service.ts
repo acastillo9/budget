@@ -140,7 +140,6 @@ export class AuthService {
           );
           await this.workspacesService.createDefaultWorkspace(
             newUser.id,
-            `${newUser.name}'s Workspace`,
             session,
           );
           const emailActivationData =
@@ -782,7 +781,6 @@ export class AuthService {
               user = await this.usersService.create(createUserDto, session);
               await this.workspacesService.createDefaultWorkspace(
                 user.id,
-                `${user.name}'s Workspace`,
                 session,
               );
             }

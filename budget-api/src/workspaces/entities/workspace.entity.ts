@@ -7,9 +7,6 @@ export type WorkspaceDocument = HydratedDocument<Workspace>;
 
 @Schema()
 export class Workspace {
-  @Prop({ type: String, required: true })
-  name: string;
-
   @Prop({
     type: SchemaTypes.ObjectId,
     ref: 'User',

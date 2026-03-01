@@ -526,6 +526,7 @@
 		"revokeInviteDescription": "Are you sure you want to revoke the invitation for \"{email}\"?",
 		"revokeInviteSuccess": "Invitation revoked successfully.",
 		"revokeInviteError": "Error revoking invitation. Please try again.",
-		"loadMembersError": "Error loading workspace members. Please try again."
+		"loadMembersError": "Error loading workspace members. Please try again.",
+		"ownerWorkspaceName": "{name}'s Workspace"
 	}
 }

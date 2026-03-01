@@ -19,6 +19,10 @@
 
 	const sidebar = useSidebar();
 
+	function getWorkspaceDisplayName(workspace: Workspace) {
+		return $t('workspaces.ownerWorkspaceName', { values: { name: workspace.owner.name } });
+	}
+
 	async function switchWorkspace(workspace: Workspace) {
 		if (workspace.id === currentWorkspace?.id) return;
 
@@ -43,7 +47,7 @@
 							<WalletIcon class="size-4" />
 						</div>
 						<div class="grid flex-1 text-left text-sm leading-tight">
-							<span class="truncate font-semibold">{currentWorkspace?.name ?? 'Budget'}</span>
+							<span class="truncate font-semibold">{currentWorkspace?.owner?.name ?? 'Budget'}</span>
 							<span class="text-muted-foreground truncate text-xs"
 								>{$t('workspaces.workspace')}</span
 							>
@@ -53,7 +57,7 @@
 				{/snippet}
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content
-				class="w-(--bits-dropdown-menu-anchor-width) min-w-56 rounded-lg"
+				class="min-w-56 rounded-lg"
 				side={sidebar.isMobile ? 'bottom' : 'right'}
 				align="start"
 				sideOffset={4}
@@ -64,7 +68,7 @@
 					<DropdownMenu.Item onSelect={() => switchWorkspace(workspace)}>
 						<div class="flex w-full items-center gap-2">
 							<WalletIcon class="size-4" />
-							<span class="flex-1 truncate">{workspace.name}</span>
+							<span class="flex-1 truncate">{getWorkspaceDisplayName(workspace)}</span>
 							{#if workspace.id === currentWorkspace?.id}
 								<CheckIcon class="size-4" />
 							{/if}

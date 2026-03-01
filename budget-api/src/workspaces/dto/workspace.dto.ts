@@ -9,10 +9,6 @@ export class WorkspaceDto {
   id: string;
 
   @Expose()
-  @ApiProperty({ description: 'Workspace name' })
-  name: string;
-
-  @Expose()
   @Type(() => UserDto)
   @ApiProperty({ description: 'Workspace owner', type: UserDto })
   owner: UserDto;

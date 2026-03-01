@@ -22,7 +22,7 @@
 				<Card.Title class="text-2xl">{$t('workspaces.acceptInvite')}</Card.Title>
 				<Card.Description>
 					{$t('workspaces.invitedToWorkspace', {
-						values: { workspace: data.invitation?.workspace?.name ?? '' }
+						values: { workspace: data.invitation?.workspace?.owner?.name ? $t('workspaces.ownerWorkspaceName', { values: { name: data.invitation.workspace.owner.name } }) : '' }
 					})}
 				</Card.Description>
 			</Card.Header>
