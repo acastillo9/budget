@@ -31,6 +31,7 @@
 		dateFrom?: string;
 		dateTo?: string;
 		categoryId?: string;
+		accountId?: string;
 		offset?: number;
 	}): string {
 		const searchParams = new URLSearchParams();
@@ -38,6 +39,7 @@
 		if (params.dateFrom) searchParams.set('dateFrom', params.dateFrom);
 		if (params.dateTo) searchParams.set('dateTo', params.dateTo);
 		if (params.categoryId) searchParams.set('categoryId', params.categoryId);
+		if (params.accountId) searchParams.set('accountId', params.accountId);
 		const qs = searchParams.toString();
 		return `/transactions${qs ? `?${qs}` : ''}`;
 	}
@@ -121,9 +123,11 @@
 	<div class="container mx-auto">
 		<TransactionFilters
 			categories={data.categories}
+			accounts={data.accounts}
 			dateFrom={data.filters.dateFrom}
 			dateTo={data.filters.dateTo}
 			categoryId={data.filters.categoryId}
+			accountId={data.filters.accountId}
 			onFilterChange={(filters) => {
 				goto(
 					buildTransactionsUrl({

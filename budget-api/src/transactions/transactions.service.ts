@@ -188,6 +188,7 @@ export class TransactionsService {
     categoryId?: string,
     dateFrom?: Date,
     dateTo?: Date,
+    accountId?: string,
   ): Promise<PaginatedDataDto<TransactionDto>> {
     const filter: any = { workspace: workspaceId };
     const skip = paginationDto.offset || 0;
@@ -203,6 +204,10 @@ export class TransactionsService {
       filter.date = {};
       if (dateFrom) filter.date.$gte = dateFrom;
       if (dateTo) filter.date.$lt = dateTo;
+    }
+
+    if (accountId) {
+      filter.account = accountId;
     }
 
     if (categoryId) {

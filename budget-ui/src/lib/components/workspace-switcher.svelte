@@ -47,7 +47,8 @@
 							<WalletIcon class="size-4" />
 						</div>
 						<div class="grid flex-1 text-left text-sm leading-tight">
-							<span class="truncate font-semibold">{currentWorkspace?.owner?.name ?? 'Budget'}</span>
+							<span class="truncate font-semibold">{currentWorkspace?.owner?.name ?? 'Budget'}</span
+							>
 							<span class="text-muted-foreground truncate text-xs"
 								>{$t('workspaces.workspace')}</span
 							>

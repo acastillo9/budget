@@ -98,6 +98,7 @@ export class TransactionsController {
       queryDto.categoryId,
       queryDto.dateFrom,
       queryDto.dateTo,
+      queryDto.accountId,
     );
   }
 

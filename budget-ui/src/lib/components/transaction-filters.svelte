@@ -14,20 +14,31 @@
 	import CalendarIcon from '@lucide/svelte/icons/calendar';
 	import X from '@lucide/svelte/icons/x';
 	import type { Category } from '$lib/types/category.types';
+	import type { Account } from '$lib/types/account.types';
 	import { iconMap } from '$lib/utils/icons';
+	import { formatAccountName } from '$lib/utils/account';
 
 	let {
 		categories,
+		accounts,
 		dateFrom,
 		dateTo,
 		categoryId,
+		accountId,
 		onFilterChange
 	}: {
 		categories: Category[];
+		accounts: Account[];
 		dateFrom?: string;
 		dateTo?: string;
 		categoryId?: string;
-		onFilterChange: (filters: { dateFrom?: string; dateTo?: string; categoryId?: string }) => void;
+		accountId?: string;
+		onFilterChange: (filters: {
+			dateFrom?: string;
+			dateTo?: string;
+			categoryId?: string;
+			accountId?: string;
+		}) => void;
 	} = $props();
 
 	const df = new DateFormatter($locale || 'en-US', {
@@ -42,7 +53,7 @@
 	let dateFromContentRef = $state<HTMLElement | null>(null);
 	let dateToContentRef = $state<HTMLElement | null>(null);
 
-	const hasActiveFilters = $derived(dateFrom || dateTo || categoryId);
+	const hasActiveFilters = $derived(dateFrom || dateTo || categoryId || accountId);
 
 	function getCategoryLabel(catId: string): string {
 		for (const parent of categories) {
@@ -84,7 +95,8 @@
 						onFilterChange({
 							dateFrom: v?.toString(),
 							dateTo,
-							categoryId
+							categoryId,
+							accountId
 						});
 					}}
 				/>
@@ -118,7 +130,8 @@
 						onFilterChange({
 							dateFrom,
 							dateTo: v?.toString(),
-							categoryId
+							categoryId,
+							accountId
 						});
 					}}
 				/>
@@ -135,7 +148,8 @@
 				onFilterChange({
 					dateFrom,
 					dateTo,
-					categoryId: v === '' ? undefined : v
+					categoryId: v === '' ? undefined : v,
+					accountId
 				});
 			}}
 		>
@@ -166,6 +180,37 @@
 							{/each}
 						{/if}
 					</Select.Group>
+				{/each}
+			</Select.Content>
+		</Select.Root>
+	</div>
+
+	<div class="flex flex-col gap-1.5">
+		<span class="text-sm font-medium">{$t('transactions.filters.account')}</span>
+		<Select.Root
+			type="single"
+			value={accountId}
+			onValueChange={(v) => {
+				onFilterChange({
+					dateFrom,
+					dateTo,
+					categoryId,
+					accountId: v === '' ? undefined : v
+				});
+			}}
+		>
+			<Select.Trigger class="w-[200px]">
+				{accountId
+					? formatAccountName(accounts.find((a) => a.id === accountId)!)
+					: $t('transactions.filters.allAccounts')}
+			</Select.Trigger>
+			<Select.Content>
+				<Select.Item value="">{$t('transactions.filters.allAccounts')}</Select.Item>
+				<Select.Separator />
+				{#each accounts as account (account.id)}
+					<Select.Item value={account.id}>
+						{formatAccountName(account)}
+					</Select.Item>
 				{/each}
 			</Select.Content>
 		</Select.Root>

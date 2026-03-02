@@ -481,6 +481,8 @@
 		"transfer": "Transferencia",
 		"whatTypeOfTransaction": "¿Qué tipo de transacción es esta?",
 		"filters": {
+			"account": "Cuenta",
+			"allAccounts": "Todas las cuentas",
 			"allCategories": "Todas las categorías",
 			"category": "Categoría",
 			"clearFilters": "Limpiar filtros",
