@@ -29,6 +29,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies, fetch }) => {
 	let workspaces: Workspace[] = [];
 	let currentWorkspace: Workspace | undefined = undefined;
 	let workspaceRole: WorkspaceRole | undefined = undefined;
+	let hasCollaborators = false;
 	try {
 		const wsResponse = await fetch(`${API_URL}/workspaces`);
 		if (wsResponse.ok) {
@@ -64,11 +65,12 @@ export const load: LayoutServerLoad = async ({ locals, cookies, fetch }) => {
 						(typeof m.user === 'string' ? m.user : m.user?.id) === user.id
 				);
 				workspaceRole = myMembership?.role;
+				hasCollaborators = members.length > 1;
 			}
 		}
 	} catch {
 		// Workspaces may not be available yet (pre-migration)
 	}
 
-	return { user, currencyRates, workspaces, currentWorkspace, workspaceRole };
+	return { user, currencyRates, workspaces, currentWorkspace, workspaceRole, hasCollaborators };
 };

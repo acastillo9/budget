@@ -1,3 +1,4 @@
+import type { EntityUser } from './index';
 import type { Account } from './account.types';
 import type { Category } from './category.types';
 
@@ -13,4 +14,5 @@ export type Transaction = {
 	category: Category;
 	account: Account;
 	transfer: Transaction;
+	user?: EntityUser;
 };

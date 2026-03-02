@@ -1,3 +1,5 @@
+import type { EntityUser } from './index';
+
 export type ParentCategory = {
 	id: string;
 	name: string;
@@ -12,4 +14,5 @@ export type Category = {
 	categoryType: string;
 	parent?: ParentCategory | null;
 	children?: Category[];
+	user?: EntityUser;
 };

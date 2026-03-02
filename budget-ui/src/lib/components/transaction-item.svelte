@@ -2,6 +2,7 @@
 	import { formatCurrencyWithSymbol } from '$lib/utils/currency';
 	import { ArrowDownLeft, ArrowUpRight, Edit, Trash2 } from '@lucide/svelte';
 	import CategoryBadge from './category-badge.svelte';
+	import CreatedByBadge from './created-by-badge.svelte';
 	import Button from './ui/button/button.svelte';
 	import { t } from 'svelte-i18n';
 	import { getUserContext } from '$lib/context';
@@ -68,6 +69,9 @@
 					</Badge>
 					{#if transaction.category}
 						<CategoryBadge category={transaction.category} />
+					{/if}
+					{#if transaction.user}
+						<CreatedByBadge userName={transaction.user.name} />
 					{/if}
 				</div>
 			</div>

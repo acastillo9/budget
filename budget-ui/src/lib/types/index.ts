@@ -13,12 +13,20 @@ export type UserSession = {
 	currencyCode: string;
 };
 
+export type EntityUser = {
+	id: string;
+	name: string;
+	email: string;
+	picture: string;
+};
+
 export type UserState = {
 	user: UserSession | undefined;
 	currencyRates: CurrencyRates | undefined;
 	workspaces: import('./workspace.types').Workspace[];
 	currentWorkspace: import('./workspace.types').Workspace | undefined;
 	workspaceRole: import('./workspace.types').WorkspaceRole | undefined;
+	hasCollaborators: boolean;
 };
 
 export type CountdownData = {

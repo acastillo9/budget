@@ -329,6 +329,7 @@
 		"next": "Siguiente",
 		"password": "Contraseña",
 		"pickADate": "Elige una fecha",
+		"createdBy": "por {name}",
 		"save": "Guardar",
 		"send": "Enviar",
 		"signIn": "Iniciar sesión"

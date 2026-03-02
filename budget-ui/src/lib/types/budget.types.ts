@@ -1,3 +1,4 @@
+import type { EntityUser } from './index';
 import type { Category } from './category.types';
 
 export enum BudgetPeriod {
@@ -14,6 +15,7 @@ export type Budget = {
 	startDate: string;
 	endDate?: string;
 	categories: Category[];
+	user?: EntityUser;
 };
 
 export type BudgetProgress = {
@@ -27,4 +29,5 @@ export type BudgetProgress = {
 	remaining: number;
 	percentUsed: number;
 	categories: Category[];
+	user?: EntityUser;
 };

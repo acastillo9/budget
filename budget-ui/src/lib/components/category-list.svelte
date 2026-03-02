@@ -3,6 +3,7 @@
 	import * as Collapsible from '$lib/components/ui/collapsible';
 	import { t } from 'svelte-i18n';
 	import { Badge } from '$lib/components/ui/badge';
+	import CreatedByBadge from './created-by-badge.svelte';
 	import Button from './ui/button/button.svelte';
 	import { Edit, Trash2, Tags, ChevronRight, Plus } from '@lucide/svelte';
 	import type { Category } from '$lib/types/category.types';
@@ -61,6 +62,9 @@
 														values: { count: category.children?.length ?? 0 }
 													})}
 												</span>
+												{#if category.user}
+													<CreatedByBadge userName={category.user.name} />
+												{/if}
 											</div>
 										</div>
 									</Collapsible.Trigger>
@@ -148,6 +152,9 @@
 										>
 											{$t(`categories.categoryType.${category.categoryType}`)}
 										</Badge>
+										{#if category.user}
+											<CreatedByBadge userName={category.user.name} />
+										{/if}
 									</div>
 								</div>
 							</div>

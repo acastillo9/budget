@@ -329,6 +329,7 @@
 		"next": "Next",
 		"password": "Password",
 		"pickADate": "Pick a date",
+		"createdBy": "by {name}",
 		"save": "Save",
 		"send": "Send",
 		"signIn": "Sign In"

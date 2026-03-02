@@ -1,9 +1,12 @@
+import type { EntityUser } from './index';
+
 export type Account = {
 	id: string;
 	name: string;
 	balance: number;
 	accountType: AccountType;
 	currencyCode: 'USD' | 'COP';
+	user?: EntityUser;
 };
 
 export type AccountType = {

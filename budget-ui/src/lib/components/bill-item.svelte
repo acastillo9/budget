@@ -4,6 +4,7 @@
 	import Button from './ui/button/button.svelte';
 	import { t } from 'svelte-i18n';
 	import { getUserContext } from '$lib/context';
+	import CreatedByBadge from './created-by-badge.svelte';
 	import { formatUTCStringDateWithLocal } from '$lib/utils/date';
 	import { BillStatus, type Bill } from '$lib/types/bill.types';
 	import { iconMap } from '$lib/utils/icons';
@@ -116,6 +117,9 @@
 							<span>•</span>
 							<span>{bill.category.name}</span>
 						</span>
+						{#if bill.user}
+							<CreatedByBadge userName={bill.user.name} />
+						{/if}
 						<span>
 							<span>•</span>
 							<span

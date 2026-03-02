@@ -4,6 +4,7 @@
 	import type { Account } from '$lib/types/account.types';
 	import Wallet from '@lucide/svelte/icons/wallet';
 	import { Badge } from '$lib/components/ui/badge';
+	import CreatedByBadge from './created-by-badge.svelte';
 	import Building2 from '@lucide/svelte/icons/building-2';
 	import CreditCard from '@lucide/svelte/icons/credit-card';
 	import { formatCurrencyWithSymbol, getCurrencyByCode } from '$lib/utils/currency';
@@ -80,6 +81,9 @@
 										<Badge variant="outline">
 											{`${currency?.flag} ${currency?.code}`}
 										</Badge>
+										{#if account.user}
+											<CreatedByBadge userName={account.user.name} />
+										{/if}
 									</div>
 								</div>
 								<div class="flex flex-col md:text-right">

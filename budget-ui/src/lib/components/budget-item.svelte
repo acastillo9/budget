@@ -3,6 +3,7 @@
 	import { Edit, Trash2 } from '@lucide/svelte';
 	import Button from './ui/button/button.svelte';
 	import CategoryBadge from './category-badge.svelte';
+	import CreatedByBadge from './created-by-badge.svelte';
 	import Badge from './ui/badge/badge.svelte';
 	import BudgetProgressBar from './budget-progress-bar.svelte';
 	import { formatCurrencyWithSymbol } from '$lib/utils/currency';
@@ -33,6 +34,9 @@
 				<Badge variant="secondary" class="shrink-0">
 					{$t(`budgets.periods.${budget.period}`)}
 				</Badge>
+				{#if budget.user}
+					<CreatedByBadge userName={budget.user.name} />
+				{/if}
 			</div>
 			<p class="text-muted-foreground mt-1 text-sm">
 				{$t('budgets.budgetAmount')}:

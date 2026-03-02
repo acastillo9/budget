@@ -5,7 +5,8 @@ export const userState: UserState = $state({
 	currencyRates: undefined,
 	workspaces: [],
 	currentWorkspace: undefined,
-	workspaceRole: undefined
+	workspaceRole: undefined,
+	hasCollaborators: false
 });
 
 export function syncUserState(data: {
@@ -14,10 +15,12 @@ export function syncUserState(data: {
 	workspaces?: UserState['workspaces'];
 	currentWorkspace: UserState['currentWorkspace'];
 	workspaceRole: UserState['workspaceRole'];
+	hasCollaborators?: UserState['hasCollaborators'];
 }) {
 	userState.user = data.user;
 	userState.currencyRates = data.currencyRates;
 	userState.workspaces = data.workspaces ?? [];
 	userState.currentWorkspace = data.currentWorkspace;
 	userState.workspaceRole = data.workspaceRole;
+	userState.hasCollaborators = data.hasCollaborators ?? false;
 }

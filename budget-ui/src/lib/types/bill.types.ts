@@ -1,3 +1,4 @@
+import type { EntityUser } from './index';
 import type { Account } from './account.types';
 import type { Category } from './category.types';
 
@@ -30,4 +31,5 @@ export type Bill = {
 	category: Category;
 	paidDate?: string;
 	applyToFuture: boolean;
+	user?: EntityUser;
 };
