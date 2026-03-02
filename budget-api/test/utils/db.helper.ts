@@ -55,7 +55,6 @@ export async function createActiveUser(
   // Create a default workspace and OWNER membership
   const WorkspaceModel = connection.model('Workspace');
   const workspace = await WorkspaceModel.create({
-    name: `${data.name ?? 'Test User'}'s Workspace`,
     owner: user._id,
   });
 

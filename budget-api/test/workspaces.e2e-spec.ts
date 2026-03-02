@@ -73,20 +73,11 @@ describe('WorkspacesController (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/workspaces')
         .set('Authorization', `Bearer ${ownerToken}`)
-        .send({ name: 'Family Budget' });
-
-      expect(response.status).toBe(201);
-      expect(response.body).toMatchObject({ name: 'Family Budget' });
-      expect(response.body.id).toBeDefined();
-    });
-
-    it('should return 400 when name is missing', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/workspaces')
-        .set('Authorization', `Bearer ${ownerToken}`)
         .send({});
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(201);
+      expect(response.body.id).toBeDefined();
+      expect(response.body.owner).toBeDefined();
     });
 
     it('should return 401 without auth token', async () => {
@@ -141,7 +132,7 @@ describe('WorkspacesController (e2e)', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBeDefined();
-      expect(response.body.name).toBeDefined();
+      expect(response.body.owner).toBeDefined();
     });
 
     it('should return 401 without auth token', async () => {
@@ -157,14 +148,14 @@ describe('WorkspacesController (e2e)', () => {
   // PATCH /workspaces/:id
   // ──────────────────────────────────────────────────
   describe('PATCH /workspaces/:id', () => {
-    it('should update workspace name as owner', async () => {
+    it('should update workspace as owner', async () => {
       const response = await request(app.getHttpServer())
         .patch(`/workspaces/${ownerWorkspaceId}`)
         .set('Authorization', `Bearer ${ownerToken}`)
-        .send({ name: 'Updated Workspace' });
+        .send({});
 
       expect(response.status).toBe(200);
-      expect(response.body.name).toBe('Updated Workspace');
+      expect(response.body.id).toBe(ownerWorkspaceId);
     });
 
     it('should return 403 when non-owner tries to update', async () => {

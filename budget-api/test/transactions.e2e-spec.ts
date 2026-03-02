@@ -34,20 +34,13 @@ describe('TransactionsController (e2e)', () => {
   let expenseTransactionId: string;
   let transferTransactionId: string;
 
-  // Use a date safely in the middle of the current month to avoid timezone edge cases.
-  // The summary endpoint builds its date range using local-timezone `new Date(year, month, 1)`,
-  // so dates at the very start of the month in UTC can fall outside the range when the server
-  // runs in a timezone behind UTC.
+  // Use a date safely in the recent past to stay within the default 30-day query window.
+  // Avoids timezone edge cases by using noon, and avoids future-date issues by subtracting days.
   const midMonthDate = (() => {
-    const now = new Date();
-    return new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      15,
-      12,
-      0,
-      0,
-    ).toISOString();
+    const d = new Date();
+    d.setDate(d.getDate() - 5);
+    d.setHours(12, 0, 0, 0);
+    return d.toISOString();
   })();
 
   beforeAll(async () => {
