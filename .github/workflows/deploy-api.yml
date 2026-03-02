@@ -26,7 +26,10 @@ jobs:
         with:
           context: ./budget-api
           push: true
+          no-cache: true
           platforms: linux/amd64
+          build-args: |
+            COMMIT_SHA=${{ github.sha }}
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/budget-api:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/budget-api:${{ github.sha }}
@@ -39,6 +42,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/budget-api
-            docker compose pull budget-api
-            docker compose up -d --no-deps --force-recreate budget-api
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/budget-api:${{ github.sha }}
+            DEPLOY_IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/budget-api:${{ github.sha }} docker compose up -d --no-deps --force-recreate budget-api
             docker image prune -f

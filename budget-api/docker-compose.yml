@@ -1,6 +1,6 @@
 services:
   budget-api:
-    image: ${DOCKERHUB_USERNAME}/budget-api:latest
+    image: ${DEPLOY_IMAGE:-${DOCKERHUB_USERNAME}/budget-api:latest}
     container_name: budget-api
     restart: always
     env_file:

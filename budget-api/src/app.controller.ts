@@ -10,6 +10,7 @@ export class AppController {
       name: 'Personal Finance API',
       version: '1.0.0',
       status: 'running',
+      commit: process.env.COMMIT_SHA || 'unknown',
     };
   }
 
