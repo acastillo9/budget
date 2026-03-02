@@ -8,7 +8,7 @@ export class AppController {
   getInfo() {
     return {
       name: 'Personal Finance API',
-      version: '1.0.0',
+      version: '1.0.1',
       status: 'running',
       commit: process.env.COMMIT_SHA || 'unknown',
     };
