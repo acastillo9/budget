@@ -41,7 +41,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/budget-api
+            cd ~/budget/budget-api
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/budget-api:${{ github.sha }}
             DEPLOY_IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/budget-api:${{ github.sha }} docker compose up -d --no-deps --force-recreate budget-api
             docker image prune -f
