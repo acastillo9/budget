@@ -4,6 +4,8 @@ import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Transaction } from './entities/transaction.entity';
 import { ClientSession, Model } from 'mongoose';
+import { Account } from 'src/accounts/entities/account.entity';
+import { Category } from 'src/categories/entities/category.entity';
 import { AccountsService } from 'src/accounts/accounts.service';
 import { TransactionDto } from './dto/transaction.dto';
 import { plainToClass } from 'class-transformer';
@@ -27,6 +29,10 @@ export class TransactionsService {
     private readonly categoriesService: CategoriesService,
     @InjectModel(Transaction.name)
     private readonly transactionModel: Model<Transaction>,
+    @InjectModel(Account.name)
+    private readonly accountModel: Model<Account>,
+    @InjectModel(Category.name)
+    private readonly categoryModel: Model<Category>,
     private readonly i18n: I18nService,
   ) {}
 
@@ -189,6 +195,7 @@ export class TransactionsService {
     dateFrom?: Date,
     dateTo?: Date,
     accountId?: string,
+    search?: string,
   ): Promise<PaginatedDataDto<TransactionDto>> {
     const filter: any = { workspace: workspaceId };
     const skip = paginationDto.offset || 0;
@@ -217,6 +224,42 @@ export class TransactionsService {
           workspaceId,
         );
       filter.category = { $in: expandedIds };
+    }
+
+    if (search) {
+      const searchRegex = { $regex: search, $options: 'i' };
+      const searchOrConditions: any[] = [
+        { description: searchRegex },
+        { notes: searchRegex },
+      ];
+
+      const [matchingAccounts, matchingCategories] = await Promise.all([
+        this.accountModel.find(
+          { workspace: workspaceId, name: searchRegex },
+          { _id: 1 },
+        ),
+        this.categoryModel.find(
+          { workspace: workspaceId, name: searchRegex },
+          { _id: 1 },
+        ),
+      ]);
+
+      if (matchingAccounts.length > 0) {
+        searchOrConditions.push({
+          account: { $in: matchingAccounts.map((a) => a._id) },
+        });
+      }
+      if (matchingCategories.length > 0) {
+        searchOrConditions.push({
+          category: { $in: matchingCategories.map((c) => c._id) },
+        });
+      }
+
+      if (filter.$and) {
+        filter.$and.push({ $or: searchOrConditions });
+      } else {
+        filter.$or = searchOrConditions;
+      }
     }
 
     try {

@@ -99,6 +99,7 @@ export class TransactionsController {
       queryDto.dateFrom,
       queryDto.dateTo,
       queryDto.accountId,
+      queryDto.search,
     );
   }
 

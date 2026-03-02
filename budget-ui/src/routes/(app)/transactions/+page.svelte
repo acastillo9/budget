@@ -32,6 +32,7 @@
 		dateTo?: string;
 		categoryId?: string;
 		accountId?: string;
+		search?: string;
 		offset?: number;
 	}): string {
 		const searchParams = new URLSearchParams();
@@ -40,6 +41,7 @@
 		if (params.dateTo) searchParams.set('dateTo', params.dateTo);
 		if (params.categoryId) searchParams.set('categoryId', params.categoryId);
 		if (params.accountId) searchParams.set('accountId', params.accountId);
+		if (params.search) searchParams.set('search', params.search);
 		const qs = searchParams.toString();
 		return `/transactions${qs ? `?${qs}` : ''}`;
 	}
@@ -128,6 +130,7 @@
 			dateTo={data.filters.dateTo}
 			categoryId={data.filters.categoryId}
 			accountId={data.filters.accountId}
+			search={data.filters.search}
 			onFilterChange={(filters) => {
 				goto(
 					buildTransactionsUrl({

@@ -488,7 +488,8 @@
 			"clearFilters": "Clear filters",
 			"dateFrom": "From",
 			"dateTo": "To",
-			"pickDate": "Pick a date"
+			"pickDate": "Pick a date",
+			"search": "Search transactions..."
 		}
 	},
 	"workspaces": {

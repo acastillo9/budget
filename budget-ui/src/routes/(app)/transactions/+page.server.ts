@@ -17,6 +17,7 @@ export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
 	const dateTo = url.searchParams.get('dateTo') || undefined;
 	const categoryId = url.searchParams.get('categoryId') || undefined;
 	const accountId = url.searchParams.get('accountId') || undefined;
+	const search = url.searchParams.get('search') || undefined;
 
 	// Load accounts from the API
 	let accounts = [];
@@ -57,6 +58,7 @@ export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
 		if (dateTo) params.set('dateTo', `${dateTo}T00:00:00.000Z`);
 		if (categoryId) params.set('categoryId', categoryId);
 		if (accountId) params.set('accountId', accountId);
+		if (search) params.set('search', search);
 		const qs = params.toString();
 		const response = await fetch(`${API_URL}/transactions${qs ? `?${qs}` : ''}`);
 		if (!response.ok) {
@@ -79,7 +81,7 @@ export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
 		transactions: transactions,
 		accounts,
 		categories,
-		filters: { dateFrom, dateTo, categoryId, accountId }
+		filters: { dateFrom, dateTo, categoryId, accountId, search }
 	};
 };
 

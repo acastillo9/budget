@@ -488,7 +488,8 @@
 			"clearFilters": "Limpiar filtros",
 			"dateFrom": "Desde",
 			"dateTo": "Hasta",
-			"pickDate": "Elige una fecha"
+			"pickDate": "Elige una fecha",
+			"search": "Buscar transacciones..."
 		}
 	},
 	"workspaces": {

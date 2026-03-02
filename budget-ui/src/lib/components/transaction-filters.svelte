@@ -3,6 +3,7 @@
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import { Calendar } from '$lib/components/ui/calendar/index.js';
+	import { Input } from '$lib/components/ui/input/index.js';
 	import { cn } from '$lib/utils';
 	import { locale, t } from 'svelte-i18n';
 	import {
@@ -12,6 +13,7 @@
 		parseDate
 	} from '@internationalized/date';
 	import CalendarIcon from '@lucide/svelte/icons/calendar';
+	import SearchIcon from '@lucide/svelte/icons/search';
 	import X from '@lucide/svelte/icons/x';
 	import type { Category } from '$lib/types/category.types';
 	import type { Account } from '$lib/types/account.types';
@@ -25,6 +27,7 @@
 		dateTo,
 		categoryId,
 		accountId,
+		search,
 		onFilterChange
 	}: {
 		categories: Category[];
@@ -33,11 +36,13 @@
 		dateTo?: string;
 		categoryId?: string;
 		accountId?: string;
+		search?: string;
 		onFilterChange: (filters: {
 			dateFrom?: string;
 			dateTo?: string;
 			categoryId?: string;
 			accountId?: string;
+			search?: string;
 		}) => void;
 	} = $props();
 
@@ -53,7 +58,30 @@
 	let dateFromContentRef = $state<HTMLElement | null>(null);
 	let dateToContentRef = $state<HTMLElement | null>(null);
 
-	const hasActiveFilters = $derived(dateFrom || dateTo || categoryId || accountId);
+	let searchInput = $state('');
+	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+
+	const searchValue = $derived(search || '');
+	$effect(() => {
+		searchInput = searchValue;
+	});
+
+	function handleSearchInput(e: Event) {
+		const value = (e.target as HTMLInputElement).value;
+		searchInput = value;
+		clearTimeout(debounceTimer);
+		debounceTimer = setTimeout(() => {
+			onFilterChange({
+				dateFrom,
+				dateTo,
+				categoryId,
+				accountId,
+				search: value || undefined
+			});
+		}, 300);
+	}
+
+	const hasActiveFilters = $derived(dateFrom || dateTo || categoryId || accountId || search);
 
 	function getCategoryLabel(catId: string): string {
 		for (const parent of categories) {
@@ -69,6 +97,20 @@
 </script>
 
 <div class="flex flex-wrap items-end gap-3">
+	<div class="flex flex-col gap-1.5">
+		<span class="text-sm font-medium">{$t('transactions.filters.search')}</span>
+		<div class="relative w-[200px]">
+			<SearchIcon class="text-muted-foreground absolute top-2.5 left-2.5 size-4" />
+			<Input
+				type="text"
+				placeholder={$t('transactions.filters.search')}
+				value={searchInput}
+				oninput={handleSearchInput}
+				class="pl-9"
+			/>
+		</div>
+	</div>
+
 	<div class="flex flex-col gap-1.5">
 		<span class="text-sm font-medium">{$t('transactions.filters.dateFrom')}</span>
 		<Popover.Root>
@@ -96,7 +138,8 @@
 							dateFrom: v?.toString(),
 							dateTo,
 							categoryId,
-							accountId
+							accountId,
+							search
 						});
 					}}
 				/>
@@ -131,7 +174,8 @@
 							dateFrom,
 							dateTo: v?.toString(),
 							categoryId,
-							accountId
+							accountId,
+							search
 						});
 					}}
 				/>
@@ -149,7 +193,8 @@
 					dateFrom,
 					dateTo,
 					categoryId: v === '' ? undefined : v,
-					accountId
+					accountId,
+					search
 				});
 			}}
 		>
@@ -195,7 +240,8 @@
 					dateFrom,
 					dateTo,
 					categoryId,
-					accountId: v === '' ? undefined : v
+					accountId: v === '' ? undefined : v,
+					search
 				});
 			}}
 		>

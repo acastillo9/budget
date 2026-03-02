@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsMongoId, IsOptional } from 'class-validator';
+import { IsDate, IsMongoId, IsOptional, IsString } from 'class-validator';
 
 export class TransactionsQueryDto {
   @ApiPropertyOptional({
@@ -36,4 +36,13 @@ export class TransactionsQueryDto {
   @IsMongoId()
   @IsOptional()
   categoryId?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Search transactions by description, notes, account name, or category name',
+    example: 'grocery',
+  })
+  @IsString()
+  @IsOptional()
+  search?: string;
 }
