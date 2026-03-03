@@ -37,6 +37,18 @@ Read both `budget-api/CLAUDE.md` and `budget-ui/CLAUDE.md`. Use skills from both
 
 ---
 
+## Skill Inventory
+
+| Skill | Description | Applies To |
+|---|---|---|
+| [`find-skills`](.agents/skills/find-skills/SKILL.md) | Discover and install agent skills | Both |
+| [`frontend-design`](.agents/skills/frontend-design/SKILL.md) | Create distinctive, production-grade frontend interfaces | Frontend |
+| [`skill-creator`](.agents/skills/skill-creator/SKILL.md) | Guide for creating or updating skills | Both |
+| [`svelte-code-writer`](.agents/skills/svelte-code-writer/SKILL.md) | Svelte 5 documentation lookup and code analysis | Frontend |
+| [`web-design-guidelines`](.agents/skills/web-design-guidelines/SKILL.md) | Review UI code for Web Interface Guidelines compliance | Frontend |
+
+---
+
 ## Auto-invoke Skills
 
 When performing these actions, ALWAYS invoke the corresponding skill FIRST:
@@ -48,18 +60,6 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 | Reviewing UI for accessibility, design quality, or UX compliance | `web-design-guidelines` | "review my UI", "check accessibility", "audit design", "review UX", "check against best practices" |
 | Looking for new capabilities or asking about available skills | `find-skills` | "how do I do X", "find a skill for X", "is there a skill that can…" |
 | Creating a new skill or updating an existing one | `skill-creator` | "create a skill for…", "update the svelte skill" |
-
----
-
-## Skill Inventory
-
-| Skill | Description | Applies To |
-|---|---|---|
-| [`find-skills`](.agents/skills/find-skills/SKILL.md) | Discover and install agent skills | Both |
-| [`frontend-design`](.agents/skills/frontend-design/SKILL.md) | Create distinctive, production-grade frontend interfaces | Frontend |
-| [`skill-creator`](.agents/skills/skill-creator/SKILL.md) | Guide for creating or updating skills | Both |
-| [`svelte-code-writer`](.agents/skills/svelte-code-writer/SKILL.md) | Svelte 5 documentation lookup and code analysis | Frontend |
-| [`web-design-guidelines`](.agents/skills/web-design-guidelines/SKILL.md) | Review UI code for Web Interface Guidelines compliance | Frontend |
 
 ---
 
