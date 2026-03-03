@@ -20,6 +20,7 @@ All skills live in `.agents/skills/` (single source of truth). Symlinks in `.cla
 1. Read `budget-api/CLAUDE.md` for architecture, commands, and conventions.
 2. Use these skills:
    - **[budget-api](.agents/skills/budget-api/SKILL.md)** — contextualized patterns for NestJS controllers, services, entities, DTOs, modules, and E2E tests
+   - **[budget-test-api](.agents/skills/budget-test-api/SKILL.md)** — write E2E tests for the budget-api backend
    - **[budget-mermaid-docs](.agents/skills/budget-mermaid-docs/SKILL.md)** — create Mermaid diagrams (class, sequence, flowchart, ER, state) in `budget-api/docs/`
 
 ### Frontend work (files under `budget-ui/`)
@@ -27,6 +28,7 @@ All skills live in `.agents/skills/` (single source of truth). Symlinks in `.cla
 1. Read `budget-ui/CLAUDE.md` for architecture, commands, and conventions.
 2. Use these skills:
    - **[budget-ui](.agents/skills/budget-ui/SKILL.md)** — contextualized patterns for SvelteKit pages, components, server loaders, form actions, API proxy routes, schemas, and types
+   - **[budget-test-ui](.agents/skills/budget-test-ui/SKILL.md)** — write E2E Playwright tests for the budget-ui frontend
    - **[svelte-code-writer](.agents/skills/svelte-code-writer/SKILL.md)** — write/edit Svelte 5 components (always use for `.svelte` files)
    - **[frontend-design](.agents/skills/frontend-design/SKILL.md)** — create polished UI components and pages
    - **[web-design-guidelines](.agents/skills/web-design-guidelines/SKILL.md)** — audit UI for accessibility and design compliance
@@ -47,8 +49,10 @@ Read both `budget-api/CLAUDE.md` and `budget-ui/CLAUDE.md`. Use skills from both
 | Skill | Description | Applies To |
 |---|---|---|
 | [`budget-api`](.agents/skills/budget-api/SKILL.md) | Contextualized patterns for NestJS backend | Backend |
+| [`budget-test-api`](.agents/skills/budget-test-api/SKILL.md) | Write E2E tests for the budget-api NestJS backend | Backend |
 | [`budget-mermaid-docs`](.agents/skills/budget-mermaid-docs/SKILL.md) | Create Mermaid diagrams for software documentation | Backend |
 | [`budget-ui`](.agents/skills/budget-ui/SKILL.md) | Contextualized patterns for SvelteKit frontend | Frontend |
+| [`budget-test-ui`](.agents/skills/budget-test-ui/SKILL.md) | Write E2E Playwright tests for the budget-ui frontend | Frontend |
 | [`find-skills`](.agents/skills/find-skills/SKILL.md) | Discover and install agent skills | Both |
 | [`frontend-design`](.agents/skills/frontend-design/SKILL.md) | Create distinctive, production-grade frontend interfaces | Frontend |
 | [`skill-creator`](.agents/skills/skill-creator/SKILL.md) | Guide for creating or updating skills | Both |
@@ -64,6 +68,8 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 | Trigger | Skill | Examples |
 |---|---|---|
 | Creating, editing, or reviewing code inside `budget-api/` | `budget-api` | "add an endpoint", "create a service", "fix an API bug", "write an E2E test" |
+| Writing or reviewing E2E tests in `budget-api/test/` | `budget-test-api` | "write E2E tests for accounts", "create tests for the new feature" |
+| Writing or reviewing E2E tests in `budget-ui/e2e/` | `budget-test-ui` | "write Playwright tests for the accounts page", "create E2E tests for the UI" |
 | Creating or updating diagrams in `budget-api/docs/`, or documenting/designing a feature with diagrams | `budget-mermaid-docs` | "create a diagram for...", "document this module", "design the data model for..." |
 | Creating, editing, or reviewing code inside `budget-ui/` | `budget-ui` | "add a page", "create a form", "fix a UI bug", "add an API proxy route" |
 | Creating, editing, or analyzing any `.svelte`, `.svelte.ts`, or `.svelte.js` file | `svelte-code-writer` | "edit the Header component", "create a new Svelte page", "analyze this .svelte file" |
