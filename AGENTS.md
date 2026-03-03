@@ -37,6 +37,10 @@ All skills live in `.agents/skills/` (single source of truth). Symlinks in `.cla
 
 Read both `budget-api/CLAUDE.md` and `budget-ui/CLAUDE.md`. Use skills from both sections as needed.
 
+### Epic-level orchestration
+
+- **[epic-orchestrator](.agents/skills/epic-orchestrator/SKILL.md)** — orchestrate end-to-end feature development from a Jira epic through 7 phases (retrieval, design, docs, implementation, testing, review, skills analysis). Use for full epic workflows, not individual tasks.
+
 ### General skills (any context)
 
 - **[code-review](.agents/skills/code-review/SKILL.md)** — review generated code for quality, conventions, security, and correctness
@@ -55,6 +59,7 @@ Read both `budget-api/CLAUDE.md` and `budget-ui/CLAUDE.md`. Use skills from both
 | [`budget-ui`](.agents/skills/budget-ui/SKILL.md) | Contextualized patterns for SvelteKit frontend | Frontend |
 | [`budget-test-ui`](.agents/skills/budget-test-ui/SKILL.md) | Write E2E Playwright tests for the budget-ui frontend | Frontend |
 | [`code-review`](.agents/skills/code-review/SKILL.md) | Review generated code for quality, conventions, security, and correctness | Both |
+| [`epic-orchestrator`](.agents/skills/epic-orchestrator/SKILL.md) | Orchestrate end-to-end feature development from a Jira epic (7-phase lifecycle) | Both |
 | [`find-skills`](.agents/skills/find-skills/SKILL.md) | Discover and install agent skills | Both |
 | [`frontend-design`](.agents/skills/frontend-design/SKILL.md) | Create distinctive, production-grade frontend interfaces | Frontend |
 | [`skill-creator`](.agents/skills/skill-creator/SKILL.md) | Guide for creating or updating skills | Both |
@@ -80,6 +85,7 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 | Reviewing generated code, checking code quality, or at end of code generation workflow | `code-review` | "review the code", "check what was generated", "review changes", "code review" |
 | Looking for new capabilities or asking about available skills | `find-skills` | "how do I do X", "find a skill for X", "is there a skill that can…" |
 | Creating a new skill or updating an existing one | `skill-creator` | "create a skill for…", "update the svelte skill" |
+| Implementing a full Jira epic end-to-end, or orchestrating multi-phase feature development | `epic-orchestrator` | "orchestrate epic BUD-42", "implement epic X", "drive epic to completion" |
 
 ---
 
