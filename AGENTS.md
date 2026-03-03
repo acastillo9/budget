@@ -18,8 +18,7 @@ All skills live in `.agents/skills/` (single source of truth). Symlinks in `.cla
 ### Backend work (files under `budget-api/`)
 
 1. Read `budget-api/CLAUDE.md` for architecture, commands, and conventions.
-2. Use these skills:
-   - **[budget-api](.agents/skills/budget-api/SKILL.md)** — contextualized patterns for NestJS modules, controllers, services, entities, DTOs, guards, and tests
+
 ### Frontend work (files under `budget-ui/`)
 
 1. Read `budget-ui/CLAUDE.md` for architecture, commands, and conventions.
@@ -44,7 +43,6 @@ Read both `budget-api/CLAUDE.md` and `budget-ui/CLAUDE.md`. Use skills from both
 
 | Skill | Description | Applies To |
 |---|---|---|
-| [`budget-api`](.agents/skills/budget-api/SKILL.md) | Contextualized patterns for NestJS backend | Backend |
 | [`budget-ui`](.agents/skills/budget-ui/SKILL.md) | Contextualized patterns for SvelteKit frontend | Frontend |
 | [`find-skills`](.agents/skills/find-skills/SKILL.md) | Discover and install agent skills | Both |
 | [`frontend-design`](.agents/skills/frontend-design/SKILL.md) | Create distinctive, production-grade frontend interfaces | Frontend |
@@ -60,7 +58,6 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 
 | Trigger | Skill | Examples |
 |---|---|---|
-| Creating, editing, or reviewing code inside `budget-api/` | `budget-api` | "add an endpoint", "create a new module", "fix a bug in the API", "write e2e tests" |
 | Creating, editing, or reviewing code inside `budget-ui/` | `budget-ui` | "add a page", "create a form", "fix a UI bug", "add an API proxy route" |
 | Creating, editing, or analyzing any `.svelte`, `.svelte.ts`, or `.svelte.js` file | `svelte-code-writer` | "edit the Header component", "create a new Svelte page", "analyze this .svelte file" |
 | Building or styling web UI components, pages, or layouts | `frontend-design` | "build a dashboard", "create a landing page", "style this component", "beautify the UI" |
