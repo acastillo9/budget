@@ -39,6 +39,7 @@ Read both `budget-api/CLAUDE.md` and `budget-ui/CLAUDE.md`. Use skills from both
 
 ### General skills (any context)
 
+- **[code-review](.agents/skills/code-review/SKILL.md)** — review generated code for quality, conventions, security, and correctness
 - **[find-skills](.agents/skills/find-skills/SKILL.md)** — discover and install new skills
 - **[skill-creator](.agents/skills/skill-creator/SKILL.md)** — create or update skills
 
@@ -53,6 +54,7 @@ Read both `budget-api/CLAUDE.md` and `budget-ui/CLAUDE.md`. Use skills from both
 | [`budget-mermaid-docs`](.agents/skills/budget-mermaid-docs/SKILL.md) | Create Mermaid diagrams for software documentation | Backend |
 | [`budget-ui`](.agents/skills/budget-ui/SKILL.md) | Contextualized patterns for SvelteKit frontend | Frontend |
 | [`budget-test-ui`](.agents/skills/budget-test-ui/SKILL.md) | Write E2E Playwright tests for the budget-ui frontend | Frontend |
+| [`code-review`](.agents/skills/code-review/SKILL.md) | Review generated code for quality, conventions, security, and correctness | Both |
 | [`find-skills`](.agents/skills/find-skills/SKILL.md) | Discover and install agent skills | Both |
 | [`frontend-design`](.agents/skills/frontend-design/SKILL.md) | Create distinctive, production-grade frontend interfaces | Frontend |
 | [`skill-creator`](.agents/skills/skill-creator/SKILL.md) | Guide for creating or updating skills | Both |
@@ -75,6 +77,7 @@ When performing these actions, ALWAYS invoke the corresponding skill FIRST:
 | Creating, editing, or analyzing any `.svelte`, `.svelte.ts`, or `.svelte.js` file | `svelte-code-writer` | "edit the Header component", "create a new Svelte page", "analyze this .svelte file" |
 | Building or styling web UI components, pages, or layouts | `frontend-design` | "build a dashboard", "create a landing page", "style this component", "beautify the UI" |
 | Reviewing UI for accessibility, design quality, or UX compliance | `web-design-guidelines` | "review my UI", "check accessibility", "audit design", "review UX", "check against best practices" |
+| Reviewing generated code, checking code quality, or at end of code generation workflow | `code-review` | "review the code", "check what was generated", "review changes", "code review" |
 | Looking for new capabilities or asking about available skills | `find-skills` | "how do I do X", "find a skill for X", "is there a skill that can…" |
 | Creating a new skill or updating an existing one | `skill-creator` | "create a skill for…", "update the svelte skill" |
 
