@@ -37,7 +37,7 @@ See `AGENTS.md` at the repo root for the full skill inventory and routing guide.
 
 ### Skill Management
 
-- **When creating or updating a skill, ALWAYS invoke the `skill-creator` skill FIRST.** Do not write SKILL.md files manually.
+- **When creating or updating a skill, ALWAYS invoke the `skill-creator` skill FIRST.** Do not write SKILL.md files manually. The `skill-creator` skill owns the entire SKILL.md creation process — do NOT plan specific SKILL.md content, structure, frontmatter, or file layout. Plans should only describe **what** the skill needs to do and delegate **how** to create it to the `skill-creator` skill.
 - **Always read `AGENTS.md` before creating or modifying skills.** It defines the skill directory structure and routing.
 - Skills source of truth: `.agents/skills/`. Symlinks in `.claude/skills/` and `.cursor/skills/` point to `.agents/skills/`.
 - When creating a new skill, use `--path .agents/skills` (not `.claude/skills`), then create symlinks in both `.claude/skills/` and `.cursor/skills/`.
