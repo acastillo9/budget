@@ -11,6 +11,69 @@ import os from 'os';
 // Helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * Mock the attachment API endpoints so upload/delete tests don't require a real S3 backend.
+ * Maintains an in-memory store keyed by transactionId.
+ */
+async function mockAttachmentApi(page: Page) {
+	const store = new Map<string, Array<Record<string, unknown>>>();
+	let idCounter = 1;
+
+	await page.route('**/api/transactions/*/attachments**', async (route, request) => {
+		const url = new URL(request.url());
+		const segments = url.pathname.split('/');
+		// segments: ['', 'api', 'transactions', '{transactionId}', 'attachments', '{attachmentId}?']
+		const transactionId = segments[3];
+		const attachmentId = segments.length > 5 ? segments[5] : undefined;
+
+		if (attachmentId && request.method() === 'DELETE') {
+			const list = store.get(transactionId) || [];
+			const attachment = list.find((a) => a.id === attachmentId);
+			store.set(
+				transactionId,
+				list.filter((a) => a.id !== attachmentId)
+			);
+			await route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify(attachment || {})
+			});
+		} else if (!attachmentId && request.method() === 'POST') {
+			const body = request.postData() || '';
+			const match = body.match(/filename="([^"]+)"/);
+			const filename = match ? match[1] : `file-${idCounter}.jpg`;
+			const now = new Date().toISOString();
+
+			const attachment = {
+				id: `mock-att-${idCounter++}`,
+				filename,
+				mimeType: 'image/jpeg',
+				size: 22,
+				createdAt: now,
+				updatedAt: now
+			};
+
+			const list = store.get(transactionId) || [];
+			list.push(attachment);
+			store.set(transactionId, list);
+
+			await route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify(attachment)
+			});
+		} else if (!attachmentId && request.method() === 'GET') {
+			await route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify(store.get(transactionId) || [])
+			});
+		} else {
+			await route.continue();
+		}
+	});
+}
+
 function uniqueName(prefix: string): string {
 	return `${prefix} ${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 }
@@ -86,10 +149,8 @@ async function setupTransactionForEdit(page: Page) {
 test.describe('Attachments — Upload Zone Visibility', () => {
 	test.setTimeout(120_000);
 
-	test('should NOT show attachment upload zone when creating a new transaction', async ({
-		page
-	}) => {
-		const accountName = await createTestAccount(page, 'AttNewAcc');
+	test('should show attachment upload zone when creating a new transaction', async ({ page }) => {
+		await createTestAccount(page, 'AttNewAcc');
 		const categoryName = await createTestCategory(page, 'AttNewCat', 'Expense');
 		const transactionsPage = new TransactionsPage(page);
 		await transactionsPage.goto();
@@ -101,9 +162,9 @@ test.describe('Attachments — Upload Zone Visibility', () => {
 		await transactionsPage.selectCategory(categoryName);
 		await transactionsPage.goToNextStep();
 
-		// On step 3 (creating new), upload zone should NOT be visible
-		await expect(transactionsPage.uploadZone).not.toBeVisible();
-		await expect(transactionsPage.supportedFormatsText).not.toBeVisible();
+		// On step 3 (creating new), upload zone should be visible for pending file uploads
+		await expect(transactionsPage.uploadZone).toBeVisible({ timeout: 10_000 });
+		await expect(transactionsPage.supportedFormatsText).toBeVisible();
 	});
 
 	test('should show attachment upload zone when editing an existing transaction', async ({
@@ -118,9 +179,9 @@ test.describe('Attachments — Upload Zone Visibility', () => {
 		await expect(transactionsPage.supportedFormatsText).toBeVisible();
 	});
 
-	test('should NOT show attachment upload zone when creating a new transfer', async ({ page }) => {
-		const accountName1 = await createTestAccount(page, 'AttTrFrom');
-		const accountName2 = await createTestAccount(page, 'AttTrTo');
+	test('should show attachment upload zone when creating a new transfer', async ({ page }) => {
+		await createTestAccount(page, 'AttTrFrom');
+		await createTestAccount(page, 'AttTrTo');
 		const transactionsPage = new TransactionsPage(page);
 		await transactionsPage.goto();
 		await expect(transactionsPage.heading).toBeVisible({ timeout: 15_000 });
@@ -129,8 +190,8 @@ test.describe('Attachments — Upload Zone Visibility', () => {
 		await transactionsPage.selectTransactionType('TRANSFER');
 		await transactionsPage.goToNextStep();
 
-		// On step 3 (creating new transfer), upload zone should NOT be visible
-		await expect(transactionsPage.uploadZone).not.toBeVisible();
+		// On step 3 (creating new transfer), upload zone should be visible for pending file uploads
+		await expect(transactionsPage.uploadZone).toBeVisible({ timeout: 10_000 });
 	});
 });
 
@@ -242,6 +303,7 @@ test.describe('Attachments — File Upload & API Integration', () => {
 	test.setTimeout(120_000);
 
 	test('should upload a JPEG file and show success toast', async ({ page }) => {
+		await mockAttachmentApi(page);
 		const { transactionsPage, description } = await setupTransactionForEdit(page);
 		await transactionsPage.clickEdit(description);
 		await expect(transactionsPage.uploadZone).toBeVisible({ timeout: 10_000 });
@@ -267,6 +329,7 @@ test.describe('Attachments — File Upload & API Integration', () => {
 	});
 
 	test('should show uploaded attachment in the list with filename and size', async ({ page }) => {
+		await mockAttachmentApi(page);
 		const { transactionsPage, description } = await setupTransactionForEdit(page);
 		await transactionsPage.clickEdit(description);
 		await expect(transactionsPage.uploadZone).toBeVisible({ timeout: 10_000 });
@@ -298,6 +361,7 @@ test.describe('Attachments — File Upload & API Integration', () => {
 	});
 
 	test('should delete an uploaded attachment and show success toast', async ({ page }) => {
+		await mockAttachmentApi(page);
 		const { transactionsPage, description } = await setupTransactionForEdit(page);
 		await transactionsPage.clickEdit(description);
 		await expect(transactionsPage.uploadZone).toBeVisible({ timeout: 10_000 });
@@ -335,6 +399,7 @@ test.describe('Attachments — File Upload & API Integration', () => {
 	test('should show confirmation dialog with filename when deleting an attachment', async ({
 		page
 	}) => {
+		await mockAttachmentApi(page);
 		const { transactionsPage, description } = await setupTransactionForEdit(page);
 		await transactionsPage.clickEdit(description);
 		await expect(transactionsPage.uploadZone).toBeVisible({ timeout: 10_000 });

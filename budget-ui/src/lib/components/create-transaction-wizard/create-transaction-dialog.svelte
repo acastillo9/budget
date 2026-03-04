@@ -218,7 +218,11 @@
 		<Plus class="mr-2 h-4 w-4" />
 		{$t('transactions.addTransaction')}
 	</Dialog.Trigger>
-	<Dialog.Content escapeKeydownBehavior="ignore" interactOutsideBehavior="ignore">
+	<Dialog.Content
+		escapeKeydownBehavior="ignore"
+		interactOutsideBehavior="ignore"
+		class="flex max-h-[85vh] flex-col"
+	>
 		<Dialog.Header>
 			<Dialog.Title>
 				{#if isEdit}
@@ -236,79 +240,81 @@
 						: $t('transactions.transactionDetails')}
 			</Dialog.Description>
 		</Dialog.Header>
-		<div class="mb-6 flex items-center justify-between">
-			{#each [1, 2, 3] as step}
-				<div class="flex items-center">
-					<div
-						class={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
-							step < transactionStep
-								? 'bg-green-500 text-white'
-								: step === transactionStep
-									? 'bg-blue-500 text-white'
-									: 'bg-gray-200 text-gray-600'
-						}`}
-					>
-						{#if step < transactionStep}
-							<Check class="h-4 w-4" />
-						{:else}
-							{step}
+		<div class="min-h-0 flex-1 overflow-y-auto">
+			<div class="mb-6 flex items-center justify-between">
+				{#each [1, 2, 3] as step}
+					<div class="flex items-center">
+						<div
+							class={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
+								step < transactionStep
+									? 'bg-green-500 text-white'
+									: step === transactionStep
+										? 'bg-blue-500 text-white'
+										: 'bg-gray-200 text-gray-600'
+							}`}
+						>
+							{#if step < transactionStep}
+								<Check class="h-4 w-4" />
+							{:else}
+								{step}
+							{/if}
+						</div>
+						{#if step < 3}
+							<div
+								class={`mx-2 h-1 w-12 ${step < transactionStep ? 'bg-green-500' : 'bg-gray-200'}`}
+							></div>
 						{/if}
 					</div>
-					{#if step < 3}
-						<div
-							class={`mx-2 h-1 w-12 ${step < transactionStep ? 'bg-green-500' : 'bg-gray-200'}`}
-						></div>
+				{/each}
+			</div>
+			{#if transactionStep === 1}
+				<SelectTransactionType bind:type={categoryType} />
+			{:else if transactionStep === 2}
+				<ChooseCategory
+					{categoryType}
+					{createCategoryForm}
+					categories={filteredCategories}
+					bind:category
+				/>
+			{:else}
+				<div class="space-y-4">
+					<div class="mb-4 flex items-center justify-between">
+						<h3 class="font-medium">{$t('transactions.transactionDetails')}</h3>
+						<div class="flex items-center gap-2">
+							<Badge
+								variant={categoryType === 'INCOME'
+									? 'default'
+									: categoryType === 'EXPENSE'
+										? 'destructive'
+										: 'secondary'}
+							>
+								{$t(`categories.categoryType.${categoryType}`).toUpperCase()}
+							</Badge>
+							{#if category}
+								<CategoryBadge {category} />
+							{/if}
+						</div>
+					</div>
+					{#if categoryType === 'TRANSFER'}
+						<CreateTransferForm
+							form={transferForm}
+							bind:formData={$transferFormData}
+							enhance={transferEnhance}
+							{accounts}
+							bind:pendingFiles={transferPendingFiles}
+						/>
+					{:else}
+						<CreateTransactionForm
+							{form}
+							bind:formData={$formData}
+							{enhance}
+							{accounts}
+							bind:pendingFiles={transactionPendingFiles}
+						/>
 					{/if}
 				</div>
-			{/each}
+			{/if}
 		</div>
-		{#if transactionStep === 1}
-			<SelectTransactionType bind:type={categoryType} />
-		{:else if transactionStep === 2}
-			<ChooseCategory
-				{categoryType}
-				{createCategoryForm}
-				categories={filteredCategories}
-				bind:category
-			/>
-		{:else}
-			<div class="space-y-4">
-				<div class="mb-4 flex items-center justify-between">
-					<h3 class="font-medium">{$t('transactions.transactionDetails')}</h3>
-					<div class="flex items-center gap-2">
-						<Badge
-							variant={categoryType === 'INCOME'
-								? 'default'
-								: categoryType === 'EXPENSE'
-									? 'destructive'
-									: 'secondary'}
-						>
-							{$t(`categories.categoryType.${categoryType}`).toUpperCase()}
-						</Badge>
-						{#if category}
-							<CategoryBadge {category} />
-						{/if}
-					</div>
-				</div>
-				{#if categoryType === 'TRANSFER'}
-					<CreateTransferForm
-						form={transferForm}
-						bind:formData={$transferFormData}
-						enhance={transferEnhance}
-						{accounts}
-						bind:pendingFiles={transferPendingFiles}
-					/>
-				{:else}
-					<CreateTransactionForm
-						{form}
-						bind:formData={$formData}
-						{enhance}
-						{accounts}
-						bind:pendingFiles={transactionPendingFiles}
-					/>
-				{/if}
-			</div>
-		{/if}
 		<Dialog.Footer>
 			<div class={`flex w-full pt-4 ${transactionStep > 1 ? 'justify-between' : 'justify-end'}`}>
 				{#if transactionStep > 1}
