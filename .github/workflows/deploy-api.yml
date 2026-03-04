@@ -24,7 +24,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: ./budget-api
+          context: .
+          file: ./budget-api/Dockerfile
           push: true
           no-cache: true
           platforms: linux/amd64

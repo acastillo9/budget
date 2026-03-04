@@ -1,0 +1,14 @@
+node_modules
+.git
+budget-ui
+budget-api/node_modules
+budget-api/dist
+budget-api/.env*
+budget-api/coverage
+budget-api/test
+*.log
+.idea
+.vscode
+.claude
+.cursor
+.agents
