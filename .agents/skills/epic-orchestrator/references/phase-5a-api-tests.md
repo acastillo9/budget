@@ -27,7 +27,7 @@ Write comprehensive E2E tests covering:
 - Database state verification
 
 Run the tests: cd budget-api && npm run test:e2e
-Fix any failures.
+Fix any failures. If tests still fail after 2 fix attempts, report them explicitly — never skip or suppress failing tests.
 
 Write results to: .claude/orchestrator/<EPIC-KEY>/phase-5a-tests-api.md
 
@@ -41,7 +41,10 @@ Format:
 - Total: N tests
 - Passed: N
 - Failed: N
-- <failure details if any>
+- <failure details if any — include full error messages for failures>
+
+## Unresolved Failures
+- <test name> — <error message and what was tried> (or "None")
 
 Return a 1-line summary: "N API tests: P passed, F failed"
 ```

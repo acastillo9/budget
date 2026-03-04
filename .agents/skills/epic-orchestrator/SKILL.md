@@ -70,6 +70,9 @@ Initialize `STATUS.md` with:
 2. Phases 4a/4b may run in **parallel**. Same for 5a/5b.
 3. After each subagent returns, update `STATUS.md` with the 1-line summary.
 4. Before dispatching each phase, read its prompt template from `references/phase-<N>-<name>.md`.
+5. Implementation subagents (4a/4b) **must** run lint/check and include pass/fail results in their phase output.
+6. Test subagents (5a/5b) **must** report failures explicitly — never skip or suppress failing tests.
+7. All subagents **must** note deviations from skill patterns with rationale in their phase output.
 
 ## User Checkpoints
 

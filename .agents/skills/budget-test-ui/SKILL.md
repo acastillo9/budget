@@ -289,6 +289,7 @@ async function createPrerequisites(page: Page) {
 | `dashboard.spec.ts` | Dashboard cards, navigation | `/` |
 | `transactions.spec.ts` | CRUD transactions, transfers, filters, pagination | `/transactions` |
 | `workspaces.spec.ts` | CRUD workspaces, members, invitations, roles | `/workspaces` |
+| `attachments.spec.ts` | Upload zone visibility, file input, client-side validation, upload/delete with API mock | `/transactions` (edit mode) |
 
 ## Existing Page Objects
 
@@ -305,6 +306,101 @@ async function createPrerequisites(page: Page) {
 | `signup.page.ts` | `/signup` | `fillBasicInfo()`, `fillActivationCode()`, `fillPassword()` |
 | `transactions.page.ts` | `/transactions` | `createTransaction()`, `createTransfer()`, `deleteTransaction()` |
 | `workspaces.page.ts` | `/workspaces` | `createWorkspace()`, `inviteMember()`, `removeMember()` |
+
+## Testing File Inputs
+
+Use Playwright's `setInputFiles()` to simulate file uploads via hidden file inputs.
+
+### Setting file inputs
+
+```typescript
+// Create a temporary test file with proper content
+const tmpDir = path.join(os.tmpdir(), '.tmp-test-upload');
+if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+
+const jpegHeader = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46,
+  0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0xff, 0xd9]);
+const filePath = path.join(tmpDir, 'receipt.jpg');
+fs.writeFileSync(filePath, jpegHeader);
+
+// Set the file on the hidden input
+await page.locator('input[type="file"]').setInputFiles(filePath);
+
+// Cleanup in finally block
+fs.rmSync(tmpDir, { recursive: true, force: true });
+```
+
+Rules:
+- Always create temp files with proper MIME headers (JPEG: `0xff 0xd8 0xff 0xe0`, PNG: `0x89 0x50 0x4e 0x47`)
+- Use `try/finally` with `fs.rmSync()` for cleanup
+- Target hidden inputs with `page.locator('input[type="file"]')` or a POM locator
+- For testing oversized files, use `Buffer.alloc(6 * 1024 * 1024)` prepended with MIME header
+- For unsupported types, use `.txt` files — they fail the MIME check
+
+### Extending existing POM for embedded features
+
+When file upload is part of an existing page (e.g., transaction form), extend the existing POM with new locators rather than creating a separate page object:
+
+```typescript
+// In transactions.page.ts constructor:
+this.uploadZone = page.getByRole('button', { name: /drag and drop/i });
+this.fileInput = page.locator('input[type="file"]');
+this.supportedFormatsText = page.getByText(/supported.*jpg.*png/i);
+this.attachmentsTitle = page.getByRole('heading', { name: /attachments/i });
+```
+
+## Mocking API Responses for Uploads
+
+Use `page.route()` to intercept upload/download API calls with an in-memory store.
+
+```typescript
+async function mockAttachmentApi(page: Page) {
+  const store = new Map<string, Array<Record<string, unknown>>>();
+  let idCounter = 1;
+
+  await page.route('**/api/transactions/*/attachments**', async (route, request) => {
+    const url = new URL(request.url());
+    const segments = url.pathname.split('/');
+    const transactionId = segments[3];
+    const attachmentId = segments.length > 5 ? segments[5] : undefined;
+
+    if (!attachmentId && request.method() === 'POST') {
+      // Parse filename from multipart body
+      const body = request.postData() || '';
+      const match = body.match(/filename="([^"]+)"/);
+      const filename = match ? match[1] : `file-${idCounter}.jpg`;
+
+      const attachment = {
+        id: `mock-att-${idCounter++}`,
+        filename,
+        mimeType: 'image/jpeg',
+        size: 22,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      const list = store.get(transactionId) || [];
+      list.push(attachment);
+      store.set(transactionId, list);
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(attachment) });
+    } else if (!attachmentId && request.method() === 'GET') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(store.get(transactionId) || []) });
+    } else if (attachmentId && request.method() === 'DELETE') {
+      // ... remove from store, fulfill with deleted item
+    } else {
+      await route.continue();
+    }
+  });
+}
+```
+
+Rules:
+- Call `mockAttachmentApi(page)` **before** navigating to the page
+- Use `request.postData()` + regex to extract filename from multipart body
+- Maintain `Map` keyed by parent entity ID for realistic GET responses
+- Use `route.continue()` as fallback for unmatched methods
+
+Source: `budget-ui/e2e/attachments.spec.ts`
 
 ## Rules
 

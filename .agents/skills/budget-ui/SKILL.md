@@ -230,6 +230,141 @@ export const PATCH: RequestHandler = async ({ request, fetch, params }) => {
 
 Purpose: client-side `fetch('/api/...')` goes through SvelteKit, which attaches auth via `handleFetch`.
 
+## Multipart Proxy Route Pattern
+
+For file uploads, forward `FormData` directly — no `JSON.stringify`, no manual `Content-Type` header. The `handleFetch` hook still auto-attaches auth.
+
+```typescript
+import { API_URL } from '$env/static/private';
+import { error, json, type RequestHandler } from '@sveltejs/kit';
+
+export const POST: RequestHandler = async ({ request, fetch, params }) => {
+  const { transactionId } = params;
+  const formData = await request.formData();
+
+  // Forward FormData directly — browser/SvelteKit sets Content-Type with boundary automatically
+  const response = await fetch(`${API_URL}/transactions/${transactionId}/attachments`, {
+    method: 'POST',
+    body: formData
+  });
+
+  if (!response.ok) {
+    const { message, statusCode } = await response.json();
+    return error(statusCode, { message });
+  }
+  return json(await response.json());
+};
+```
+
+Rules:
+- `await request.formData()` to extract the multipart body
+- Pass `body: formData` directly — **never** `JSON.stringify` or set `Content-Type` manually
+- `handleFetch` still attaches `Authorization` and `X-Workspace-Id` headers automatically
+
+Source: `budget-ui/src/routes/api/transactions/[transactionId]/attachments/+server.ts`
+
+## Client-Side File Upload Pattern
+
+Upload files to API proxy routes using `FormData` + `fetch`. Use `$state()` for loading/error tracking.
+
+```typescript
+let uploading = $state(false);
+
+async function handleFileSelect(file: File) {
+  if (!entityId) {
+    // Queue files for upload after parent entity creation
+    pendingFiles = [...pendingFiles, file];
+    return;
+  }
+  uploading = true;
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    const response = await fetch(`/api/transactions/${entityId}/attachments`, {
+      method: 'POST',
+      body: fd
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Upload failed');
+    }
+    const newAttachment = await response.json();
+    attachments = [...attachments, newAttachment];
+    toast.success($t('feature.uploadSuccess'));
+  } catch {
+    toast.error($t('feature.uploadError'));
+  } finally {
+    uploading = false;
+  }
+}
+```
+
+**Pending files pattern** — when the parent entity doesn't exist yet (create mode), queue files in a `pendingFiles` array and upload them after the parent is created:
+
+```typescript
+let pendingFiles = $bindable<File[]>([]);
+const MAX_ATTACHMENTS = 5;
+let canUpload = $derived(attachments.length + pendingFiles.length < MAX_ATTACHMENTS);
+```
+
+Source: `budget-ui/src/lib/components/create-transaction-wizard/create-transaction-form.svelte`
+
+## Drag-and-Drop File Input Pattern
+
+Accessible file upload zone using a `<button>` with hidden `<input type="file">`, drag events, and client-side validation.
+
+```svelte
+<script lang="ts">
+  let {
+    accept = 'image/jpeg,image/png,image/webp,application/pdf',
+    maxSize = 5242880,
+    disabled = false,
+    uploading = false,
+    onFileSelect
+  }: {
+    accept?: string; maxSize?: number; disabled?: boolean;
+    uploading?: boolean; onFileSelect: (file: File) => void;
+  } = $props();
+
+  let dragOver = $state(false);
+  let errorMessage = $state('');
+  let fileInputRef = $state<HTMLInputElement | null>(null);
+  const allowedTypes = $derived(accept.split(',').map((t) => t.trim()));
+
+  function validateFile(file: File): boolean {
+    errorMessage = '';
+    if (!allowedTypes.includes(file.type)) { errorMessage = $t('unsupportedType'); return false; }
+    if (file.size > maxSize) { errorMessage = $t('fileTooLarge'); return false; }
+    return true;
+  }
+
+  function handleDrop(event: DragEvent) {
+    event.preventDefault();
+    dragOver = false;
+    if (disabled || uploading) return;
+    const file = event.dataTransfer?.files?.[0];
+    if (file && validateFile(file)) onFileSelect(file);
+  }
+</script>
+
+<button type="button" ondrop={handleDrop} ondragover={...} onclick={() => fileInputRef?.click()}
+  disabled={disabled || uploading}>
+  <!-- Upload icon + instructions -->
+</button>
+{#if errorMessage}<p class="text-red-500">{errorMessage}</p>{/if}
+<input bind:this={fileInputRef} type="file" {accept} class="hidden" onchange={handleFileInput} />
+```
+
+Rules:
+- Use `<button type="button">` (not `<div>`) for keyboard accessibility
+- Hidden `<input type="file">` triggered via `fileInputRef.click()`
+- Client-side validation: check MIME type against `accept` list and file size against `maxSize`
+- Display error message below the upload zone, reset on next attempt
+- Reset `input.value = ''` after selection to allow re-selecting the same file
+- `dragOver` state for visual feedback on drag
+
+Source: `budget-ui/src/lib/components/file-upload-zone.svelte`
+
 ## Schema Pattern (Zod v4)
 
 ```typescript

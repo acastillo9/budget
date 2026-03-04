@@ -30,7 +30,9 @@ Implement ALL frontend changes specified in the design:
 - Navigation updates if needed
 
 After implementation, run: cd budget-ui && npm run lint && npm run check
-Fix any errors.
+Fix any errors. You MUST include the full lint and check output in the phase file.
+
+If you deviate from any pattern in the budget-ui skill, document the deviation and rationale.
 
 Write a manifest of all created/modified files to: .claude/orchestrator/<EPIC-KEY>/phase-4b-impl-ui.md
 
@@ -44,7 +46,10 @@ Format:
 - <path> — <what changed>
 
 ## Lint/Check Status
-<pass/fail + details>
+<full lint + check output — pass or fail with details>
+
+## Deviations
+- <deviation description> — <rationale> (or "None")
 
 Return a 1-line summary: "Created N files, modified M files in budget-ui/"
 ```

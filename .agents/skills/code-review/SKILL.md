@@ -55,6 +55,8 @@ Evaluate each changed file against these categories:
 | 5 | **TypeScript** | Type safety, null checks, proper generics, `any` usage, missing types |
 | 6 | **i18n** | Both `en` and `es` translations present where UI text was added/changed |
 | 7 | **Reuse** | Existing utilities, helpers, or shared code that could replace new code |
+| 8 | **External config** | `ConfigService.getOrThrow()` in constructor for mandatory env vars, not `get()` at first use |
+| 9 | **Transaction consistency** | Cascade operations use DB session propagation; external resource cleanup deferred to post-commit |
 
 ## 4. Present Findings
 

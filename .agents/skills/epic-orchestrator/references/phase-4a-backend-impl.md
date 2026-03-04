@@ -28,7 +28,9 @@ Implement ALL backend changes specified in the design:
 - Any guards, interceptors, or pipes needed
 
 After implementation, run: cd budget-api && npm run lint
-Fix any lint errors.
+Fix any lint errors. You MUST include the full lint output in the phase file.
+
+If you deviate from any pattern in the budget-api skill, document the deviation and rationale.
 
 Write a manifest of all created/modified files to: .claude/orchestrator/<EPIC-KEY>/phase-4a-impl-api.md
 
@@ -42,7 +44,10 @@ Format:
 - <path> — <what changed>
 
 ## Lint Status
-<pass/fail + details>
+<full lint output — pass or fail with details>
+
+## Deviations
+- <deviation description> — <rationale> (or "None")
 
 Return a 1-line summary: "Created N files, modified M files in budget-api/"
 ```

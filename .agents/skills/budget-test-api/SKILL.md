@@ -65,6 +65,7 @@ seedAccount(app, { name, balance, currencyCode, accountType, user, workspace? })
 seedBill(app, { name, amount, dueDate, frequency, account, category, user, endDate?, workspace? }): Promise<string>
 seedBudget(app, { name?, amount, period, startDate, endDate?, categories, user, workspace? }): Promise<string>
 seedTransaction(app, { amount, date, description?, category?, account, user, isTransfer?, workspace? }): Promise<string>
+seedAttachment(app, { filename, s3Key, mimeType, size, transaction, user, workspace }): Promise<string>
 getAccountBalance(app, accountId: string): Promise<number>
 ```
 
@@ -184,6 +185,55 @@ describe('FeatureController (e2e)', () => {
 
 **Budget progress**: Budget `spent`/`remaining`/`percentUsed` are computed from transactions. Seed transactions then verify progress endpoint.
 
+## Mocking External Providers
+
+When a feature depends on an external service (S3, email, etc.), mock the provider in tests.
+
+### Pattern: Override provider before compilation
+
+```typescript
+import { createTestApp } from './utils/test-app.factory';
+
+// Mock class implementing the same interface as the real service
+class MockS3Service {
+  private store = new Map<string, Buffer>();
+
+  async upload(key: string, buffer: Buffer): Promise<string> {
+    this.store.set(key, buffer);
+    return key;
+  }
+  async delete(key: string): Promise<void> { this.store.delete(key); }
+  async getPresignedUrl(key: string): Promise<string> { return `https://mock-s3/${key}`; }
+}
+
+// Override the real provider BEFORE compile
+const moduleRef = Test.createTestingModule({ imports: [AppModule] })
+  .overrideProvider(S3Service)
+  .useClass(MockS3Service);
+app = await createTestApp(moduleRef);
+```
+
+### Multipart file upload with supertest
+
+```typescript
+const response = await request(app.getHttpServer())
+  .post(`/transactions/${transactionId}/attachments`)
+  .set('Authorization', `Bearer ${authToken}`)
+  .attach('file', Buffer.from([0xff, 0xd8, 0xff, 0xe0]), {
+    filename: 'receipt.jpg',
+    contentType: 'image/jpeg',
+  })
+  .expect(201);
+```
+
+Rules:
+- Mock external services using `overrideProvider().useClass()` before `.compile()`
+- Mock class must implement the same public interface as the real service
+- Use `.attach('file', buffer, { filename, contentType })` for multipart uploads (not `.send()`)
+- Seed attachments with `seedAttachment()` for tests that need pre-existing attachments
+
+Source: `budget-api/test/attachments.e2e-spec.ts`
+
 ## Rules
 
 1. One `describe` block per controller, named `'ControllerName (e2e)'`
@@ -219,6 +269,7 @@ describe('FeatureController (e2e)', () => {
 | `transactions.e2e-spec.ts` | CRUD transactions, transfers, balance effects |
 | `users.e2e-spec.ts` | Get/update profile, currency |
 | `workspaces.e2e-spec.ts` | CRUD workspaces, members, invitations, roles |
+| `attachments.e2e-spec.ts` | File upload/download/delete, MIME validation, cascade delete, S3 mock |
 
 ## Workflow
 

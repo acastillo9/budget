@@ -260,31 +260,26 @@ export class CreateFeatureDto {
 }
 ```
 
-Response DTOs use `@Exclude()` / `@Expose()` with `ClassSerializerInterceptor`:
+Response DTOs use class-level `@Exclude()` + `@Expose()` only on public fields (excludes everything by default, including `_id`, `__v`, `s3Key`, and any internal fields):
 
 ```typescript
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
+@Exclude()
 export class FeatureDto {
-  @ApiProperty()
   @Expose()
+  @ApiProperty()
   id: string;
 
-  @ApiProperty()
   @Expose()
+  @ApiProperty()
   name: string;
 
-  @ApiProperty({ type: CategoryDto })
   @Expose()
+  @ApiProperty({ type: CategoryDto })
   @Type(() => CategoryDto)
   category: CategoryDto;
-
-  @Exclude()
-  _id: string;
-
-  @Exclude()
-  __v: number;
 }
 ```
 
@@ -292,7 +287,7 @@ Rules:
 - Input DTOs: `class-validator` decorators (`@IsString`, `@IsNumber`, `@IsMongoId`, `@IsEnum`, `@IsOptional`, `@IsPositive`)
 - Date fields: `@Type(() => Date)` from `class-transformer`
 - Swagger: `@ApiProperty` (required) / `@ApiPropertyOptional` (optional) with `description` and `example`
-- Response DTOs: `@Expose()` on visible fields, `@Exclude()` on hidden (`_id`, `__v`)
+- Response DTOs: class-level `@Exclude()` + `@Expose()` only on public fields (no need to list `_id`, `__v`, etc.)
 - Nested DTOs: `@Type(() => NestedDto)` for proper transformation
 
 ## Module Pattern
@@ -375,6 +370,16 @@ Rules:
 - Set `x-workspace-id` header when testing workspace-scoped endpoints
 - Test timeout: 30000ms (configured in `jest-e2e.json`)
 - Env: `.env.test`
+
+## Advanced Patterns
+
+For file uploads, external service wrappers (S3, etc.), cascade deletes with deferred external cleanup, and compensation patterns, see [references/advanced-patterns.md](references/advanced-patterns.md).
+
+Read this reference when working with:
+- `FileInterceptor`, `@ApiConsumes('multipart/form-data')`, `@UploadedFile()`
+- External SDK wrappers (`S3Client`, `ConfigService.getOrThrow()`)
+- Cascade deletes involving external resources (collect keys in session, delete after commit)
+- Upload + DB save compensation (clean up external resource on DB failure)
 
 ## File Naming
 
