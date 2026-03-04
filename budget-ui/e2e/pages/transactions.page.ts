@@ -499,6 +499,102 @@ export class TransactionsPage {
 	}
 
 	// ---------------------------------------------------------------------------
+	// Attachment interactions (available when editing an existing transaction)
+	// ---------------------------------------------------------------------------
+
+	/**
+	 * Returns the file upload zone button (drag-and-drop area).
+	 */
+	get uploadZone(): Locator {
+		return this.page.getByRole('button', { name: /drag and drop/i });
+	}
+
+	/**
+	 * Returns the hidden file input used by the upload zone.
+	 */
+	get fileInput(): Locator {
+		return this.page.locator('input[type="file"]');
+	}
+
+	/**
+	 * Returns the "Attachments" heading in the attachment list.
+	 */
+	get attachmentsTitle(): Locator {
+		return this.page.getByRole('heading', { name: /attachments/i, level: 4 });
+	}
+
+	/**
+	 * Returns the "Supported: JPG, PNG, WebP, PDF (max 5MB)" hint text.
+	 */
+	get supportedFormatsText(): Locator {
+		return this.page.getByText(/supported.*jpg.*png.*webp.*pdf/i);
+	}
+
+	/**
+	 * Returns the "Maximum of N attachments" message.
+	 */
+	get maxAttachmentsText(): Locator {
+		return this.page.getByText(/maximum of \d+ attachments/i);
+	}
+
+	/**
+	 * Returns all attachment items in the attachment list.
+	 */
+	getAttachmentItems(): Locator {
+		return this.page.locator('.space-y-1\\.5 > div');
+	}
+
+	/**
+	 * Returns an attachment item by filename.
+	 */
+	getAttachmentItem(filename: string): Locator {
+		return this.page.locator('.space-y-1\\.5 > div', { hasText: filename });
+	}
+
+	/**
+	 * Returns the attachment count badge on a transaction item.
+	 */
+	getAttachmentBadge(description: string): Locator {
+		const item = this.getTransactionItem(description);
+		return item.locator('div', { hasText: /^\d+$/ }).filter({
+			has: this.page.locator('svg') // Paperclip icon
+		});
+	}
+
+	/**
+	 * Upload a file using the file input (bypasses drag-and-drop for reliability).
+	 * The file should be created via Playwright's setInputFiles.
+	 */
+	async uploadFile(filePath: string) {
+		await this.fileInput.setInputFiles(filePath);
+	}
+
+	/**
+	 * Click the delete button for an attachment by filename.
+	 */
+	async clickDeleteAttachment(filename: string) {
+		const item = this.getAttachmentItem(filename);
+		await item.locator('button.text-destructive').click();
+	}
+
+	/**
+	 * Confirm attachment deletion in the alert dialog.
+	 */
+	async confirmAttachmentDeletion() {
+		const alertDialog = this.page.getByRole('alertdialog');
+		await expect(alertDialog).toBeVisible({ timeout: 10_000 });
+		await alertDialog.getByRole('button', { name: /confirm/i }).click();
+	}
+
+	/**
+	 * Delete an attachment by filename (click delete + confirm).
+	 */
+	async deleteAttachment(filename: string) {
+		await this.clickDeleteAttachment(filename);
+		await this.confirmAttachmentDeletion();
+	}
+
+	// ---------------------------------------------------------------------------
 	// Toast assertions
 	// ---------------------------------------------------------------------------
 

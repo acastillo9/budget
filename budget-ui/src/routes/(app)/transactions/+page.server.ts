@@ -113,6 +113,11 @@ export const actions: Actions = {
 				return fail(statusCode, { form });
 			}
 
+			if (!isEditing) {
+				const result = await response.json();
+				form.data.id = result.id;
+			}
+
 			const message = isEditing
 				? $t('transactions.editTransactionSuccess')
 				: $t('transactions.addTransactionSuccess');
@@ -150,6 +155,11 @@ export const actions: Actions = {
 				const { message, statusCode } = await response.json();
 				setFlash({ type: 'error', message }, cookies);
 				return fail(statusCode, { form });
+			}
+
+			if (!isEditing) {
+				const result = await response.json();
+				form.data.id = result.id;
 			}
 
 			const message = isEditing

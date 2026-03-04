@@ -1,0 +1,10 @@
+{
+  "fileRequired": "El archivo es requerido.",
+  "fileTooLarge": "El archivo es muy grande. El tamaño máximo es 5MB.",
+  "unsupportedType": "Tipo de archivo no soportado. Formatos permitidos: JPG, PNG, WebP, PDF.",
+  "maxAttachments": "Máximo de {max} adjuntos por transacción.",
+  "notFound": "Adjunto no encontrado.",
+  "uploadError": "Error al subir el archivo.",
+  "downloadError": "Error al descargar el adjunto. Por favor intenta de nuevo.",
+  "deleteError": "Error al eliminar el adjunto."
+}

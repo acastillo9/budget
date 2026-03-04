@@ -12,6 +12,7 @@ import { AccountsModule } from 'src/accounts/accounts.module';
 import { CategoriesModule } from 'src/categories/categories.module';
 import { UsersModule } from 'src/users/users.module';
 import { SharedModule } from 'src/shared/shared.module';
+import { AttachmentsModule } from 'src/attachments/attachments.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SharedModule } from 'src/shared/shared.module';
     AccountsModule,
     CategoriesModule,
     UsersModule,
+    AttachmentsModule,
   ],
   controllers: [TransactionsController],
   providers: [TransactionsService],

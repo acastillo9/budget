@@ -4,16 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-| Task | Command |
-|------|---------|
-| Dev server | `npm run dev` |
-| Build | `npm run build` |
-| Preview | `npm run preview` |
-| Lint | `npm run lint` |
-| Format | `npm run format` |
-| Type check | `npm run check` |
-| Type check (watch) | `npm run check:watch` |
-| E2E tests (Playwright) | `npm run test:e2e` |
+| Task                   | Command               |
+| ---------------------- | --------------------- |
+| Dev server             | `npm run dev`         |
+| Build                  | `npm run build`       |
+| Preview                | `npm run preview`     |
+| Lint                   | `npm run lint`        |
+| Format                 | `npm run format`      |
+| Type check             | `npm run check`       |
+| Type check (watch)     | `npm run check:watch` |
+| E2E tests (Playwright) | `npm run test:e2e`    |
 
 ## Architecture
 
@@ -22,30 +22,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Route Groups
 
 - `(app)/` — Authenticated pages (dashboard, accounts, bills, budgets, categories, transactions, workspaces). The `(app)/+layout.server.ts` redirects to `/signin` if no user session; loads user data, workspace list, currency rates, and current workspace on every request.
-- `(auth)/` — Auth pages (signin, signup, forgot-password, reset-password/[token], accept-invite/[token], google/* OAuth flow).
+- `(auth)/` — Auth pages (signin, signup, forgot-password, reset-password/[token], accept-invite/[token], google/\* OAuth flow).
 - `api/` — SvelteKit API routes that proxy to the backend. These exist so client-side fetches go through SvelteKit, which attaches the auth token and workspace header via `handleFetch` in `hooks.server.ts`.
 
 ### API Proxy Routes
 
 Proxy routes under `src/routes/api/`:
 
-| Area | Routes |
-|------|--------|
-| **Users** | `PATCH /api/users` |
-| **Accounts** | `DELETE /api/accounts/[id]` |
-| **Transactions** | `DELETE /api/transactions/[id]`, `POST/PATCH /api/transactions/transfer/[id]` |
-| **Bills** | `GET/PATCH /api/bills/[id]/[targetDate]`, `POST .../pay`, `POST .../unpay` |
-| **Categories** | `DELETE /api/categories/[id]` |
-| **Budgets** | `DELETE /api/budgets/[id]` |
-| **Currencies** | `GET /api/currencies/[currencyCode]` |
-| **Workspaces** | `GET/POST /api/workspaces`, `GET /api/workspaces/current`, `GET /api/workspaces/members`, `PATCH /api/workspaces/members/[memberId]/role`, `DELETE /api/workspaces/members/[memberId]`, `GET/POST /api/workspaces/invitations`, `GET/POST/DELETE /api/workspaces/invitations/[token]` |
-| **Auth** | `POST /api/auth/resend-activation-code` |
+| Area             | Routes                                                                                                                                                                                                                                                                                |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Users**        | `PATCH /api/users`                                                                                                                                                                                                                                                                    |
+| **Accounts**     | `DELETE /api/accounts/[id]`                                                                                                                                                                                                                                                           |
+| **Transactions** | `DELETE /api/transactions/[id]`, `POST/PATCH /api/transactions/transfer/[id]`                                                                                                                                                                                                         |
+| **Bills**        | `GET/PATCH /api/bills/[id]/[targetDate]`, `POST .../pay`, `POST .../unpay`                                                                                                                                                                                                            |
+| **Categories**   | `DELETE /api/categories/[id]`                                                                                                                                                                                                                                                         |
+| **Budgets**      | `DELETE /api/budgets/[id]`                                                                                                                                                                                                                                                            |
+| **Currencies**   | `GET /api/currencies/[currencyCode]`                                                                                                                                                                                                                                                  |
+| **Workspaces**   | `GET/POST /api/workspaces`, `GET /api/workspaces/current`, `GET /api/workspaces/members`, `PATCH /api/workspaces/members/[memberId]/role`, `DELETE /api/workspaces/members/[memberId]`, `GET/POST /api/workspaces/invitations`, `GET/POST/DELETE /api/workspaces/invitations/[token]` |
+| **Auth**         | `POST /api/auth/resend-activation-code`                                                                                                                                                                                                                                               |
 
 ### Auth Flow
 
 Authentication uses JWT tokens stored in httpOnly cookies (`AuthorizationToken`, `RefreshToken`). A third cookie `X-Workspace-Id` (not httpOnly — read by client) persists the active workspace.
 
 The `hooks.server.ts` handle hook:
+
 1. Validates `AuthorizationToken` on every request
 2. If valid → fetches user from `GET /auth/me`
 3. If expired → attempts refresh with `RefreshToken` via `GET /auth/refresh`
@@ -54,6 +55,7 @@ The `hooks.server.ts` handle hook:
 6. On failure → deletes cookies, proceeds without user
 
 The `handleFetch` hook attaches:
+
 - `Authorization: Bearer <token>` header
 - `X-Workspace-Id` header (from cookie)
 - `Accept-Language` header (from request)
@@ -61,6 +63,7 @@ The `handleFetch` hook attaches:
 ### Workspace System
 
 Multi-user workspace support integrated throughout the app:
+
 - **Workspace switcher** in sidebar (`workspace-switcher.svelte`)
 - **Member management** — invite, remove, change roles (OWNER/CONTRIBUTOR/VIEWER)
 - **Invitation flow** — email invites with token-based acceptance (`/accept-invite/[token]`)
@@ -84,6 +87,7 @@ Multi-user workspace support integrated throughout the app:
 Page data is loaded in `+page.server.ts` files that fetch from the backend API using `API_URL`. The `handleFetch` hook automatically attaches auth and workspace headers.
 
 **Common pattern** — server actions:
+
 1. `superValidate(zod4(schema))` to prepare forms
 2. Form submitted via `use:enhance`
 3. Server action validates, proxies to API
@@ -114,6 +118,7 @@ Page data is loaded in `+page.server.ts` files that fetch from the backend API u
 ### Component Inventory
 
 **Custom components** (`src/lib/components/`):
+
 - Layout: `header`, `footer`, `app-sidebar`, `nav-main`, `nav-user`, `workspace-switcher`
 - Dashboard: `total-card`, `balance-breakdown-card`, `currency-rates-card`, `upcoming-bills-card`, `budget-progress-bar`, `transaction-list`, `account-list`
 - Wizards: `create-transaction-wizard/` (type selector, transaction form, transfer form), `create-bill-wizard/` (dialog + form)
@@ -125,6 +130,7 @@ Page data is loaded in `+page.server.ts` files that fetch from the backend API u
 ### E2E Testing (Playwright)
 
 Config in `playwright.config.ts`:
+
 - Base URL: `http://localhost:4173`
 - Test directory: `e2e/`
 - Two projects: `authenticated` (most tests) and `unauthenticated` (`*.unauth.spec.ts`)

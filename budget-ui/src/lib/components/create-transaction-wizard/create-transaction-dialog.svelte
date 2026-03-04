@@ -23,6 +23,7 @@
 	import type { CreateCategorySchema } from '$lib/schemas/category.schema';
 	import type { Account } from '$lib/types/account.types';
 	import type { Transaction } from '$lib/types/transactions.types';
+	import { toast } from 'svelte-sonner';
 	import CategoryBadge from '../category-badge.svelte';
 	import ChooseCategory from '../choose-category.svelte';
 
@@ -53,6 +54,9 @@
 	let transactionStep = $state(1);
 	let categoryType = $state('');
 	let category: Category | undefined = $state(undefined);
+	let transactionPendingFiles = $state<File[]>([]);
+	let transferPendingFiles = $state<File[]>([]);
+	let uploadingAttachments = $state(false);
 	let filteredCategories = $derived(
 		categories.filter((c: Category) => c.categoryType === categoryType)
 	);
@@ -86,6 +90,11 @@
 		},
 		onUpdate({ form }) {
 			if (form.valid) {
+				const txId = form.data.id;
+				if (txId && transactionPendingFiles.length > 0) {
+					uploadAndClose(txId, [...transactionPendingFiles]);
+					return;
+				}
 				resetDialog();
 				open = false;
 			}
@@ -99,6 +108,11 @@
 		validators: zod4(createTransferSchema),
 		onUpdate({ form }) {
 			if (form.valid) {
+				const txId = form.data.id;
+				if (txId && transferPendingFiles.length > 0) {
+					uploadAndClose(txId, [...transferPendingFiles]);
+					return;
+				}
 				resetDialog();
 				open = false;
 			}
@@ -115,10 +129,41 @@
 		reset: transferReset
 	} = transferForm;
 
+	async function uploadPendingFiles(transactionId: string, files: File[]) {
+		for (const file of files) {
+			try {
+				const fd = new FormData();
+				fd.append('file', file);
+				const response = await fetch(`/api/transactions/${transactionId}/attachments`, {
+					method: 'POST',
+					body: fd
+				});
+				if (!response.ok) {
+					toast.error($t('transactions.attachments.uploadError'));
+				}
+			} catch {
+				toast.error($t('transactions.attachments.uploadError'));
+			}
+		}
+	}
+
+	async function uploadAndClose(transactionId: string, files: File[]) {
+		uploadingAttachments = true;
+		try {
+			await uploadPendingFiles(transactionId, files);
+		} finally {
+			uploadingAttachments = false;
+			resetDialog();
+			open = false;
+		}
+	}
+
 	function resetDialog() {
 		transactionStep = 1;
 		categoryType = '';
 		category = undefined;
+		transactionPendingFiles = [];
+		transferPendingFiles = [];
 		reset();
 		transferReset();
 	}
@@ -251,9 +296,16 @@
 						bind:formData={$transferFormData}
 						enhance={transferEnhance}
 						{accounts}
+						bind:pendingFiles={transferPendingFiles}
 					/>
 				{:else}
-					<CreateTransactionForm {form} bind:formData={$formData} {enhance} {accounts} />
+					<CreateTransactionForm
+						{form}
+						bind:formData={$formData}
+						{enhance}
+						{accounts}
+						bind:pendingFiles={transactionPendingFiles}
+					/>
 				{/if}
 			</div>
 		{/if}
@@ -281,6 +333,7 @@
 						form="addTransferForm"
 						type="submit"
 						disabled={$transferDelayed ||
+							uploadingAttachments ||
 							!transferIsTainted($transferTainted?.account) ||
 							!transferIsTainted($transferTainted?.originAccount) ||
 							!transferIsTainted($transferTainted?.amount) ||
@@ -288,7 +341,9 @@
 							!transferIsTainted($transferTainted?.description) ||
 							!!$transferAllErrors.length}
 					>
-						{#if $transferDelayed}<LoaderCircle class="mr-1 animate-spin" />{/if}
+						{#if $transferDelayed || uploadingAttachments}<LoaderCircle
+								class="mr-1 animate-spin"
+							/>{/if}
 						{$t('common.save')}
 					</Button>
 				{:else}
@@ -297,13 +352,14 @@
 						form="addTransactionForm"
 						type="submit"
 						disabled={$delayed ||
+							uploadingAttachments ||
 							!isTainted($tainted?.account) ||
 							!isTainted($tainted?.amount) ||
 							!isTainted($tainted?.date) ||
 							!isTainted($tainted?.description) ||
 							!!$allErrors.length}
 					>
-						{#if $delayed}<LoaderCircle class="mr-1 animate-spin" />{/if}
+						{#if $delayed || uploadingAttachments}<LoaderCircle class="mr-1 animate-spin" />{/if}
 						{$t('common.save')}
 					</Button>
 				{/if}

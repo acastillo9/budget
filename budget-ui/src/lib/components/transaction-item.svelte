@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { formatCurrencyWithSymbol } from '$lib/utils/currency';
-	import { ArrowDownLeft, ArrowUpRight, Edit, Trash2 } from '@lucide/svelte';
+	import { ArrowDownLeft, ArrowUpRight, Edit, Paperclip, Trash2 } from '@lucide/svelte';
 	import CategoryBadge from './category-badge.svelte';
 	import CreatedByBadge from './created-by-badge.svelte';
 	import Button from './ui/button/button.svelte';
@@ -72,6 +72,12 @@
 					{/if}
 					{#if transaction.user}
 						<CreatedByBadge userName={transaction.user.name} />
+					{/if}
+					{#if transaction.attachmentCount && transaction.attachmentCount > 0}
+						<Badge variant="outline" class="gap-1">
+							<Paperclip class="h-3 w-3" />
+							{transaction.attachmentCount}
+						</Badge>
 					{/if}
 				</div>
 			</div>

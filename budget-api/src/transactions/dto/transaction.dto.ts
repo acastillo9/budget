@@ -74,4 +74,10 @@ export class TransactionDto {
   @ApiProperty({ description: 'Owner user', type: () => UserDto })
   @Type(() => UserDto)
   user: UserDto;
+
+  @ApiPropertyOptional({
+    description: 'Number of attachments on this transaction',
+    example: 2,
+  })
+  attachmentCount?: number;
 }

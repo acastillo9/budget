@@ -18,6 +18,7 @@ import { PaginationDto } from 'src/shared/dto/pagination.dto';
 import { PaginatedDataDto } from 'src/shared/dto/paginated-data.dto';
 import { UpdateTransferDto } from './dto/update-transfer.dto';
 import { ObjectId } from 'mongodb';
+import { AttachmentsService } from 'src/attachments/attachments.service';
 
 @Injectable()
 export class TransactionsService {
@@ -34,6 +35,7 @@ export class TransactionsService {
     @InjectModel(Category.name)
     private readonly categoryModel: Model<Category>,
     private readonly i18n: I18nService,
+    private readonly attachmentsService: AttachmentsService,
   ) {}
 
   async create(
@@ -269,10 +271,23 @@ export class TransactionsService {
         sort,
       });
       const total = await this.transactionModel.countDocuments(filter);
+
+      const transactionIds = transactions.map((t) => t._id.toString());
+      const attachmentCounts =
+        transactionIds.length > 0
+          ? await this.attachmentsService.countByTransactions(
+              transactionIds,
+              workspaceId,
+            )
+          : new Map<string, number>();
+
       return {
-        data: transactions.map((transaction) =>
-          plainToClass(TransactionDto, transaction.toObject()),
-        ),
+        data: transactions.map((transaction) => {
+          const dto = plainToClass(TransactionDto, transaction.toObject());
+          dto.attachmentCount =
+            attachmentCounts.get(transaction._id.toString()) || 0;
+          return dto;
+        }),
         total,
         limit,
         offset: skip,
@@ -588,12 +603,23 @@ export class TransactionsService {
       if (!deletedTransaction) {
         throw new HttpException('Transaction not found', HttpStatus.NOT_FOUND);
       }
-      return plainToClass(TransactionDto, deletedTransaction.toObject());
+      const s3Keys = await this.attachmentsService.removeAllByTransaction(
+        id,
+        wsId,
+        session,
+      );
+      return {
+        dto: plainToClass(TransactionDto, deletedTransaction.toObject()),
+        s3Keys,
+      };
     };
 
-    return session
-      ? removeFn(session)
-      : this.dbTransactionService.runTransaction(removeFn);
+    const result = session
+      ? await removeFn(session)
+      : await this.dbTransactionService.runTransaction(removeFn);
+
+    await this.attachmentsService.deleteS3Objects(result.s3Keys);
+    return result.dto;
   }
 
   async removeTransfer(
@@ -608,33 +634,51 @@ export class TransactionsService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return this.dbTransactionService.runTransaction(async (session) => {
-      await this.accountsService.addAccountBalance(
-        transaction.account.id,
-        -transaction.amount,
-        session,
-      );
-      await this.accountsService.addAccountBalance(
-        transaction.transfer.account.id,
-        -transaction.transfer.amount,
-        session,
-      );
-      const deletedTransaction = await this.transactionModel.findOneAndDelete(
-        { _id: id, workspace: workspaceId },
-        { session },
-      );
-      const deletedTransfer = await this.transactionModel.findOneAndDelete(
-        { _id: transaction.transfer.id, workspace: workspaceId },
-        { session },
-      );
-      if (!deletedTransaction || !deletedTransfer) {
-        throw new HttpException(
-          'Transfer transaction not found',
-          HttpStatus.NOT_FOUND,
+    const result = await this.dbTransactionService.runTransaction(
+      async (session) => {
+        await this.accountsService.addAccountBalance(
+          transaction.account.id,
+          -transaction.amount,
+          session,
         );
-      }
-      return plainToClass(TransactionDto, deletedTransaction.toObject());
-    });
+        await this.accountsService.addAccountBalance(
+          transaction.transfer.account.id,
+          -transaction.transfer.amount,
+          session,
+        );
+        const deletedTransaction = await this.transactionModel.findOneAndDelete(
+          { _id: id, workspace: workspaceId },
+          { session },
+        );
+        const deletedTransfer = await this.transactionModel.findOneAndDelete(
+          { _id: transaction.transfer.id, workspace: workspaceId },
+          { session },
+        );
+        if (!deletedTransaction || !deletedTransfer) {
+          throw new HttpException(
+            'Transfer transaction not found',
+            HttpStatus.NOT_FOUND,
+          );
+        }
+        const s3Keys1 = await this.attachmentsService.removeAllByTransaction(
+          id,
+          workspaceId,
+          session,
+        );
+        const s3Keys2 = await this.attachmentsService.removeAllByTransaction(
+          transaction.transfer.id,
+          workspaceId,
+          session,
+        );
+        return {
+          dto: plainToClass(TransactionDto, deletedTransaction.toObject()),
+          s3Keys: [...s3Keys1, ...s3Keys2],
+        };
+      },
+    );
+
+    await this.attachmentsService.deleteS3Objects(result.s3Keys);
+    return result.dto;
   }
 
   async getSummary(workspaceId: string): Promise<

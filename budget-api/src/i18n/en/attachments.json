@@ -1,0 +1,10 @@
+{
+  "fileRequired": "File is required.",
+  "fileTooLarge": "File is too large. Maximum size is 5MB.",
+  "unsupportedType": "Unsupported file type. Allowed: JPG, PNG, WebP, PDF.",
+  "maxAttachments": "Maximum of {max} attachments per transaction.",
+  "notFound": "Attachment not found.",
+  "uploadError": "Error uploading file.",
+  "downloadError": "Error downloading attachment. Please try again.",
+  "deleteError": "Error deleting attachment."
+}
