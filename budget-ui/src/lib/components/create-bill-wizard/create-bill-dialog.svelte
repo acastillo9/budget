@@ -170,9 +170,9 @@
 			/>
 		{:else}
 			<div class="space-y-4">
-				<div class="mb-4 flex items-center justify-between">
-					<h3 class="font-medium">{$t('bills.billDetails')}</h3>
-					<div class="flex items-center gap-2">
+				<div class="mb-4 flex flex-wrap items-center justify-between">
+					<h3 class="mb-2 font-medium">{$t('bills.billDetails')}</h3>
+					<div class="mb-2 flex flex-wrap items-center gap-2">
 						<Badge
 							variant={categoryType === 'INCOME'
 								? 'default'

@@ -211,9 +211,9 @@
 		{:else}
 			<!-- Step 2: Budget details form -->
 			<div class="space-y-4">
-				<div class="mb-4 flex items-center justify-between">
-					<h3 class="font-medium">{$t('budgets.budgetDetails')}</h3>
-					<div class="flex flex-wrap items-center gap-1">
+				<div class="mb-4 flex flex-wrap items-center justify-between">
+					<h3 class="mb-2 font-medium">{$t('budgets.budgetDetails')}</h3>
+					<div class="mb-2 flex flex-wrap items-center gap-1">
 						{#each selectedCategories.slice(0, 3) as cat (cat.id)}
 							<CategoryBadge category={cat} size="sm" />
 						{/each}
