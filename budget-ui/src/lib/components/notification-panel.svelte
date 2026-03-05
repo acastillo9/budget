@@ -45,7 +45,7 @@
 
 <Sheet.Root bind:open>
 	<Sheet.Content side="right" class="flex w-full flex-col sm:max-w-md">
-		<Sheet.Header class="border-b px-4 pb-3">
+		<Sheet.Header class="border-b px-4 pr-12 pb-3">
 			<div class="flex items-center justify-between">
 				<Sheet.Title>{$t('notifications.title')}</Sheet.Title>
 				<div class="flex items-center gap-1">
