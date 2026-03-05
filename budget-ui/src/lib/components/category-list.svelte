@@ -49,8 +49,8 @@
 										/>
 										<Icon class="h-6 w-6 shrink-0" />
 										<div class="min-w-0 flex-1 text-left">
-											<p class="font-medium">{category.name}</p>
-											<div class="flex items-center gap-2">
+											<p class="truncate font-medium">{category.name}</p>
+											<div class="flex flex-wrap items-center gap-2">
 												<Badge
 													variant={category.categoryType === 'INCOME' ? 'default' : 'destructive'}
 													class="text-xs"
@@ -102,16 +102,16 @@
 								</div>
 								<Collapsible.Content>
 									<div class="border-t px-4 pt-2 pb-3">
-										<div class="ml-8 grid gap-2">
+										<div class="ml-4 grid gap-2 sm:ml-8">
 											{#each category.children ?? [] as child (child.id)}
 												{@const ChildIcon = iconMap[child.icon as keyof typeof iconMap]}
 												<div class="flex items-center justify-between rounded-md border p-3">
-													<div class="flex items-center gap-3">
-														<ChildIcon class="h-5 w-5" />
-														<p class="text-sm font-medium">{child.name}</p>
+													<div class="flex min-w-0 flex-1 items-center gap-3">
+														<ChildIcon class="h-5 w-5 shrink-0" />
+														<p class="truncate text-sm font-medium">{child.name}</p>
 													</div>
 													{#if editable}
-														<div class="flex items-center gap-1">
+														<div class="flex shrink-0 items-center gap-1">
 															<Button
 																variant="ghost"
 																size="icon"
@@ -141,11 +141,11 @@
 						</Collapsible.Root>
 					{:else}
 						<div class="flex items-center justify-between rounded-lg border p-4">
-							<div class="flex items-center gap-3">
-								<Icon class="h-6 w-6" />
-								<div>
-									<p class="font-medium">{category.name}</p>
-									<div class="text-muted-foreground flex items-center gap-2 text-xs">
+							<div class="flex min-w-0 flex-1 items-center gap-3">
+								<Icon class="h-6 w-6 shrink-0" />
+								<div class="min-w-0">
+									<p class="truncate font-medium">{category.name}</p>
+									<div class="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
 										<Badge
 											variant={category.categoryType === 'INCOME' ? 'default' : 'destructive'}
 											class="text-xs"
@@ -159,7 +159,7 @@
 								</div>
 							</div>
 							{#if editable}
-								<div class="flex items-center gap-1">
+								<div class="flex shrink-0 items-center gap-1">
 									<Button
 										variant="ghost"
 										size="icon"
