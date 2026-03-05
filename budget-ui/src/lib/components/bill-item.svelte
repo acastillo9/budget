@@ -48,7 +48,7 @@
 	);
 
 	let itemClasses = $derived.by(() => {
-		let classes = 'flex items-center justify-between gap-4 rounded-lg border p-4 ';
+		let classes = 'flex flex-col gap-3 overflow-hidden rounded-lg border p-4 md:flex-row md:items-center md:justify-between md:gap-4 ';
 		if (bill.status === BillStatus.OVERDUE) {
 			classes += 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950';
 		} else if (bill.status === BillStatus.DUE || useYellowForUpcoming) {
@@ -67,7 +67,7 @@
 </script>
 
 <div class={itemClasses}>
-	<div class="flex w-full items-center gap-4">
+	<div class="flex w-full min-w-0 items-center gap-4">
 		{#if bill.status === 'OVERDUE'}
 			<div class="rounded-full bg-red-100 p-2 dark:bg-red-900">
 				<Icon class="h-4 w-4 text-red-600" />
@@ -86,9 +86,9 @@
 			</div>
 		{/if}
 		<div
-			class="flex w-full flex-col items-start gap-2 md:flex-row md:items-center md:justify-between"
+			class="flex w-full min-w-0 flex-col items-start gap-2 md:flex-row md:items-center md:justify-between"
 		>
-			<div class="flex-flex-col-gap-1">
+			<div class="flex flex-col gap-1">
 				<div>
 					<p
 						class={`font-medium ${
@@ -212,7 +212,7 @@
 		</div>
 	</div>
 	{#if editable}
-		<div class="flex items-center gap-3">
+		<div class="flex shrink-0 items-center gap-3 self-end md:self-auto">
 			<div class="flex items-center gap-2">
 				{#if bill.status !== BillStatus.PAID}
 					<Button
