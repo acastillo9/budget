@@ -1,0 +1,14 @@
+{
+  "subject": "Low Balance Alert: {{accountName}}",
+  "preheader": "Your account {{accountName}} balance is below the threshold.",
+  "heading": "Low Account Balance",
+  "greeting": "Hi there,",
+  "instruction": "One of your accounts has a balance below your configured threshold.",
+  "accountName": "Account: {{accountName}}",
+  "balance": "Current Balance: {{balance}}",
+  "threshold": "Threshold: {{threshold}}",
+  "button": "View Accounts",
+  "regards": "Best regards,",
+  "signature": "The Budget Team.",
+  "rightsReserved": "All rights reserved."
+}

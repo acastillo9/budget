@@ -1,0 +1,13 @@
+{
+  "subject": "Factura recurrente por finalizar: {{billName}}",
+  "preheader": "Tu factura recurrente {{billName}} está por finalizar.",
+  "heading": "Factura recurrente por finalizar",
+  "greeting": "Hola,",
+  "instruction": "Una de tus facturas recurrentes está por finalizar. Revísala para decidir si necesitas renovarla o hacer cambios.",
+  "billName": "Factura: {{billName}}",
+  "endDate": "Fecha de finalización: {{endDate}}",
+  "button": "Ver facturas",
+  "regards": "Un saludo,",
+  "signature": "El equipo de Budget App.",
+  "rightsReserved": "Todos los derechos reservados."
+}

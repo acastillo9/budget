@@ -1,0 +1,6 @@
+# Documentation: Notification System & Multi-Channel Alerts
+
+## Created Diagrams
+- budget-api/docs/class-diagram.notifications-design.md — Class diagram showing all entities (Notification, NotificationPreference, NotificationLock), DTOs (input and response), services (NotificationsService, NotificationDispatcher), channel strategies (ChannelStrategy interface, InAppChannel, EmailChannel), event handlers (TransactionNotificationHandler, WorkspaceNotificationHandler), scheduled jobs (BillScannerJob, BudgetCheckerJob, LowBalanceJob, MonthlySummaryJob, NotificationCleanupJob), the NotificationType enum, and all relationships between them
+- budget-api/docs/sequence-diagram.notification-flow.md — Sequence diagram showing the primary end-to-end user flow: transaction creation, event emission via EventEmitter2, handler processing with budget threshold check, dispatcher preference resolution and deduplication, multi-channel delivery (in-app persistence and email), UI polling for unread count, panel display, and mark-as-read interaction
+- budget-api/docs/er-diagram.notifications-design.md — ER diagram showing three new database collections (Notification, NotificationPreference, NotificationLock) with their fields, keys, and relationships to existing collections (User, Workspace, Bill, Budget, Account, Transaction)

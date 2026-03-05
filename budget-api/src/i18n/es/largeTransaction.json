@@ -1,0 +1,15 @@
+{
+  "subject": "Alerta de transacción grande",
+  "preheader": "Se registró una transacción grande de {{amount}}.",
+  "heading": "Transacción grande detectada",
+  "greeting": "Hola,",
+  "instruction": "Se ha registrado una transacción por encima del umbral configurado.",
+  "amount": "Monto: {{amount}}",
+  "description": "Descripción: {{description}}",
+  "accountName": "Cuenta: {{accountName}}",
+  "date": "Fecha: {{date}}",
+  "button": "Ver transacciones",
+  "regards": "Un saludo,",
+  "signature": "El equipo de Budget App.",
+  "rightsReserved": "Todos los derechos reservados."
+}

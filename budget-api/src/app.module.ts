@@ -16,6 +16,9 @@ import { BillsModule } from './bills/bills.module';
 import { BudgetsModule } from './budgets/budgets.module';
 import { WorkspacesModule } from './workspaces/workspaces.module';
 import { AttachmentsModule } from './attachments/attachments.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 
 @Module({
@@ -46,6 +49,9 @@ import { AppController } from './app.controller';
     BudgetsModule,
     WorkspacesModule,
     AttachmentsModule,
+    EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [],

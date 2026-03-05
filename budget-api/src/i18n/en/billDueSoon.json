@@ -1,0 +1,15 @@
+{
+  "subject": "Bill Due Soon: {{billName}}",
+  "preheader": "Your bill {{billName}} is due in {{daysUntilDue}} day(s).",
+  "heading": "Bill Due Soon",
+  "greeting": "Hi there,",
+  "instruction": "You have an upcoming bill due soon. Make sure you're prepared to pay it on time.",
+  "billName": "Bill: {{billName}}",
+  "amount": "Amount: {{amount}}",
+  "dueDate": "Due Date: {{dueDate}}",
+  "daysUntilDue": "Due in: {{daysUntilDue}} day(s)",
+  "button": "View Bills",
+  "regards": "Best regards,",
+  "signature": "The Budget Team.",
+  "rightsReserved": "All rights reserved."
+}

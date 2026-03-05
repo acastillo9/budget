@@ -1,0 +1,15 @@
+{
+  "subject": "Alerta de presupuesto: {{budgetName}} al {{percentUsed}}%",
+  "preheader": "Tu presupuesto {{budgetName}} ha alcanzado el {{percentUsed}}% del límite.",
+  "heading": "Umbral de presupuesto alcanzado",
+  "greeting": "Hola,",
+  "instruction": "Tu presupuesto se está acercando a su límite. Considera revisar tus gastos.",
+  "budgetName": "Presupuesto: {{budgetName}}",
+  "spent": "Gastado: {{spent}}",
+  "limit": "Límite: {{limit}}",
+  "percentUsed": "Usado: {{percentUsed}}%",
+  "button": "Ver presupuestos",
+  "regards": "Un saludo,",
+  "signature": "El equipo de Budget App.",
+  "rightsReserved": "Todos los derechos reservados."
+}

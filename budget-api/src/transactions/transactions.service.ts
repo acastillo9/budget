@@ -18,6 +18,7 @@ import { PaginationDto } from 'src/shared/dto/pagination.dto';
 import { PaginatedDataDto } from 'src/shared/dto/paginated-data.dto';
 import { UpdateTransferDto } from './dto/update-transfer.dto';
 import { ObjectId } from 'mongodb';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AttachmentsService } from 'src/attachments/attachments.service';
 
 @Injectable()
@@ -36,6 +37,7 @@ export class TransactionsService {
     private readonly categoryModel: Model<Category>,
     private readonly i18n: I18nService,
     private readonly attachmentsService: AttachmentsService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(
@@ -96,9 +98,23 @@ export class TransactionsService {
     };
 
     try {
-      return session
-        ? saveTransactionFn(session)
-        : this.dbTransactionService.runTransaction(saveTransactionFn);
+      const result = session
+        ? await saveTransactionFn(session)
+        : await this.dbTransactionService.runTransaction(saveTransactionFn);
+
+      // Emit event after successful transaction creation
+      if (!session) {
+        this.eventEmitter.emit('transaction.created', {
+          transaction: result,
+          userId,
+          workspaceId,
+          accountId: createTransactionDto.account,
+          categoryId: createTransactionDto.category || result.category?.id,
+          amount: result.amount,
+        });
+      }
+
+      return result;
     } catch (error) {
       this.logger.error(
         `Failed to create transaction: ${error.message}`,

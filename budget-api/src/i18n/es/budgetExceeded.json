@@ -1,0 +1,15 @@
+{
+  "subject": "Presupuesto excedido: {{budgetName}}",
+  "preheader": "Tu presupuesto {{budgetName}} ha sido excedido.",
+  "heading": "Presupuesto excedido",
+  "greeting": "Hola,",
+  "instruction": "Tu presupuesto ha sido excedido. Revisa tus gastos para retomar el control.",
+  "budgetName": "Presupuesto: {{budgetName}}",
+  "spent": "Gastado: {{spent}}",
+  "limit": "Límite: {{limit}}",
+  "percentUsed": "Usado: {{percentUsed}}%",
+  "button": "Ver presupuestos",
+  "regards": "Un saludo,",
+  "signature": "El equipo de Budget App.",
+  "rightsReserved": "Todos los derechos reservados."
+}

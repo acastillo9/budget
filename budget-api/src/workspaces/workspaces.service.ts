@@ -18,6 +18,7 @@ import { MailService } from 'src/mail/mail.service';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from 'src/users/users.service';
 import { I18nService } from 'nestjs-i18n';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class WorkspacesService {
@@ -34,6 +35,7 @@ export class WorkspacesService {
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
     private readonly i18n: I18nService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async createDefaultWorkspace(
@@ -345,6 +347,15 @@ export class WorkspacesService {
           inviteLink,
           year: new Date().getFullYear(),
         },
+      });
+
+      // Emit event for notification system
+      const invitedByUser = await this.usersService.findById(invitedByUserId);
+      this.eventEmitter.emit('workspace.invitation.created', {
+        invitation: savedInvitation,
+        workspaceId,
+        invitedUserId: existingUser?.id,
+        invitedByName: invitedByUser?.name || 'Someone',
       });
 
       return plainToClass(InvitationDto, savedInvitation.toObject());

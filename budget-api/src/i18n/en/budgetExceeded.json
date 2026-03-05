@@ -1,0 +1,15 @@
+{
+  "subject": "Budget Exceeded: {{budgetName}}",
+  "preheader": "Your budget {{budgetName}} has been exceeded.",
+  "heading": "Budget Exceeded",
+  "greeting": "Hi there,",
+  "instruction": "Your budget has been exceeded. Please review your spending to get back on track.",
+  "budgetName": "Budget: {{budgetName}}",
+  "spent": "Spent: {{spent}}",
+  "limit": "Limit: {{limit}}",
+  "percentUsed": "Used: {{percentUsed}}%",
+  "button": "View Budgets",
+  "regards": "Best regards,",
+  "signature": "The Budget Team.",
+  "rightsReserved": "All rights reserved."
+}

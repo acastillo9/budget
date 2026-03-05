@@ -1,0 +1,17 @@
+{
+  "subject": "Resumen mensual: {{month}}",
+  "preheader": "Tu resumen financiero mensual de {{month}}.",
+  "heading": "Resumen mensual",
+  "greeting": "Hola,",
+  "instruction": "Aquí tienes tu resumen financiero del mes pasado.",
+  "month": "Mes: {{month}}",
+  "totalIncome": "Ingresos totales: {{totalIncome}}",
+  "totalExpenses": "Gastos totales: {{totalExpenses}}",
+  "netSavings": "Ahorro neto: {{netSavings}}",
+  "topCategories": "Categorías principales",
+  "billsPaid": "Facturas pagadas",
+  "button": "Ver detalles",
+  "regards": "Un saludo,",
+  "signature": "El equipo de Budget App.",
+  "rightsReserved": "Todos los derechos reservados."
+}

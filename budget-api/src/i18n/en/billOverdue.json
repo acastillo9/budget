@@ -1,0 +1,14 @@
+{
+  "subject": "Bill Overdue: {{billName}}",
+  "preheader": "Your bill {{billName}} is overdue.",
+  "heading": "Bill Overdue",
+  "greeting": "Hi there,",
+  "instruction": "Your bill is past its due date. Please take action to avoid late fees.",
+  "billName": "Bill: {{billName}}",
+  "amount": "Amount: {{amount}}",
+  "dueDate": "Due Date: {{dueDate}}",
+  "button": "View Bills",
+  "regards": "Best regards,",
+  "signature": "The Budget Team.",
+  "rightsReserved": "All rights reserved."
+}

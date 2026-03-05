@@ -1,0 +1,17 @@
+{
+  "subject": "Monthly Summary: {{month}}",
+  "preheader": "Your monthly financial summary for {{month}}.",
+  "heading": "Monthly Summary",
+  "greeting": "Hi there,",
+  "instruction": "Here's your financial summary for the past month.",
+  "month": "Month: {{month}}",
+  "totalIncome": "Total Income: {{totalIncome}}",
+  "totalExpenses": "Total Expenses: {{totalExpenses}}",
+  "netSavings": "Net Savings: {{netSavings}}",
+  "topCategories": "Top Categories",
+  "billsPaid": "Bills Paid",
+  "button": "View Details",
+  "regards": "Best regards,",
+  "signature": "The Budget Team.",
+  "rightsReserved": "All rights reserved."
+}

@@ -1,0 +1,14 @@
+{
+  "subject": "Factura vencida: {{billName}}",
+  "preheader": "Tu factura {{billName}} está vencida.",
+  "heading": "Factura vencida",
+  "greeting": "Hola,",
+  "instruction": "Tu factura ha pasado su fecha de vencimiento. Toma acción para evitar cargos por mora.",
+  "billName": "Factura: {{billName}}",
+  "amount": "Monto: {{amount}}",
+  "dueDate": "Fecha de vencimiento: {{dueDate}}",
+  "button": "Ver facturas",
+  "regards": "Un saludo,",
+  "signature": "El equipo de Budget App.",
+  "rightsReserved": "Todos los derechos reservados."
+}

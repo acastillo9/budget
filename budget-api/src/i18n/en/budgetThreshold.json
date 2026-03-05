@@ -1,0 +1,15 @@
+{
+  "subject": "Budget Alert: {{budgetName}} at {{percentUsed}}%",
+  "preheader": "Your budget {{budgetName}} has reached {{percentUsed}}% of the limit.",
+  "heading": "Budget Threshold Reached",
+  "greeting": "Hi there,",
+  "instruction": "Your budget is approaching its limit. Consider reviewing your spending.",
+  "budgetName": "Budget: {{budgetName}}",
+  "spent": "Spent: {{spent}}",
+  "limit": "Limit: {{limit}}",
+  "percentUsed": "Used: {{percentUsed}}%",
+  "button": "View Budgets",
+  "regards": "Best regards,",
+  "signature": "The Budget Team.",
+  "rightsReserved": "All rights reserved."
+}
