@@ -34,10 +34,24 @@
 	// For current month: show DUE and UPCOMING in "Due Soon"
 	// For other months: show DUE and UPCOMING in "Upcoming Bills"
 	let pendingBills = $derived(
-		bills.filter((bill) => bill.status === BillStatus.DUE || bill.status === BillStatus.UPCOMING)
+		bills
+			.filter((bill) => bill.status === BillStatus.DUE || bill.status === BillStatus.UPCOMING)
+			.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
 	);
-	let overdueBills = $derived(bills.filter((bill) => bill.status === BillStatus.OVERDUE));
-	let paidBills = $derived(bills.filter((bill) => bill.status === BillStatus.PAID));
+	let overdueBills = $derived(
+		bills
+			.filter((bill) => bill.status === BillStatus.OVERDUE)
+			.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+	);
+	let paidBills = $derived(
+		bills
+			.filter((bill) => bill.status === BillStatus.PAID)
+			.sort(
+				(a, b) =>
+					new Date(b.paidDate ?? b.dueDate).getTime() -
+					new Date(a.paidDate ?? a.dueDate).getTime()
+			)
+	);
 </script>
 
 <Card.Root class="mb-4">
