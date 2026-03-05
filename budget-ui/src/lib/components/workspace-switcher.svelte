@@ -23,9 +23,15 @@
 		return $t('workspaces.ownerWorkspaceName', { values: { name: workspace.owner.name } });
 	}
 
+	function closeMobileSidebar() {
+		if (sidebar.isMobile) {
+			sidebar.setOpenMobile(false);
+		}
+	}
+
 	async function switchWorkspace(workspace: Workspace) {
 		if (workspace.id === currentWorkspace?.id) return;
-
+		closeMobileSidebar();
 		document.cookie = `X-Workspace-Id=${workspace.id}; path=/; SameSite=Strict`;
 		await invalidateAll();
 	}
@@ -77,7 +83,7 @@
 					</DropdownMenu.Item>
 				{/each}
 				<DropdownMenu.Separator />
-				<DropdownMenu.Item onSelect={() => goto('/workspaces')}>
+				<DropdownMenu.Item onSelect={() => { closeMobileSidebar(); goto('/workspaces'); }}>
 					<SettingsIcon class="mr-2 size-4" />
 					{$t('workspaces.settings')}
 				</DropdownMenu.Item>
