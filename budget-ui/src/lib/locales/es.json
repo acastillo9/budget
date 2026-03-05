@@ -498,6 +498,15 @@
 			"unsupportedType": "Tipo de archivo no soportado. Por favor sube un JPG, PNG, WebP o PDF.",
 			"count": "{count} adjunto | {count} adjuntos"
 		},
+		"detail": {
+			"notes": "Notas",
+			"attachments": "Adjuntos",
+			"createdAt": "Creado",
+			"updatedAt": "Actualizado",
+			"transferLinkedAccount": "Cuenta vinculada",
+			"loadingAttachments": "Cargando adjuntos...",
+			"loadAttachmentsError": "Error al cargar adjuntos. Toca para reintentar."
+		},
 		"filters": {
 			"account": "Cuenta",
 			"allAccounts": "Todas las cuentas",

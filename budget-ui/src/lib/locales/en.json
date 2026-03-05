@@ -498,6 +498,15 @@
 			"unsupportedType": "Unsupported file type. Please upload a JPG, PNG, WebP, or PDF.",
 			"count": "{count} attachment | {count} attachments"
 		},
+		"detail": {
+			"notes": "Notes",
+			"attachments": "Attachments",
+			"createdAt": "Created",
+			"updatedAt": "Updated",
+			"transferLinkedAccount": "Linked account",
+			"loadingAttachments": "Loading attachments...",
+			"loadAttachmentsError": "Failed to load attachments. Tap to retry."
+		},
 		"filters": {
 			"account": "Account",
 			"allAccounts": "All accounts",

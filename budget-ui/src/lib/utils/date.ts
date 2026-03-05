@@ -9,3 +9,7 @@ export function formatUTCStringDateWithLocal(dateString: string): string {
 	const date = dayjs(dateString);
 	return date.utc().format('L');
 }
+
+export function formatDateTimeLocal(dateString: string): string {
+	return dayjs(dateString).format('L LT');
+}

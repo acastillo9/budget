@@ -379,8 +379,8 @@ export class TransactionsPage {
 		await this.page.waitForLoadState('networkidle');
 		const item = this.getTransactionItem(description);
 		await expect(item).toBeVisible({ timeout: 10_000 });
-		// The edit button is the first button in the transaction item's action area
-		await item.getByRole('button').first().click();
+		// Use locator('button') to match only real <button> elements, skipping the div[role="button"] expandable row
+		await item.locator('button').first().click();
 		await expect(this.dialog).toBeVisible({ timeout: 10_000 });
 	}
 

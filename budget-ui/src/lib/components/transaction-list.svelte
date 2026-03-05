@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import { t } from 'svelte-i18n';
-	import type { Transaction } from '$lib/types/transactions.types';
+	import type { Transaction, Attachment } from '$lib/types/transactions.types';
 	import { DollarSign } from '@lucide/svelte';
 	import TransactionItem from './transaction-item.svelte';
 	import type { Rates } from '$lib/types';
@@ -23,6 +23,24 @@
 		onEdit = () => {},
 		onDelete = () => {}
 	}: Props = $props();
+
+	let expandedTransactionId = $state<string | null>(null);
+	const attachmentCache = new Map<string, Attachment[]>();
+
+	function toggleExpand(id: string) {
+		expandedTransactionId = expandedTransactionId === id ? null : id;
+	}
+
+	async function fetchAttachments(transactionId: string): Promise<Attachment[]> {
+		const cached = attachmentCache.get(transactionId);
+		if (cached) return cached;
+
+		const response = await fetch(`/api/transactions/${transactionId}/attachments`);
+		if (!response.ok) throw new Error('Failed to fetch attachments');
+		const attachments: Attachment[] = await response.json();
+		attachmentCache.set(transactionId, attachments);
+		return attachments;
+	}
 </script>
 
 <Card.Root class="mb-4">
@@ -45,6 +63,9 @@
 						{transaction}
 						{editable}
 						{rates}
+						expanded={expandedTransactionId === transaction.id}
+						onToggleExpand={() => toggleExpand(transaction.id)}
+						{fetchAttachments}
 						onEdit={() => onEdit(transaction)}
 						onDelete={() => onDelete(transaction)}
 					/>
