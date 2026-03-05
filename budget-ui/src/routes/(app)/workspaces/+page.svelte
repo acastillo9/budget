@@ -113,7 +113,7 @@
 </svelte:head>
 
 <div class="mx-auto w-full max-w-4xl space-y-6">
-	<div class="flex items-center justify-between">
+	<div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
 		<div>
 			<h1 class="text-2xl font-bold tracking-tight">{$t('workspaces.title')}</h1>
 			<p class="text-muted-foreground text-sm">{$t('workspaces.description')}</p>
@@ -133,28 +133,28 @@
 			<div class="space-y-4">
 				{#each members as member}
 					<div class="flex items-center justify-between">
-						<div class="flex items-center gap-3">
+						<div class="flex min-w-0 flex-1 items-center gap-3">
 							<div
-								class="bg-muted flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium"
+								class="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-medium"
 							>
 								{member.user?.name
 									?.split(' ')
 									.map((w) => w.charAt(0).toUpperCase())
 									.join('') ?? '?'}
 							</div>
-							<div>
-								<p class="text-sm font-medium">{member.user?.name ?? member.user?.email}</p>
-								<p class="text-muted-foreground text-xs">{member.user?.email}</p>
+							<div class="min-w-0">
+								<p class="truncate text-sm font-medium">{member.user?.name ?? member.user?.email}</p>
+								<p class="text-muted-foreground truncate text-xs">{member.user?.email}</p>
 							</div>
 						</div>
-						<div class="flex items-center gap-2">
+						<div class="flex shrink-0 items-center gap-2">
 							{#if isOwner && member.role !== 'OWNER'}
 								<Select.Root
 									type="single"
 									value={member.role}
 									onValueChange={(value) => updateMemberRole(member.id, value as WorkspaceRole)}
 								>
-									<Select.Trigger class="w-36">
+									<Select.Trigger class="w-28 sm:w-36">
 										{$t(`workspaces.roles.${member.role}`)}
 									</Select.Trigger>
 									<Select.Content>
@@ -188,14 +188,14 @@
 				<div class="space-y-4">
 					{#each invitations as invitation}
 						<div class="flex items-center justify-between">
-							<div class="flex items-center gap-3">
+							<div class="flex min-w-0 flex-1 items-center gap-3">
 								<div
-									class="bg-muted flex h-10 w-10 items-center justify-center rounded-full text-sm"
+									class="bg-muted flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm"
 								>
 									<MailIcon class="h-4 w-4" />
 								</div>
-								<div>
-									<p class="text-sm font-medium">{invitation.email}</p>
+								<div class="min-w-0">
+									<p class="truncate text-sm font-medium">{invitation.email}</p>
 									<p class="text-muted-foreground text-xs">
 										{$t(`workspaces.roles.${invitation.role}`)}
 									</p>
@@ -204,6 +204,7 @@
 							<Button
 								variant="ghost"
 								size="icon"
+								class="shrink-0"
 								onclick={() => confirmRevokeInvitation(invitation)}
 							>
 								<XIcon class="h-4 w-4" />
