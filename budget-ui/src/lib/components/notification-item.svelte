@@ -84,7 +84,9 @@
 			{timeAgo}
 		</p>
 	</div>
-	<div class="flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+	<div
+		class="flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-100 [@media(pointer:coarse)]:opacity-100"
+	>
 		<Button variant="ghost" size="icon" class="h-7 w-7" onclick={handleDelete}>
 			<Trash2 class="h-3.5 w-3.5" />
 		</Button>
