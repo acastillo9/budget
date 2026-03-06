@@ -50,10 +50,18 @@
 			</Card.Header>
 			<Card.Content class="grid gap-4 pb-0">
 				{#if step === 1}
-					<Button variant="outline" class="mb-4 w-full" href="/google">
+					<Button variant="outline" class="w-full" href="/google">
 						<Google class="mr-2 h-4 w-4" />
 						Google
 					</Button>
+					<p class="text-muted-foreground mb-4 text-center text-xs">
+						{@html $t('legal.googleConsentNote', {
+							values: {
+								termsLink: `<a href="/terms" target="_blank" class="text-primary underline underline-offset-2 hover:opacity-80">${$t('legal.termsLink')}</a>`,
+								privacyLink: `<a href="/privacy" target="_blank" class="text-primary underline underline-offset-2 hover:opacity-80">${$t('legal.privacyLink')}</a>`
+							}
+						})}
+					</p>
 					<div class="relative">
 						<div class="absolute inset-0 flex items-center">
 							<span class="w-full border-t"></span>

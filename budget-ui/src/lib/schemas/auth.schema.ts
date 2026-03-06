@@ -9,7 +9,12 @@ export const signupFormSchema = z.object({
 		.min(1, { error: () => $t('signUp.validation.nameIsRequired') })
 		.max(200),
 	email: z.string().email(),
-	currencyCode: z.enum(currencyCodes)
+	currencyCode: z.enum(currencyCodes),
+	termsAccepted: z
+		.boolean({ error: () => $t('signUp.validation.termsRequired') })
+		.refine((val) => val === true, {
+			error: () => $t('signUp.validation.termsRequired')
+		})
 });
 
 export type SignupFormSchema = z.infer<typeof signupFormSchema>;

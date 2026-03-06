@@ -405,6 +405,33 @@
 		"signOutError": "Error signing out. Please try again.",
 		"signOutSuccess": "You have been signed out successfully."
 	},
+	"legal": {
+		"termsOfService": "Terms of Service",
+		"privacyPolicy": "Privacy Policy",
+		"lastUpdated": "Last updated: {date}",
+		"version": "Version {version}",
+		"loadError": "Error loading legal content. Please try again later.",
+		"loading": "Loading...",
+		"consentCheckbox": "I agree to the {termsLink} and {privacyLink}",
+		"termsLink": "Terms of Service",
+		"privacyLink": "Privacy Policy",
+		"googleConsentNote": "By signing up with Google, you agree to our {termsLink} and {privacyLink}",
+		"settings": {
+			"title": "Legal & Privacy",
+			"description": "Your legal documents and consent history",
+			"viewTerms": "View Terms of Service",
+			"viewPrivacy": "View Privacy Policy",
+			"consentStatus": "Consent Status",
+			"upToDate": "Up to date",
+			"actionRequired": "Action required",
+			"consentHistory": "Consent History",
+			"noHistory": "No consent history available.",
+			"acceptedOn": "Accepted on {date}",
+			"documentTitle": "Document",
+			"versionColumn": "Version",
+			"dateColumn": "Date Accepted"
+		}
+	},
 	"signUp": {
 		"activationCode": "Activation Code",
 		"activationCodeSent": "An activation code has been sent to your email",
@@ -431,7 +458,8 @@
 			"emailAlreadyExists": "An account with this email already exists.",
 			"nameIsRequired": "Name is required",
 			"passwordMinLength": "Password must be at least 8 characters long.",
-			"passwordMustContainUppercase": "Password must contain at least one uppercase letter."
+			"passwordMustContainUppercase": "Password must contain at least one uppercase letter.",
+			"termsRequired": "You must accept the Terms of Service and Privacy Policy to create an account."
 		}
 	},
 	"transactions": {

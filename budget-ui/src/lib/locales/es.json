@@ -405,6 +405,33 @@
 		"signOutError": "Error al cerrar sesión. Por favor, inténtalo de nuevo.",
 		"signOutSuccess": "Has cerrado sesión exitosamente."
 	},
+	"legal": {
+		"termsOfService": "Términos de Servicio",
+		"privacyPolicy": "Política de Privacidad",
+		"lastUpdated": "Última actualización: {date}",
+		"version": "Versión {version}",
+		"loadError": "Error al cargar el contenido legal. Por favor intenta de nuevo.",
+		"loading": "Cargando...",
+		"consentCheckbox": "Acepto los {termsLink} y la {privacyLink}",
+		"termsLink": "Términos de Servicio",
+		"privacyLink": "Política de Privacidad",
+		"googleConsentNote": "Al registrarte con Google, aceptas nuestros {termsLink} y {privacyLink}",
+		"settings": {
+			"title": "Legal y Privacidad",
+			"description": "Tus documentos legales e historial de consentimiento",
+			"viewTerms": "Ver Términos de Servicio",
+			"viewPrivacy": "Ver Política de Privacidad",
+			"consentStatus": "Estado de Consentimiento",
+			"upToDate": "Al día",
+			"actionRequired": "Acción requerida",
+			"consentHistory": "Historial de Consentimiento",
+			"noHistory": "No hay historial de consentimiento disponible.",
+			"acceptedOn": "Aceptado el {date}",
+			"documentTitle": "Documento",
+			"versionColumn": "Versión",
+			"dateColumn": "Fecha de Aceptación"
+		}
+	},
 	"signUp": {
 		"activationCode": "Código de activación",
 		"activationCodeSent": "Se ha enviado un código de activación a tu correo",
@@ -431,7 +458,8 @@
 			"emailAlreadyExists": "Ya existe una cuenta con este correo electrónico.",
 			"nameIsRequired": "El nombre es obligatorio",
 			"passwordMinLength": "La contraseña debe tener al menos 8 caracteres.",
-			"passwordMustContainUppercase": "La contraseña debe contener al menos una letra mayúscula."
+			"passwordMustContainUppercase": "La contraseña debe contener al menos una letra mayúscula.",
+			"termsRequired": "Debes aceptar los Términos de Servicio y la Política de Privacidad para crear una cuenta."
 		}
 	},
 	"transactions": {

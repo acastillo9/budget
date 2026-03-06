@@ -1,0 +1,8 @@
+{
+  "termsOfService": "Terms of Service",
+  "privacyPolicy": "Privacy Policy",
+  "termsNotFound": "Terms version not found",
+  "errorGettingTerms": "Error getting terms",
+  "errorRecordingConsent": "Error recording consent",
+  "consentRecorded": "Consent recorded successfully"
+}

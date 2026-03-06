@@ -11,6 +11,7 @@
 	import { t } from 'svelte-i18n';
 	import { signupFormSchema } from '$lib/schemas/auth.schema';
 	import { currencies } from '$lib/utils/currency';
+	import ConsentCheckbox from '$lib/components/consent-checkbox.svelte';
 	import type { SuperValidated, Infer } from 'sveltekit-superforms';
 
 	let {
@@ -98,7 +99,7 @@
 		<Form.FieldErrors />
 	</Form.Field>
 	<div>
-		<Label>{$t('signUp.currency')}</Label>
+		<Label class="mb-2">{$t('signUp.currency')}</Label>
 		<Select.Root type="single" bind:value={$formData.currencyCode} name="currencyCode">
 			<Select.Trigger class="w-full">
 				{#each currencies as c (c.code)}
@@ -118,6 +119,13 @@
 		</Select.Root>
 	</div>
 
+	<div class="mt-4">
+		<ConsentCheckbox bind:checked={$formData.termsAccepted} error={$errors.termsAccepted?.[0]} />
+		{#if $formData.termsAccepted}
+			<input type="hidden" name="termsAccepted" value="on" />
+		{/if}
+	</div>
+
 	<Button
 		class="mt-5 w-full"
 		type="submit"
@@ -125,6 +133,7 @@
 		disabled={$delayed ||
 			!isTainted($tainted?.name) ||
 			!isTainted($tainted?.email) ||
+			!$formData.termsAccepted ||
 			!!$allErrors.length}
 	>
 		{#if $delayed}<LoaderCircle class="mr-1 animate-spin" />{/if}

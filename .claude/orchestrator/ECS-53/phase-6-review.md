@@ -1,0 +1,45 @@
+# Code Review: Terms of Service, Privacy Policy & User Consent System
+
+## Critical
+
+- **[budget-api/src/auth/auth.controller.ts:380-383]** *(Security / Error Handling)* — Operator precedence bug in `googleAuthRedirect`. The expression `req.user.locale || acceptLanguage ? acceptLanguage.split(',')[0] : 'en-US'` is parsed as `(req.user.locale || acceptLanguage) ? acceptLanguage.split(',')[0] : 'en-US'`. When `req.user.locale` is truthy but `acceptLanguage` is `undefined`, this evaluates the ternary as truthy and calls `undefined.split(',')`, which throws a runtime TypeError and crashes the Google OAuth callback. **Fix:** Add parentheses: `req.user.locale || (acceptLanguage ? acceptLanguage.split(',')[0] : 'en-US')`.
+
+- **[budget-api/src/terms/dto/user-consent.dto.ts:29-39]** *(Security / Privacy)* — The `ipAddress` and `userAgent` fields are exposed via `@Expose()` in the response DTO. These are PII (Personally Identifiable Information) that are returned in the `/terms/consent/history` endpoint response. IP addresses and user agents should be stored for legal audit purposes but not returned to the client API. A compromised token or XSS could leak this data. **Fix:** Remove `@Expose()` from `ipAddress` and `userAgent` fields, or remove them from the DTO entirely. They will be excluded by the class-level `@Exclude()` decorator.
+
+- **[budget-api/src/terms/terms.service.ts:39,67,121,166,220,246]** *(TypeScript)* — All `catch` blocks reference `error.message` and `error.stack` without type-narrowing. The `error` parameter is implicitly typed as `unknown` in strict TypeScript. While ESLint may not flag this currently, it could fail with stricter tsconfig settings. More importantly, if a non-Error object is thrown, accessing `.message` yields `undefined` rather than useful debug info. **Fix:** Add type guard: `const msg = error instanceof Error ? error.message : String(error)` and similarly for stack.
+
+## Warning
+
+- **[budget-ui/src/routes/(auth)/terms/+page.server.ts:10]** *(i18n)* — The `/terms` page fetches active terms from `${API_URL}/terms/active` without passing a `locale` query parameter. The API defaults to English. Users with a Spanish browser locale will see English legal content on a page that is otherwise localized. The same issue exists in `/privacy/+page.server.ts`. **Fix:** Extract locale from the request (via `event.request.headers.get('accept-language')`) and pass it as `?locale=en` or `?locale=es` to the API call.
+
+- **[budget-ui/src/routes/(app)/workspaces/+page.server.ts:32-48]** *(Code Quality / Performance)* — The consent status and consent history API calls are made sequentially (one after the other). These are independent requests and could be fetched in parallel using `Promise.all` or `Promise.allSettled`, reducing page load time. **Fix:** Use `Promise.allSettled([fetch(...status), fetch(...history)])` to parallelize both requests, same as is feasible for the members/invitations fetches.
+
+- **[budget-api/src/terms/terms.service.ts:152-160]** *(Code Quality / Performance)* — The `recordBulkConsent` method iterates through active terms and calls `recordConsent` sequentially in a for-loop. Each `recordConsent` call performs a `findById` (to verify the terms version exists) followed by a `findOneAndUpdate` (upsert). Since the active terms were already fetched and verified to exist, the verification step is redundant for bulk consent. For N terms, this results in 2N database calls instead of N. **Fix:** Either use `Promise.all` to parallelize the upserts, or extract the upsert logic into a private method that skips the existence check when called from `recordBulkConsent`.
+
+- **[budget-api/src/terms/terms.service.ts:54-74]** *(Error Handling)* — The `getTermsById` method catches all errors and re-throws as 500 Internal Server Error, except for HttpException. However, when an invalid (non-ObjectId) string is passed as `id`, Mongoose throws a `CastError` which gets caught and returned as 500. The E2E test at line 304-309 explicitly expects this behavior. A 400 Bad Request would be more appropriate for malformed input. **Fix:** Add a `@IsMongoId()` validation pipe on the `:id` param using `ParseObjectIdPipe` or a similar pattern used elsewhere in the codebase, so invalid IDs return 400 before hitting the service layer.
+
+- **[budget-api/src/i18n/es/terms.json:2-3]** *(i18n)* — Spanish translations are missing accent marks: "Terminos de Servicio" should be "T**e**rminos de Servicio" (actually "**T**\u00e9rminos de Servicio") and "Politica de Privacidad" should be "Pol**i**tica de Privacidad" (actually "Pol\u00edtica de Privacidad"). **Fix:** Update to `"termsOfService": "Términos de Servicio"` and `"privacyPolicy": "Política de Privacidad"`.
+
+- **[budget-api/migrations/20260305120000-seed-terms-versions.js:59,83]** *(i18n)* — Same accent mark issue in the migration seed data. The seeded Spanish titles use "Terminos de Servicio" and "Politica de Privacidad" without accents. **Fix:** Update to `"Términos de Servicio"` and `"Política de Privacidad"`.
+
+- **[budget-ui/src/lib/components/legal-content-page.svelte:36]** *(Security)* — The `{@html content}` directive renders raw HTML from the API response without sanitization. While the phase-4b deviation notes acknowledge this (content is developer-authored), this creates a latent XSS vector if the content source ever changes (e.g., admin panel, CMS). **Fix:** Add a comment documenting the trust assumption, or integrate a sanitizer like `DOMPurify` or `sanitize-html` for defense-in-depth.
+
+## Suggestion
+
+- **[budget-ui/src/routes/(auth)/signup/+page.server.ts:66]** *(i18n)* — The i18n key used is `$t('signUp.tooManyRequest')` (singular) but the key in `en.json` is `tooManyRequests` (plural, line 455). This is a pre-existing bug not introduced by this feature, but it means the 429 error message will show the raw key instead of the translated string. **Fix:** Change to `$t('signUp.tooManyRequests')` (with trailing 's').
+
+- **[budget-api/src/terms/terms.controller.ts:100-111]** *(Conventions)* — The `POST /terms/consent` endpoint uses `@Post('consent')` which returns HTTP 201 by default in NestJS. While this is technically correct for resource creation, the idempotent upsert behavior means subsequent calls for the same consent also return 201. Consider adding `@HttpCode(200)` for clarity, or document that 201 is returned even for idempotent re-submissions.
+
+- **[budget-ui/src/routes/api/terms/active/+server.ts:9]** *(Error Handling)* — The proxy route assumes the error response body has `{ message, statusCode }` structure. If the backend returns a non-JSON error (e.g., 502 from a reverse proxy), `response.json()` will throw. **Fix:** Wrap the error parsing in a try-catch: `try { const { message, statusCode } = await response.json(); return error(statusCode, { message }); } catch { return error(500, { message: 'Internal error' }); }`. This pattern should be applied to all 5 proxy routes.
+
+- **[budget-api/src/terms/entities/terms-version.entity.ts:9-31]** *(Conventions)* — The entity class does not extend or reference `BaseSchema` directly in the class definition, unlike some other entities. It relies solely on `.add(AuditableSchema)` at the schema level. This is functionally correct (AuditableSchema includes BaseSchema), but the class-level comment could note that `id` comes from the BaseSchema `toObject` transform. This is consistent with other entities in the codebase, so no action needed -- just noting for clarity.
+
+- **[budget-ui/src/lib/components/legal-settings-section.svelte:7-8]** *(Code Quality)* — `dayjs.extend(localizedFormat)` is called at the module level in multiple components (`legal-content-page.svelte` line 7 and `legal-settings-section.svelte` line 8). While dayjs handles duplicate extensions gracefully, this could be centralized in a shared utility. **Fix:** Consider adding a `$lib/utils/dayjs.ts` that exports a pre-configured dayjs instance with all necessary plugins, and import from there.
+
+- **[budget-api/test/terms.e2e-spec.ts:43-46,57-61]** *(Code Quality)* — The `seedTermsVersion` and `seedUserConsent` helper functions access Mongoose models via `connection.model('TermsVersion')`. If the model name changes, this will fail silently at runtime. **Fix:** Import the entity class and use `connection.model(TermsVersion.name)` for type-safe model references. This matches patterns used in other E2E tests.
+
+- **[budget-ui/src/routes/(app)/workspaces/+page.svelte:37-38]** *(TypeScript)* — The `$derived` bindings use type assertions (`as ConsentStatus | null`, `as UserConsent[]`) rather than letting the types flow from the server load function. If the `+page.server.ts` return type changes, these assertions will silently mask type mismatches. **Fix:** The `PageProps` type from `./$types` should provide correct typing from the load function, making the casts unnecessary.
+
+## Summary
+- Critical: 3 | Warning: 8 | Suggestion: 6
+- Files reviewed: 37

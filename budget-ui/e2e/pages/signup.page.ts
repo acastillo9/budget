@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
 
 export class SignUpPage {
 	readonly page: Page;
@@ -9,6 +9,10 @@ export class SignUpPage {
 	readonly nameInput: Locator;
 	readonly emailInput: Locator;
 	readonly currencyTrigger: Locator;
+	readonly consentCheckbox: Locator;
+	readonly consentLabel: Locator;
+	readonly consentError: Locator;
+	readonly googleConsentNote: Locator;
 	readonly nextButton: Locator;
 	readonly googleButton: Locator;
 	readonly signInLink: Locator;
@@ -39,6 +43,10 @@ export class SignUpPage {
 		this.nameInput = page.getByLabel(/name/i);
 		this.emailInput = page.getByLabel(/email/i);
 		this.currencyTrigger = page.locator('[data-slot="select-trigger"]');
+		this.consentCheckbox = page.locator('#terms-consent');
+		this.consentLabel = page.locator('label[for="terms-consent"]');
+		this.consentError = page.locator('.text-destructive').filter({ hasText: /terms of service/i });
+		this.googleConsentNote = page.getByText(/by signing up with google/i);
 		this.nextButton = page.getByRole('button', { name: /next/i });
 		this.googleButton = page.getByRole('link', { name: /google/i });
 		this.signInLink = page.getByRole('link', { name: /sign in/i });
@@ -76,6 +84,40 @@ export class SignUpPage {
 	async fillBasicInfo(name: string, email: string) {
 		await this.nameInput.fill(name);
 		await this.emailInput.fill(email);
+		await this.checkConsent();
+	}
+
+	/**
+	 * Ensure the terms consent checkbox is checked.
+	 * bits-ui Checkbox renders as a <button> with data-state attribute.
+	 * Clicks the button element directly (label click does not toggle button-based checkboxes).
+	 * No-op if already checked.
+	 */
+	async checkConsent() {
+		await this.consentCheckbox.waitFor({ state: 'visible', timeout: 10_000 });
+		// Wait for the component to be interactive (Svelte hydration)
+		await this.page.waitForLoadState('networkidle');
+		const isChecked = await this.consentCheckbox.getAttribute('data-state');
+		if (isChecked !== 'checked') {
+			await this.consentCheckbox.click();
+			await expect(this.consentCheckbox).toHaveAttribute('data-state', 'checked', {
+				timeout: 5_000
+			});
+		}
+	}
+
+	/**
+	 * Uncheck the terms consent checkbox. No-op if already unchecked.
+	 */
+	async uncheckConsent() {
+		await this.consentCheckbox.waitFor({ state: 'visible', timeout: 10_000 });
+		const isChecked = await this.consentCheckbox.getAttribute('data-state');
+		if (isChecked === 'checked') {
+			await this.consentCheckbox.click();
+			await expect(this.consentCheckbox).toHaveAttribute('data-state', 'unchecked', {
+				timeout: 5_000
+			});
+		}
 	}
 
 	async selectCurrency(code: string) {

@@ -1,0 +1,8 @@
+{
+  "termsOfService": "Terminos de Servicio",
+  "privacyPolicy": "Politica de Privacidad",
+  "termsNotFound": "Version de terminos no encontrada",
+  "errorGettingTerms": "Error al obtener los terminos",
+  "errorRecordingConsent": "Error al registrar el consentimiento",
+  "consentRecorded": "Consentimiento registrado exitosamente"
+}

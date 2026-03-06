@@ -100,11 +100,17 @@ export class AuthController {
   })
   @Post('register')
   register(
+    @Req() req: AuthenticatedRequest,
     @Body() registerDto: RegisterDto,
     @Headers('Accept-Language') acceptLanguage: string,
   ): Promise<RegisterResponseDto> {
     const locale = acceptLanguage ? acceptLanguage.split(',')[0] : 'en-US';
-    return this.authService.registerByEmail(registerDto, locale);
+    return this.authService.registerByEmail(
+      registerDto,
+      locale,
+      req.ip,
+      req.headers['user-agent'],
+    );
   }
 
   /**
@@ -372,13 +378,14 @@ export class AuthController {
     };
 
     const locale =
-      req.user.locale || acceptLanguage
-        ? acceptLanguage.split(',')[0]
-        : 'en-US';
+      req.user.locale ||
+      (acceptLanguage ? acceptLanguage.split(',')[0] : 'en-US');
 
     const session: Credentials = await this.authService.googleLogin(
       googleLogin,
       locale,
+      req.ip,
+      req.headers['user-agent'],
     );
 
     return res.redirect(

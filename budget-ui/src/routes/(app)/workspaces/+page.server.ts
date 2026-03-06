@@ -3,10 +3,13 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { $t } from '$lib/i18n';
 import type { PageServerLoad } from './$types';
 import type { WorkspaceMember, Invitation } from '$lib/types/workspace.types';
+import type { ConsentStatus, UserConsent } from '$lib/types/terms.types';
 
 export const load: PageServerLoad = async ({ fetch, cookies }) => {
 	let members: WorkspaceMember[] = [];
 	let invitations: Invitation[] = [];
+	let consentStatus: ConsentStatus | null = null;
+	let consentHistory: UserConsent[] = [];
 
 	try {
 		const membersResponse = await fetch(`${API_URL}/workspaces/members`);
@@ -26,5 +29,23 @@ export const load: PageServerLoad = async ({ fetch, cookies }) => {
 		// Invitations may fail if user is not OWNER, that's ok
 	}
 
-	return { members, invitations };
+	try {
+		const statusResponse = await fetch(`${API_URL}/terms/consent/status`);
+		if (statusResponse.ok) {
+			consentStatus = await statusResponse.json();
+		}
+	} catch {
+		// Consent status may fail, that's ok for existing users
+	}
+
+	try {
+		const historyResponse = await fetch(`${API_URL}/terms/consent/history`);
+		if (historyResponse.ok) {
+			consentHistory = await historyResponse.json();
+		}
+	} catch {
+		// Consent history may fail, that's ok for existing users
+	}
+
+	return { members, invitations, consentStatus, consentHistory };
 };

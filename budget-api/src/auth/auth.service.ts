@@ -46,6 +46,8 @@ import { I18nService } from 'nestjs-i18n';
 import { CurrencyCode } from 'src/shared/entities/currency-code.enum';
 import { GoogleLoginDto } from './dto/google-login.dto';
 import { WorkspacesService } from 'src/workspaces/workspaces.service';
+import { TermsService } from 'src/terms/terms.service';
+import { TermsLocale } from 'src/terms/entities/terms-locale.enum';
 
 @Injectable()
 export class AuthService {
@@ -61,6 +63,7 @@ export class AuthService {
     private dbTransactionService: DbTransactionService,
     private readonly i18n: I18nService,
     private readonly workspacesService: WorkspacesService,
+    private readonly termsService: TermsService,
   ) {}
 
   /**
@@ -120,62 +123,77 @@ export class AuthService {
   async registerByEmail(
     registerDto: RegisterDto,
     locale: string,
+    ipAddress?: string,
+    userAgent?: string,
   ): Promise<RegisterResponseDto> {
     const user = await this.usersService.findByEmail(registerDto.email);
 
     // if the user does not exists create the user and the email auth provider
     if (!user) {
       try {
-        return this.dbTransactionService.runTransaction(async (session) => {
-          const createUserDto: CreateUserDto = {
-            name: registerDto.name,
-            email: registerDto.email,
-            currencyCode:
-              registerDto.currencyCode ??
-              this.getCurrencyCodeFromLocale(locale),
-          };
-          const newUser = await this.usersService.create(
-            createUserDto,
-            session,
-          );
-          await this.workspacesService.createDefaultWorkspace(
-            newUser.id,
-            session,
-          );
-          const emailActivationData =
-            await this.calculateEmailActivationData(-1);
-          const createEmailAuthenticationProviderDto: CreateAuthenticationProviderDto =
-            {
-              providerType: AuthenticationProviderType.EMAIL,
-              providerUserId: newUser.email,
-              user: newUser.id,
-              activationCode: emailActivationData.hashedActivationCode,
-              activationCodeExpiresAt:
-                emailActivationData.activationCodeExpiresAt,
-              activationCodeResendAt:
-                emailActivationData.activationCodeResendAt,
-              activationCodeRetries: emailActivationData.activationCodeRetries,
+        const result = await this.dbTransactionService.runTransaction(
+          async (session) => {
+            const createUserDto: CreateUserDto = {
+              name: registerDto.name,
+              email: registerDto.email,
+              currencyCode:
+                registerDto.currencyCode ??
+                this.getCurrencyCodeFromLocale(locale),
             };
-          const newEmailAuthenticationProvider =
-            new this.authenticationProviderModel(
-              createEmailAuthenticationProviderDto,
+            const newUser = await this.usersService.create(
+              createUserDto,
+              session,
             );
-          const savedEmailAuthenticationProvider =
-            await newEmailAuthenticationProvider.save({ session });
+            await this.workspacesService.createDefaultWorkspace(
+              newUser.id,
+              session,
+            );
+            const emailActivationData =
+              await this.calculateEmailActivationData(-1);
+            const createEmailAuthenticationProviderDto: CreateAuthenticationProviderDto =
+              {
+                providerType: AuthenticationProviderType.EMAIL,
+                providerUserId: newUser.email,
+                user: newUser.id,
+                activationCode: emailActivationData.hashedActivationCode,
+                activationCodeExpiresAt:
+                  emailActivationData.activationCodeExpiresAt,
+                activationCodeResendAt:
+                  emailActivationData.activationCodeResendAt,
+                activationCodeRetries:
+                  emailActivationData.activationCodeRetries,
+              };
+            const newEmailAuthenticationProvider =
+              new this.authenticationProviderModel(
+                createEmailAuthenticationProviderDto,
+              );
+            const savedEmailAuthenticationProvider =
+              await newEmailAuthenticationProvider.save({ session });
 
-          this.sendActivationCodeEmail(
-            newUser.email,
-            emailActivationData.activationCode,
-          );
+            this.sendActivationCodeEmail(
+              newUser.email,
+              emailActivationData.activationCode,
+            );
 
-          return {
-            id: newUser.id,
-            name: newUser.name,
-            email: newUser.email,
-            activationCodeResendAt:
-              savedEmailAuthenticationProvider.activationCodeResendAt,
-          };
-        });
+            return {
+              id: newUser.id,
+              name: newUser.name,
+              email: newUser.email,
+              activationCodeResendAt:
+                savedEmailAuthenticationProvider.activationCodeResendAt,
+            };
+          },
+        );
+
+        // Record consent non-blocking after successful registration
+        this.recordConsentAfterRegistration(
+          result.id,
+          locale,
+          ipAddress,
+          userAgent,
+        );
+
+        return result;
       } catch (error) {
         this.logger.error(
           `Failed registering the user: ${error.message}`,
@@ -759,7 +777,12 @@ export class AuthService {
    * @returns The session created.
    * @async
    */
-  async googleLogin(googleLogin: GoogleLoginDto, locale: string) {
+  async googleLogin(
+    googleLogin: GoogleLoginDto,
+    locale: string,
+    ipAddress?: string,
+    userAgent?: string,
+  ) {
     let googleAuthenticationProvider = await this.findAuthenticationProvider(
       AuthenticationProviderType.GOOGLE,
       googleLogin.id,
@@ -767,6 +790,7 @@ export class AuthService {
 
     if (!googleAuthenticationProvider) {
       let user = await this.usersService.findByEmail(googleLogin.email);
+      const isNewUser = !user;
       try {
         googleAuthenticationProvider =
           await this.dbTransactionService.runTransaction(async (session) => {
@@ -802,6 +826,16 @@ export class AuthService {
               newAuthenticationProviderDocument.toObject(),
             );
           });
+
+        // Record consent non-blocking after successful Google registration
+        if (isNewUser) {
+          this.recordConsentAfterRegistration(
+            user.id,
+            locale,
+            ipAddress,
+            userAgent,
+          );
+        }
       } catch (error) {
         this.logger.error(
           `Failed to create authentication: ${error.message}`,
@@ -834,6 +868,35 @@ export class AuthService {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     return authenticationProvider.user;
+  }
+
+  /**
+   * Record consent non-blocking after a successful registration.
+   * Errors are logged but do not propagate.
+   * @param userId The user ID.
+   * @param locale The locale string (e.g., 'en-US', 'es-CO').
+   * @param ipAddress Optional IP address.
+   * @param userAgent Optional user agent string.
+   * @private
+   */
+  private recordConsentAfterRegistration(
+    userId: string,
+    locale: string,
+    ipAddress?: string,
+    userAgent?: string,
+  ): void {
+    const termsLocale = locale?.startsWith('es')
+      ? TermsLocale.ES
+      : TermsLocale.EN;
+
+    this.termsService
+      .recordBulkConsent(userId, termsLocale, ipAddress, userAgent)
+      .catch((error) => {
+        this.logger.error(
+          `Failed to record consent after registration for user ${userId}: ${error.message}`,
+          error.stack,
+        );
+      });
   }
 
   /**

@@ -20,6 +20,7 @@ import { JwtRefreshStrategy } from './jwt-refresh.strategy';
 import { WorkspacesModule } from 'src/workspaces/workspaces.module';
 import { WorkspaceGuard } from 'src/workspaces/guards/workspace.guard';
 import { RolesGuard } from 'src/workspaces/guards/roles.guard';
+import { TermsModule } from 'src/terms/terms.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { RolesGuard } from 'src/workspaces/guards/roles.guard';
         schema: AuthenticationProviderSchema,
       },
     ]),
+    TermsModule,
   ],
   controllers: [AuthController],
   providers: [

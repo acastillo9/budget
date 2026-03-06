@@ -5,12 +5,14 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import InviteMemberDialog from '$lib/components/invite-member-dialog.svelte';
 	import ConfirmationDialog from '$lib/components/confirmation-dialog.svelte';
+	import LegalSettingsSection from '$lib/components/legal-settings-section.svelte';
 	import { t } from 'svelte-i18n';
 	import { toast } from 'svelte-sonner';
 	import { invalidateAll } from '$app/navigation';
 	import { getUserContext } from '$lib/context';
 	import { canManageWorkspace } from '$lib/utils/permissions';
 	import type { WorkspaceMember, Invitation, WorkspaceRole } from '$lib/types/workspace.types';
+	import type { ConsentStatus, UserConsent } from '$lib/types/terms.types';
 	import TrashIcon from '@lucide/svelte/icons/trash-2';
 	import MailIcon from '@lucide/svelte/icons/mail';
 	import XIcon from '@lucide/svelte/icons/x';
@@ -32,6 +34,8 @@
 	let invitations = $derived(
 		(data.invitations as Invitation[]).filter((i) => i.status === 'PENDING')
 	);
+	let consentStatus = $derived(data.consentStatus as ConsentStatus | null);
+	let consentHistory = $derived(data.consentHistory as UserConsent[]);
 
 	async function updateMemberRole(memberId: string, role: WorkspaceRole) {
 		try {
@@ -143,7 +147,9 @@
 									.join('') ?? '?'}
 							</div>
 							<div class="min-w-0">
-								<p class="truncate text-sm font-medium">{member.user?.name ?? member.user?.email}</p>
+								<p class="truncate text-sm font-medium">
+									{member.user?.name ?? member.user?.email}
+								</p>
 								<p class="text-muted-foreground truncate text-xs">{member.user?.email}</p>
 							</div>
 						</div>
@@ -215,6 +221,9 @@
 			</Card.Content>
 		</Card.Root>
 	{/if}
+
+	<!-- Legal & Privacy -->
+	<LegalSettingsSection {consentStatus} {consentHistory} />
 </div>
 
 <ConfirmationDialog

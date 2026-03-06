@@ -50,12 +50,13 @@ export const actions: Actions = {
 		let userEmail;
 		let userActivationCodeResendAt;
 		try {
+			const { termsAccepted: _, ...registrationData } = form.data;
 			const response = await fetch(`${API_URL}/auth/register`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify(form.data)
+				body: JSON.stringify(registrationData)
 			});
 
 			if (!response.ok) {
