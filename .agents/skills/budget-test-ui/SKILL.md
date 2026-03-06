@@ -546,6 +546,8 @@ Reference impl: `budget-ui/e2e/notifications.spec.ts` and `budget-ui/e2e/pages/n
 18. For prerequisite data from other pages, create helper functions that import other POMs
 19. Never use `page.waitForTimeout()` — use `waitForLoadState`, `waitFor`, or `toBeVisible` with timeout
 20. Always use `{ timeout: 10_000 }` for assertions on elements that depend on network responses
+21. **Hydration timing**: bits-ui components (Checkbox, Select, Dialog triggers) require `waitForLoadState('networkidle')` before interaction — Svelte hydration may not be complete on `domcontentloaded`
+22. **Hidden input testing**: For checkboxes that use a hidden `<input>` bridge for FormData (see `budget-ui` skill FormData Edge Cases), assert the hidden input value rather than the visual button state: `expect(page.locator('input[name="accepted"]')).toHaveValue('on')`
 
 ## Workflow
 

@@ -51,9 +51,9 @@ Evaluate each changed file against these categories:
 | 1 | **Conventions** | Naming, file structure, module organization per CLAUDE.md and subproject CLAUDE.md |
 | 2 | **Code quality** | Readability, DRY, unnecessary complexity, over-engineering, dead code |
 | 3 | **Security** | OWASP top 10, injection risks, auth issues, exposed secrets, missing guards |
-| 4 | **Error handling** | Proper error propagation, edge cases, missing try/catch, unhandled promises |
+| 4 | **Error handling** | Proper error propagation, edge cases, missing try/catch, unhandled promises; verify proxy routes handle non-JSON error responses (use `.json().catch()`) |
 | 5 | **TypeScript** | Type safety, null checks, proper generics, `any` usage, missing types |
-| 6 | **i18n** | Both `en` and `es` translations present where UI text was added/changed |
+| 6 | **i18n** | Both `en` and `es` translations present where UI text was added/changed; verify diacritical marks in non-English translations (e.g., Spanish accents: á, é, í, ó, ú, ñ) |
 | 7 | **Reuse** | Existing utilities, helpers, or shared code that could replace new code |
 | 8 | **External config** | `ConfigService.getOrThrow()` in constructor for mandatory env vars, not `get()` at first use |
 | 9 | **Transaction consistency** | Cascade operations use DB session propagation; external resource cleanup deferred to post-commit |

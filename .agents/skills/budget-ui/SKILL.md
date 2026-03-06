@@ -58,6 +58,32 @@ Rules:
 - Fatal errors: `throw error()` or `redirect()`
 - Always return `superValidate` form(s) for each form on the page
 
+### Locale-Aware Fetching
+
+Extract the user's locale from request headers and pass to API calls for i18n-aware responses:
+
+```typescript
+export const load: PageServerLoad = async ({ cookies, fetch, request }) => {
+  const lang = request.headers.get('accept-language')?.split(',')[0]?.split('-')[0] || 'en';
+  const response = await fetch(`${API_URL}/terms/active?lang=${lang}`);
+  // ...
+};
+```
+
+### Parallel Data Fetching
+
+For independent API calls in server loaders, use `Promise.allSettled()` to avoid sequential waterfalls:
+
+```typescript
+const [itemsResult, categoriesResult] = await Promise.allSettled([
+  fetch(`${API_URL}/items`).then((r) => r.ok ? r.json() : []),
+  fetch(`${API_URL}/categories`).then((r) => r.ok ? r.json() : []),
+]);
+
+const items = itemsResult.status === 'fulfilled' ? itemsResult.value : [];
+const categories = categoriesResult.status === 'fulfilled' ? categoriesResult.value : [];
+```
+
 ### URL Query Params (pagination/filters)
 
 ```typescript
@@ -229,6 +255,13 @@ export const PATCH: RequestHandler = async ({ request, fetch, params }) => {
 ```
 
 Purpose: client-side `fetch('/api/...')` goes through SvelteKit, which attaches auth via `handleFetch`.
+
+### HTML Content Rendering
+
+`{@html content}` renders raw HTML in Svelte. Usage policy:
+
+- **Developer-authored content** (API-stored markdown rendered to HTML): `{@html}` is acceptable. Add a comment documenting the trust assumption: `<!-- Content is developer-authored, not user-generated -->`
+- **User-generated content**: sanitize with DOMPurify before rendering: `{@html DOMPurify.sanitize(content)}`
 
 ## Multipart Proxy Route Pattern
 
@@ -497,6 +530,21 @@ Rules:
 - Adapter: `zod4` from `'sveltekit-superforms/adapters'`
 - `id: z.string().optional()` enables create/edit duality
 - Number/enum defaults: `'' as unknown as T` to prevent pre-filling
+
+### FormData Edge Cases
+
+bits-ui Checkbox renders as a `<button>`, not `<input type="checkbox">`, so superforms' FormData submission won't capture its value. Bridge with a hidden input:
+
+```svelte
+<Checkbox.Root bind:checked={$formData.accepted} />
+<input type="hidden" name="accepted" value={$formData.accepted ? 'on' : ''} />
+```
+
+For boolean checkbox fields, use `z.boolean().refine()` instead of `z.literal(true)`:
+
+```typescript
+accepted: z.boolean().refine((v) => v === true, { message: $t('validation.required') })
+```
 
 ## State Management
 

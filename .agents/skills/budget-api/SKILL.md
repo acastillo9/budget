@@ -87,6 +87,35 @@ Rules:
 - Controllers delegate to service — no business logic in controllers
 - Return `Promise<Dto>` or `Promise<Dto[]>`
 
+### Public Endpoint Pattern
+
+When mixing public (unauthenticated) and authenticated endpoints in the same controller, omit class-level `@ApiBearerAuth('JWT')` and apply it per-endpoint instead. Use `@Public()` on unauthenticated endpoints. Declare specific routes before generic `:id` routes to prevent param conflicts.
+
+```typescript
+@ApiTags('Terms')
+@Controller('terms')
+export class TermsController {
+  // Public endpoints — no @ApiBearerAuth, add @Public()
+  @Public()
+  @Get('active')
+  getActive() { ... }
+
+  @Public()
+  @Get(':id')
+  findOne(@Param('id') id: string) { ... }
+
+  // Authenticated endpoints — add @ApiBearerAuth per-method
+  @ApiBearerAuth('JWT')
+  @Post('consent')
+  recordConsent(@Request() req: AuthenticatedRequest, @Body() dto: CreateConsentDto) { ... }
+}
+```
+
+Rules:
+- Route ordering: specific paths (`/consent/status`, `/active`) before generic `:id`
+- `@Public()` imported from `src/auth/decorators/public.decorator`
+- No `@Roles` on public endpoints — they have no user context
+
 ## Service Pattern
 
 ```typescript
@@ -189,6 +218,30 @@ Rules:
 - `DbTransactionService.runTransaction(async (session) => {...})` for multi-doc operations
 - Optional `session?: ClientSession` parameter for nested transactions
 - Paginated responses: return `PaginatedDataDto<T>` with `{ data, total, limit, offset, nextPage }`
+
+### Non-Workspace Entities
+
+Not all entities are workspace-scoped. Global config, user-level settings, and legal records skip the `workspace: workspaceId` filter:
+
+```typescript
+// Global entity (no user/workspace filter) — e.g., TermsVersion
+const active = await this.termsModel.find({ status: 'active' });
+
+// User-scoped entity (filter by user only) — e.g., UserConsent
+const consent = await this.consentModel.find({ user: userId });
+```
+
+### Error Type-Narrowing
+
+Caught errors are `unknown` in TypeScript. Always narrow before accessing `.message`:
+
+```typescript
+catch (error) {
+  const msg = error instanceof Error ? error.message : String(error);
+  this.logger.error(`Failed: ${msg}`, error instanceof Error ? error.stack : undefined);
+  throw new HttpException('...', HttpStatus.INTERNAL_SERVER_ERROR);
+}
+```
 
 ## Entity Pattern
 
@@ -314,6 +367,34 @@ export class FeaturesModule {}
 
 Register in `app.module.ts` imports array.
 
+### Cross-Module Integration
+
+To use Service B from Module A, import Module B and inject Service B:
+
+```typescript
+// In module-a.module.ts
+@Module({
+  imports: [ModuleBModule], // makes ServiceB available
+  providers: [ServiceA],
+})
+
+// In service-a.service.ts
+constructor(private readonly serviceB: ServiceB) {}
+```
+
+Non-blocking fire-and-forget for side-effects that shouldn't block the main flow:
+
+```typescript
+// Don't await — fire and forget
+try {
+  this.serviceB.recordSideEffect(userId, data).catch((err) => {
+    this.logger.error(`Side-effect failed: ${err instanceof Error ? err.message : String(err)}`);
+  });
+} catch (error) {
+  this.logger.error(`Failed to dispatch side-effect: ${error instanceof Error ? error.message : String(error)}`);
+}
+```
+
 ## E2E Test Pattern
 
 Tests in `test/`. Jest + supertest. Config: `test/jest-e2e.json`.
@@ -409,6 +490,45 @@ Read this reference when working with:
 - Channel strategies: `src/{feature}/channels/{channel-name}.channel.ts`
 - E2E tests: `test/{feature}.e2e-spec.ts`
 - Migrations: `migrations/{timestamp}-{name}.js`
+
+## Migration Pattern
+
+Idempotent seed migration structure in `migrations/`. File naming: `{YYYYMMDDHHmmss}-{name}.js` (e.g., `20260305120000-seed-terms-versions.js`).
+
+```javascript
+const fs = require('fs');
+const path = require('path');
+
+module.exports = {
+  async up(db) {
+    // Check-before-insert for idempotency
+    const existing = await db.collection('termsversions').findOne({ type: 'terms-of-service', version: '1.0' });
+    if (existing) return;
+
+    // Read content files from repo
+    const content = fs.readFileSync(path.join(__dirname, '..', 'src', 'terms', 'content', 'tos-en.md'), 'utf-8');
+
+    await db.collection('termsversions').insertOne({
+      type: 'terms-of-service',
+      version: '1.0',
+      content,
+      effectiveDate: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  },
+
+  async down(db) {
+    await db.collection('termsversions').deleteOne({ type: 'terms-of-service', version: '1.0' });
+  },
+};
+```
+
+Rules:
+- Always check-before-insert so migration can run multiple times safely
+- `down()` reverses exactly what `up()` did
+- Use `db.collection()` directly (not Mongoose models — migrations run outside NestJS)
+- Content files: read from repo paths relative to `__dirname`
 
 ## Key Imports
 

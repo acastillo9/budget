@@ -44,9 +44,14 @@ Format:
 ## Suggestion
 - **[file:line]** *(Category)* — Description. **Fix:** Recommended change.
 
+## Pre-existing Issues
+Issues found during review that predate this epic (not introduced by the current work):
+- **[file:line]** — Description. *(Pre-existing — not caused by this epic.)*
+
 ## Summary
 - Critical: N | Warning: N | Suggestion: N
+- Pre-existing: N
 - Files reviewed: N
 
-Return a 1-line summary: "Review: C critical, W warnings, S suggestions across N files"
+Return a 1-line summary: "Review: C critical, W warnings, S suggestions, P pre-existing across N files"
 ```
