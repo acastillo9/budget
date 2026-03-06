@@ -51,7 +51,17 @@
 	// Reset form when preferences change
 	$effect(() => {
 		if (preferences) {
-			channels = JSON.parse(JSON.stringify(preferences.channels));
+			// Extract only known notification type channels to avoid Mongoose _id fields
+			const cleanChannels: Record<string, { inApp: boolean; email: boolean }> = {};
+			for (const type of notificationTypes) {
+				if (preferences.channels[type]) {
+					cleanChannels[type] = {
+						inApp: preferences.channels[type].inApp,
+						email: preferences.channels[type].email
+					};
+				}
+			}
+			channels = cleanChannels;
 			budgetThresholdPercent = preferences.budgetThresholdPercent;
 			largeTransactionAmounts = { ...preferences.largeTransactionAmounts };
 			lowBalanceAmounts = { ...preferences.lowBalanceAmounts };

@@ -41,6 +41,7 @@ export class NotificationPreference {
       RECURRING_BILL_ENDING: ChannelToggleSchema,
       WORKSPACE_INVITATION: ChannelToggleEmailOffSchema,
       MONTHLY_SUMMARY: ChannelToggleInAppOffSchema,
+      _id: false,
     },
     default: {},
   })
