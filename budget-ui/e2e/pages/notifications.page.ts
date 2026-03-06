@@ -248,9 +248,10 @@ export class NotificationsPage {
 
 	// Threshold inputs
 	readonly budgetThresholdInput: Locator;
-	readonly largeTransactionInput: Locator;
-	readonly lowBalanceInput: Locator;
 	readonly billDueSoonInput: Locator;
+
+	// Currency selector
+	readonly currencySelector: Locator;
 
 	// Quiet hours
 	readonly quietHoursSwitch: Locator;
@@ -293,9 +294,10 @@ export class NotificationsPage {
 
 		// Threshold inputs
 		this.budgetThresholdInput = page.getByLabel(/budget alert threshold/i);
-		this.largeTransactionInput = page.locator('#large-transaction-USD');
-		this.lowBalanceInput = page.locator('#low-balance-USD');
 		this.billDueSoonInput = page.getByLabel(/days before due date/i);
+
+		// Currency selector
+		this.currencySelector = this.preferencesDialog.locator('[role="radiogroup"]');
 
 		// Quiet hours
 		this.quietHoursSwitch = this.preferencesDialog
@@ -382,14 +384,26 @@ export class NotificationsPage {
 		await this.cancelPreferencesButton.click();
 	}
 
-	async fillThreshold(field: 'budget' | 'largeTransaction' | 'lowBalance' | 'billDueSoon', value: string) {
+	async selectCurrency(code: string) {
+		await this.currencySelector.getByRole('radio', { name: code }).click();
+	}
+
+	getLargeTransactionInput(currency: string = 'COP'): Locator {
+		return this.page.locator(`#large-transaction-${currency}`);
+	}
+
+	getLowBalanceInput(currency: string = 'COP'): Locator {
+		return this.page.locator(`#low-balance-${currency}`);
+	}
+
+	async fillThreshold(field: 'budget' | 'largeTransaction' | 'lowBalance' | 'billDueSoon', value: string, currency: string = 'COP') {
 		const input =
 			field === 'budget'
 				? this.budgetThresholdInput
 				: field === 'largeTransaction'
-					? this.largeTransactionInput
+					? this.getLargeTransactionInput(currency)
 					: field === 'lowBalance'
-						? this.lowBalanceInput
+						? this.getLowBalanceInput(currency)
 						: this.billDueSoonInput;
 		await input.fill(value);
 	}

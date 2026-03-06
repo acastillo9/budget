@@ -427,9 +427,15 @@ test.describe('Notifications — Preferences Dialog', () => {
 
 		await expect(notificationsPage.budgetThresholdInput).toBeVisible({ timeout: 10_000 });
 		await expect(notificationsPage.budgetThresholdInput).toHaveValue('80');
-		await expect(notificationsPage.largeTransactionInput).toHaveValue('500');
-		await expect(notificationsPage.lowBalanceInput).toHaveValue('100');
+		// Default selected currency is COP (first in list)
+		await expect(notificationsPage.getLargeTransactionInput('COP')).toHaveValue('2000000');
+		await expect(notificationsPage.getLowBalanceInput('COP')).toHaveValue('500000');
 		await expect(notificationsPage.billDueSoonInput).toHaveValue('3');
+
+		// Switch to USD and verify its values
+		await notificationsPage.selectCurrency('USD');
+		await expect(notificationsPage.getLargeTransactionInput('USD')).toHaveValue('500');
+		await expect(notificationsPage.getLowBalanceInput('USD')).toHaveValue('100');
 	});
 
 	test('should display Quiet Hours section with toggle', async ({ page }) => {
@@ -526,10 +532,11 @@ test.describe('Notifications — Preferences Save', () => {
 		await notificationsPage.openPanel();
 		await notificationsPage.clickSettings();
 
-		// Update all thresholds
+		// Update all thresholds — select USD first for currency-specific fields
 		await notificationsPage.fillThreshold('budget', '75');
-		await notificationsPage.fillThreshold('largeTransaction', '1000');
-		await notificationsPage.fillThreshold('lowBalance', '200');
+		await notificationsPage.selectCurrency('USD');
+		await notificationsPage.fillThreshold('largeTransaction', '1000', 'USD');
+		await notificationsPage.fillThreshold('lowBalance', '200', 'USD');
 		await notificationsPage.fillThreshold('billDueSoon', '7');
 
 		// Intercept the PUT request to verify the payload

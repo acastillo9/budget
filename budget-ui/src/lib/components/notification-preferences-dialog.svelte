@@ -48,6 +48,10 @@
 	let quietHoursEnd = $state('08:00');
 	let quietHoursTimezone = $state('UTC');
 
+	// Currency selector for thresholds
+	let selectedCurrency = $state(currencies[0]?.code ?? 'USD');
+	let showCurrencySelector = $derived(currencies.length > 1);
+
 	// Reset form when preferences change
 	$effect(() => {
 		if (preferences) {
@@ -165,43 +169,65 @@
 							bind:value={budgetThresholdPercent}
 						/>
 					</div>
-					<div class="space-y-2">
-						<Label>{$t('notifications.largeTransactionAmount')}</Label>
-						{#each currencies as currency (currency.code)}
-							<div class="flex items-center gap-2">
-								<span class="w-16 text-sm">{currency.flag} {currency.code}</span>
-								<Input
-									id="large-transaction-{currency.code}"
-									type="number"
-									min={0}
-									value={largeTransactionAmounts[currency.code] ?? 0}
-									oninput={(e) => {
-										largeTransactionAmounts[currency.code] = Number(
-											(e.target as HTMLInputElement).value
-										);
-									}}
-								/>
+
+					{#if showCurrencySelector}
+						<div class="space-y-2">
+							<Label>{$t('notifications.currency')}</Label>
+							<div
+								class="flex gap-1"
+								role="radiogroup"
+								aria-label={$t('notifications.currency')}
+							>
+								{#each currencies as currency (currency.code)}
+									<button
+										type="button"
+										role="radio"
+										aria-checked={selectedCurrency === currency.code}
+										class="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors
+											{selectedCurrency === currency.code
+											? 'bg-primary text-primary-foreground border-primary'
+											: 'bg-background text-muted-foreground hover:bg-muted border-input'}"
+										onclick={() => (selectedCurrency = currency.code)}
+									>
+										<span>{currency.flag}</span>
+										<span>{currency.code}</span>
+									</button>
+								{/each}
 							</div>
-						{/each}
+						</div>
+					{/if}
+
+					<div class="space-y-2">
+						<Label for="large-transaction-{selectedCurrency}">
+							{$t('notifications.largeTransactionAmount')}
+						</Label>
+						<Input
+							id="large-transaction-{selectedCurrency}"
+							type="number"
+							min={0}
+							value={largeTransactionAmounts[selectedCurrency] ?? 0}
+							oninput={(e) => {
+								largeTransactionAmounts[selectedCurrency] = Number(
+									(e.target as HTMLInputElement).value
+								);
+							}}
+						/>
 					</div>
 					<div class="space-y-2">
-						<Label>{$t('notifications.lowBalanceAmount')}</Label>
-						{#each currencies as currency (currency.code)}
-							<div class="flex items-center gap-2">
-								<span class="w-16 text-sm">{currency.flag} {currency.code}</span>
-								<Input
-									id="low-balance-{currency.code}"
-									type="number"
-									min={0}
-									value={lowBalanceAmounts[currency.code] ?? 0}
-									oninput={(e) => {
-										lowBalanceAmounts[currency.code] = Number(
-											(e.target as HTMLInputElement).value
-										);
-									}}
-								/>
-							</div>
-						{/each}
+						<Label for="low-balance-{selectedCurrency}">
+							{$t('notifications.lowBalanceAmount')}
+						</Label>
+						<Input
+							id="low-balance-{selectedCurrency}"
+							type="number"
+							min={0}
+							value={lowBalanceAmounts[selectedCurrency] ?? 0}
+							oninput={(e) => {
+								lowBalanceAmounts[selectedCurrency] = Number(
+									(e.target as HTMLInputElement).value
+								);
+							}}
+						/>
 					</div>
 					<div class="space-y-2">
 						<Label for="bill-due-soon">{$t('notifications.billDueSoonDays')}</Label>
