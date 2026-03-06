@@ -13,7 +13,7 @@
 	let displayCount = $derived(unreadCount > 99 ? '99+' : String(unreadCount));
 </script>
 
-<Button variant="outline" size="icon" {onclick} aria-label={$t('notifications.title')}>
+<Button variant="outline" size="icon" class="relative" {onclick} aria-label={$t('notifications.title')}>
 	<Bell class="h-5 w-5" />
 	{#if unreadCount > 0}
 		<span
