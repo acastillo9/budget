@@ -57,6 +57,7 @@ Evaluate each changed file against these categories:
 | 7 | **Reuse** | Existing utilities, helpers, or shared code that could replace new code |
 | 8 | **External config** | `ConfigService.getOrThrow()` in constructor for mandatory env vars, not `get()` at first use |
 | 9 | **Transaction consistency** | Cascade operations use DB session propagation; external resource cleanup deferred to post-commit |
+| 10 | **I18nContext safety** | `I18nContext.current()` returns `null` outside HTTP request scope (cron jobs, event handlers) — verify code uses `?.lang \|\| 'en'` fallback |
 
 ## 4. Present Findings
 

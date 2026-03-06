@@ -18,7 +18,8 @@ Implement the frontend changes for the feature.
 2. Invoke the budget-ui skill
 3. Invoke the svelte-code-writer skill for all .svelte file work
 4. Invoke the frontend-design skill for UI design quality
-5. Read budget-ui/CLAUDE.md for conventions and commands
+5. Invoke the web-design-guidelines skill for accessibility review of all new components
+6. Read budget-ui/CLAUDE.md for conventions and commands
 
 Implement ALL frontend changes specified in the design:
 - Page routes (+page.svelte, +page.server.ts)

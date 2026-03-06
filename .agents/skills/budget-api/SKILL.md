@@ -381,6 +381,17 @@ Read this reference when working with:
 - Cascade deletes involving external resources (collect keys in session, delete after commit)
 - Upload + DB save compensation (clean up external resource on DB failure)
 
+## Event-Driven, Jobs, Strategy & Email Patterns
+
+For event-driven architecture, scheduled jobs, strategy/dispatcher, and email templates, see [references/event-driven-patterns.md](references/event-driven-patterns.md).
+
+Read this reference when working with:
+- `EventEmitter2`, `@OnEvent` handlers, event payload interfaces in `src/{feature}/events/`
+- `@Cron` jobs with distributed locking, batch processing with group-by-workspace
+- Strategy/dispatcher pattern for multi-channel delivery (`src/{feature}/channels/`)
+- Handlebars email templates with `{{t "key"}}` i18n helper, `I18nContext.current()` null-safety
+- Deduplication patterns (check-before-dispatch with 24h time window)
+
 ## File Naming
 
 - Controllers: `src/{feature}/{feature}.controller.ts`
@@ -392,6 +403,10 @@ Read this reference when working with:
 - Response DTOs: `src/{feature}/dto/{feature}.dto.ts`
 - Guards: `src/{feature}/guards/{name}.guard.ts`
 - Decorators: `src/{feature}/decorators/{name}.decorator.ts`
+- Event handlers: `src/{feature}/handlers/{event-name}.handler.ts`
+- Event payloads: `src/{feature}/events/{event-name}.event.ts`
+- Jobs: `src/{feature}/jobs/{job-name}.job.ts`
+- Channel strategies: `src/{feature}/channels/{channel-name}.channel.ts`
 - E2E tests: `test/{feature}.e2e-spec.ts`
 - Migrations: `migrations/{timestamp}-{name}.js`
 

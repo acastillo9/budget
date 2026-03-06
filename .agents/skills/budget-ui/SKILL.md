@@ -365,6 +365,117 @@ Rules:
 
 Source: `budget-ui/src/lib/components/file-upload-zone.svelte`
 
+## Layout-Embedded Features
+
+For features that live in the app layout (overlays, panels, global widgets) rather than dedicated pages. These use client-side state only — no server load functions or form actions.
+
+### Client-side state in `(app)/+layout.svelte`
+
+```svelte
+<script lang="ts">
+  let panelOpen = $state(false);
+  let dialogOpen = $state(false);
+  let unreadCount = $state(0);
+  let items = $state<PaginatedItems>({ data: [], total: 0, limit: 20, offset: 0, nextPage: null });
+  let loading = $state(false);
+</script>
+```
+
+### Polling with `$effect` + `setInterval`
+
+```typescript
+import { browser } from '$app/environment';
+
+$effect(() => {
+  if (!browser) return;
+  fetchUnreadCount();
+
+  const interval = setInterval(() => {
+    if (!document.hidden) fetchUnreadCount(); // Skip when tab is hidden
+  }, 60_000);
+
+  const handleVisibilityChange = () => {
+    if (!document.hidden) fetchUnreadCount(); // Resume immediately on tab focus
+  };
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  return () => {
+    clearInterval(interval);
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+  };
+});
+```
+
+Rules:
+- Guard with `if (!browser) return` — `$effect` runs on server during SSR
+- Always check `document.hidden` before polling to avoid wasted requests
+- Listen for `visibilitychange` to refresh immediately when tab becomes visible
+- Return cleanup function from `$effect` to clear interval and remove listeners
+
+### Multiple overlay components (Sheet + Dialog)
+
+```svelte
+<!-- Panel (Sheet) opens from header button -->
+<NotificationPanel
+  bind:open={panelOpen}
+  {items} {loading}
+  onOpenPreferences={() => { dialogOpen = true; fetchPreferences(); }}
+/>
+
+<!-- Dialog opens from within the panel -->
+<NotificationPreferencesDialog
+  bind:open={dialogOpen}
+  {preferences}
+  onSave={handleSavePreferences}
+/>
+```
+
+Coordination: the parent layout holds state for both overlays. Sheet triggers Dialog via callback prop.
+
+### Client-side fetch without form actions
+
+```typescript
+async function fetchItems(loadMore = false) {
+  loading = true;
+  try {
+    const offset = loadMore ? items.data.length : 0;
+    const response = await fetch(`/api/notifications?limit=20&offset=${offset}`);
+    if (!response.ok) { toast.error($t('notifications.loadError')); return; }
+    const result = await response.json();
+    items = loadMore ? { ...result, data: [...items.data, ...result.data] } : result;
+  } catch {
+    toast.error($t('notifications.loadError'));
+  } finally {
+    loading = false;
+  }
+}
+```
+
+Rules:
+- Use direct `fetch` to API proxy routes + `toast` for success/error feedback
+- No `superValidate` or form actions — these are purely client-side interactions
+- For polling endpoints, fail silently (no toast on background fetch errors)
+
+### `dayjs` plugin initialization
+
+Initialize plugins once in a utility module, not in components:
+
+```typescript
+// src/lib/utils/date.ts
+import dayjs from 'dayjs';
+import LocalizedFormat from 'dayjs/plugin/localizedFormat';
+import utc from 'dayjs/plugin/utc';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(LocalizedFormat);
+dayjs.extend(utc);
+dayjs.extend(relativeTime);
+```
+
+Usage in components: `let timeAgo = $derived(dayjs(item.createdAt).fromNow());`
+
+Reference impl: Notification bell/panel/preferences in `budget-ui/src/routes/(app)/+layout.svelte`
+
 ## Schema Pattern (Zod v4)
 
 ```typescript

@@ -402,6 +402,128 @@ Rules:
 
 Source: `budget-ui/e2e/attachments.spec.ts`
 
+## Layout/Overlay Testing Patterns
+
+For testing features embedded in the app layout (notification panels, overlays, global widgets) rather than dedicated pages.
+
+### Testing layout-embedded features
+
+Navigate to any app page (e.g., dashboard), then interact with header/overlay elements:
+
+```typescript
+async goto() {
+  await this.page.goto('/');  // Any app page — feature lives in layout
+}
+
+async openPanel() {
+  await this.bellButton.click();
+  await expect(this.panel).toBeVisible({ timeout: 10_000 });
+}
+```
+
+### Stateful API mocking with `page.route()`
+
+Use a shared closure state across multiple route handlers so mutations in one endpoint are visible to others:
+
+```typescript
+export async function mockNotificationApi(page: Page, options: { notifications?: Record<string, unknown>[]; unreadCount?: number; preferences?: Record<string, unknown> } = {}) {
+  const state = {
+    notifications: [...(options.notifications || [])],
+    unreadCount: options.unreadCount ?? 0,
+    preferences: { ...(options.preferences || defaultPreferences) },
+  };
+
+  // GET /api/notifications/unread-count — reads shared state
+  await page.route('**/api/notifications/unread-count', async (route, request) => {
+    if (request.method() === 'GET') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ count: state.unreadCount }) });
+    }
+  });
+
+  // PATCH /api/notifications/:id/read — mutates shared state
+  await page.route('**/api/notifications/*/read', async (route, request) => {
+    if (request.method() === 'PATCH') {
+      const id = new URL(request.url()).pathname.split('/')[3];
+      const notification = state.notifications.find((n) => n.id === id);
+      if (notification) {
+        notification.isRead = true;
+        if (state.unreadCount > 0) state.unreadCount--;
+      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(notification) });
+    }
+  });
+
+  // GET + PUT /api/notifications/preferences
+  await page.route('**/api/notifications/preferences', async (route, request) => {
+    if (request.method() === 'GET') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(state.preferences) });
+    } else if (request.method() === 'PUT') {
+      const body = JSON.parse(request.postData() || '{}');
+      state.preferences = { ...state.preferences, ...body };
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(state.preferences) });
+    }
+  });
+
+  return state; // Caller can inspect state changes in assertions
+}
+```
+
+Rules:
+- Call mock setup **before** navigating to the page
+- Use a single `state` object shared across all route handlers for consistency
+- Return the state object so tests can assert on mutations
+- Extract IDs from URLs with `new URL(request.url()).pathname.split('/')`
+- Use `route.continue()` as fallback for unmatched methods
+
+### Testing Sheet/Dialog overlay interactions
+
+```typescript
+// POM: locators for both overlay types
+this.panel = page.locator('[data-slot="sheet-content"]');
+this.panelTitle = this.panel.locator('[data-slot="sheet-title"]');
+this.preferencesDialog = page.getByRole('dialog', { name: /notification preferences/i });
+
+// Test: multi-step overlay workflow
+test('should open panel, mark all read, open preferences, and save', async ({ page }) => {
+  await mockNotificationApi(page, { notifications: mockItems, unreadCount: 2 });
+  const notificationsPage = new NotificationsPage(page);
+  await notificationsPage.goto();
+  await page.waitForLoadState('networkidle');
+
+  // 1. Open Sheet panel
+  await notificationsPage.openPanel();
+  await expect(notificationsPage.panel).toBeVisible({ timeout: 10_000 });
+
+  // 2. Interact within Sheet
+  await notificationsPage.clickMarkAllAsRead();
+  await notificationsPage.expectSuccessToast(/all notifications marked as read/i);
+  await notificationsPage.toast.waitFor({ state: 'hidden', timeout: 10_000 });
+
+  // 3. Open Dialog from Sheet
+  await notificationsPage.clickSettings();
+  await expect(notificationsPage.preferencesDialog).toBeVisible({ timeout: 10_000 });
+
+  // 4. Interact within Dialog and verify
+  await notificationsPage.fillThreshold('budget', '90');
+  await notificationsPage.savePreferences();
+  await notificationsPage.expectSuccessToast(/preferences saved/i);
+});
+```
+
+### Intercepting requests for assertions
+
+```typescript
+const putRequest = page.waitForRequest(
+  (req) => req.url().includes('/api/notifications/preferences') && req.method() === 'PUT'
+);
+await notificationsPage.savePreferences();
+const req = await putRequest;
+const body = JSON.parse(req.postData() || '{}');
+expect(body.budgetThresholdPercent).toBe(75);
+```
+
+Reference impl: `budget-ui/e2e/notifications.spec.ts` and `budget-ui/e2e/pages/notifications.page.ts`
+
 ## Rules
 
 1. Import `test` and `expect` from `./fixtures`, never from `@playwright/test` in spec files
