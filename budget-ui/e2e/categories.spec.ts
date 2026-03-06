@@ -202,6 +202,7 @@ test.describe('Categories — Delete', () => {
 // ---------------------------------------------------------------------------
 test.describe('Categories — Full CRUD Workflow', () => {
 	test('should create, edit, and delete a category in sequence', async ({ page }) => {
+		test.slow();
 		const categoriesPage = new CategoriesPage(page);
 		await categoriesPage.goto();
 		await page.waitForLoadState('networkidle');

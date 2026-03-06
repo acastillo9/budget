@@ -165,7 +165,7 @@
 				</Form.Control>
 				<Form.FieldErrors />
 			</Form.Field>
-			{#if !categoryType && parentCategories.length > 0}
+			{#if parentCategories.length > 0}
 				<div>
 					<Label class="mb-2">{$t('categories.parentCategory')}</Label>
 					<Select.Root type="single" bind:value={selectedParentId} name="parent">

@@ -28,6 +28,9 @@
 
 	let search = $state('');
 
+	// Top-level categories available as parents in the create dialog
+	let parentCategories = $derived(categories.filter((c) => !c.parent));
+
 	// Flatten all categories (parents + children) for search matching
 	function matchesSearch(cat: Category, query: string): boolean {
 		return cat.name.toLowerCase().includes(query.toLowerCase());
@@ -141,7 +144,7 @@
 
 	<div class="max-h-64 overflow-y-auto">
 		<div class="grid grid-cols-3 gap-4">
-			<CreateCategoryDialog {categoryType} data={createCategoryForm} />
+			<CreateCategoryDialog {categoryType} {parentCategories} data={createCategoryForm} />
 		</div>
 
 		{#each groupedCategories.groups as group (group.parent.id)}
