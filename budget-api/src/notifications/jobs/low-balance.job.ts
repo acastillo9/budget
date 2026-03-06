@@ -11,6 +11,8 @@ import {
 } from '../entities/notification-preference.entity';
 import { NotificationType } from '../entities/notification-type.enum';
 import { WorkspaceMember } from 'src/workspaces/entities/workspace-member.entity';
+import { getThresholdForCurrency } from '../constants/currency-thresholds';
+import { CurrencyCode } from 'src/shared/entities/currency-code.enum';
 
 @Injectable()
 export class LowBalanceJob {
@@ -77,7 +79,12 @@ export class LowBalanceJob {
               if (!userId) continue;
 
               const prefs = prefsMap.get(userId);
-              const threshold = prefs?.lowBalanceAmount || 100;
+              const currencyCode = (account.currencyCode as CurrencyCode) || CurrencyCode.USD;
+              const threshold = getThresholdForCurrency(
+                prefs?.lowBalanceAmounts,
+                currencyCode,
+                'lowBalanceAmount',
+              );
 
               if (account.balance < threshold) {
                 const accountName = account.name || 'Account';

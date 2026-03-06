@@ -8,8 +8,8 @@ const channelPreferenceSchema = z.object({
 export const updateNotificationPreferencesSchema = z.object({
 	channels: z.record(z.string(), channelPreferenceSchema).optional(),
 	budgetThresholdPercent: z.number().min(1).max(100).optional(),
-	largeTransactionAmount: z.number().min(0).optional(),
-	lowBalanceAmount: z.number().min(0).optional(),
+	largeTransactionAmounts: z.record(z.string(), z.number().min(0)).optional(),
+	lowBalanceAmounts: z.record(z.string(), z.number().min(0)).optional(),
 	billDueSoonDays: z.number().min(1).max(30).optional(),
 	quietHoursEnabled: z.boolean().optional(),
 	quietHoursStart: z

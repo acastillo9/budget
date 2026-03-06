@@ -29,17 +29,17 @@ export class NotificationPreferenceDto {
 
   @Expose()
   @ApiProperty({
-    description: 'Large transaction amount threshold',
-    example: 500,
+    description: 'Large transaction amount thresholds per currency',
+    example: { USD: 500, COP: 2000000 },
   })
-  largeTransactionAmount: number;
+  largeTransactionAmounts: Record<string, number>;
 
   @Expose()
   @ApiProperty({
-    description: 'Low balance amount threshold',
-    example: 100,
+    description: 'Low balance amount thresholds per currency',
+    example: { USD: 100, COP: 500000 },
   })
-  lowBalanceAmount: number;
+  lowBalanceAmounts: Record<string, number>;
 
   @Expose()
   @ApiProperty({

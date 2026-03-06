@@ -12,6 +12,7 @@ import {
   ValidationOptions,
 } from 'class-validator';
 import { NotificationType } from '../entities/notification-type.enum';
+import { CurrencyCode } from 'src/shared/entities/currency-code.enum';
 
 function IsValidChannelKeys(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
@@ -46,6 +47,31 @@ function IsValidChannelKeys(validationOptions?: ValidationOptions) {
   };
 }
 
+function IsValidCurrencyThresholds(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'isValidCurrencyThresholds',
+      target: object.constructor,
+      propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: unknown) {
+          if (typeof value !== 'object' || value === null) return false;
+          const validKeys = Object.values(CurrencyCode) as string[];
+          for (const [key, val] of Object.entries(value)) {
+            if (!validKeys.includes(key)) return false;
+            if (typeof val !== 'number' || val < 0) return false;
+          }
+          return true;
+        },
+        defaultMessage() {
+          return `${propertyName} must have valid CurrencyCode keys with non-negative number values`;
+        },
+      },
+    });
+  };
+}
+
 export class UpdateNotificationPreferenceDto {
   @ApiPropertyOptional({
     description: 'Per-event channel toggles',
@@ -72,24 +98,22 @@ export class UpdateNotificationPreferenceDto {
   budgetThresholdPercent?: number;
 
   @ApiPropertyOptional({
-    description: 'Large transaction amount threshold',
-    example: 500,
-    minimum: 0,
+    description: 'Large transaction amount thresholds per currency',
+    example: { USD: 500, COP: 2000000 },
   })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  largeTransactionAmount?: number;
+  @IsObject()
+  @IsValidCurrencyThresholds()
+  largeTransactionAmounts?: Record<string, number>;
 
   @ApiPropertyOptional({
-    description: 'Low balance amount threshold',
-    example: 100,
-    minimum: 0,
+    description: 'Low balance amount thresholds per currency',
+    example: { USD: 100, COP: 500000 },
   })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  lowBalanceAmount?: number;
+  @IsObject()
+  @IsValidCurrencyThresholds()
+  lowBalanceAmounts?: Record<string, number>;
 
   @ApiPropertyOptional({
     description: 'Days before due date to trigger bill due soon notification',

@@ -49,11 +49,11 @@ export class NotificationPreference {
   @Prop({ type: Number, default: 80 })
   budgetThresholdPercent: number;
 
-  @Prop({ type: Number, default: 500 })
-  largeTransactionAmount: number;
+  @Prop({ type: SchemaTypes.Mixed, default: { USD: 500, COP: 2000000 } })
+  largeTransactionAmounts: Record<string, number>;
 
-  @Prop({ type: Number, default: 100 })
-  lowBalanceAmount: number;
+  @Prop({ type: SchemaTypes.Mixed, default: { USD: 100, COP: 500000 } })
+  lowBalanceAmounts: Record<string, number>;
 
   @Prop({ type: Number, default: 3 })
   billDueSoonDays: number;

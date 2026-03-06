@@ -14,6 +14,7 @@
 	import { t } from 'svelte-i18n';
 	import { updateNotificationPreferencesSchema } from '$lib/schemas/notification-preferences.schema';
 	import { toast } from 'svelte-sonner';
+	import { currencies } from '$lib/utils/currency';
 
 	interface Props {
 		open: boolean;
@@ -39,8 +40,8 @@
 	// Local form state, initialized from preferences
 	let channels = $state<Record<string, { inApp: boolean; email: boolean }>>({});
 	let budgetThresholdPercent = $state(80);
-	let largeTransactionAmount = $state(500);
-	let lowBalanceAmount = $state(100);
+	let largeTransactionAmounts = $state<Record<string, number>>({ USD: 500, COP: 2000000 });
+	let lowBalanceAmounts = $state<Record<string, number>>({ USD: 100, COP: 500000 });
 	let billDueSoonDays = $state(3);
 	let quietHoursEnabled = $state(false);
 	let quietHoursStart = $state('22:00');
@@ -52,8 +53,8 @@
 		if (preferences) {
 			channels = JSON.parse(JSON.stringify(preferences.channels));
 			budgetThresholdPercent = preferences.budgetThresholdPercent;
-			largeTransactionAmount = preferences.largeTransactionAmount;
-			lowBalanceAmount = preferences.lowBalanceAmount;
+			largeTransactionAmounts = { ...preferences.largeTransactionAmounts };
+			lowBalanceAmounts = { ...preferences.lowBalanceAmounts };
 			billDueSoonDays = preferences.billDueSoonDays;
 			quietHoursEnabled = preferences.quietHoursEnabled;
 			quietHoursStart = preferences.quietHoursStart;
@@ -66,8 +67,8 @@
 		const data: UpdateNotificationPreference = {
 			channels,
 			budgetThresholdPercent,
-			largeTransactionAmount,
-			lowBalanceAmount,
+			largeTransactionAmounts,
+			lowBalanceAmounts,
 			billDueSoonDays,
 			quietHoursEnabled,
 			quietHoursStart,
@@ -155,17 +156,42 @@
 						/>
 					</div>
 					<div class="space-y-2">
-						<Label for="large-transaction">{$t('notifications.largeTransactionAmount')}</Label>
-						<Input
-							id="large-transaction"
-							type="number"
-							min={0}
-							bind:value={largeTransactionAmount}
-						/>
+						<Label>{$t('notifications.largeTransactionAmount')}</Label>
+						{#each currencies as currency (currency.code)}
+							<div class="flex items-center gap-2">
+								<span class="w-16 text-sm">{currency.flag} {currency.code}</span>
+								<Input
+									id="large-transaction-{currency.code}"
+									type="number"
+									min={0}
+									value={largeTransactionAmounts[currency.code] ?? 0}
+									oninput={(e) => {
+										largeTransactionAmounts[currency.code] = Number(
+											(e.target as HTMLInputElement).value
+										);
+									}}
+								/>
+							</div>
+						{/each}
 					</div>
 					<div class="space-y-2">
-						<Label for="low-balance">{$t('notifications.lowBalanceAmount')}</Label>
-						<Input id="low-balance" type="number" min={0} bind:value={lowBalanceAmount} />
+						<Label>{$t('notifications.lowBalanceAmount')}</Label>
+						{#each currencies as currency (currency.code)}
+							<div class="flex items-center gap-2">
+								<span class="w-16 text-sm">{currency.flag} {currency.code}</span>
+								<Input
+									id="low-balance-{currency.code}"
+									type="number"
+									min={0}
+									value={lowBalanceAmounts[currency.code] ?? 0}
+									oninput={(e) => {
+										lowBalanceAmounts[currency.code] = Number(
+											(e.target as HTMLInputElement).value
+										);
+									}}
+								/>
+							</div>
+						{/each}
 					</div>
 					<div class="space-y-2">
 						<Label for="bill-due-soon">{$t('notifications.billDueSoonDays')}</Label>

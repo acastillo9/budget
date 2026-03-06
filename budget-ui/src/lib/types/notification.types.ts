@@ -38,8 +38,8 @@ export type NotificationPreference = {
 	id: string;
 	channels: Record<NotificationType, ChannelPreference>;
 	budgetThresholdPercent: number;
-	largeTransactionAmount: number;
-	lowBalanceAmount: number;
+	largeTransactionAmounts: Record<string, number>;
+	lowBalanceAmounts: Record<string, number>;
 	billDueSoonDays: number;
 	quietHoursEnabled: boolean;
 	quietHoursStart: string;

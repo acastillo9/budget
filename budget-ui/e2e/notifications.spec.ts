@@ -543,8 +543,8 @@ test.describe('Notifications — Preferences Save', () => {
 		const req = await putRequest;
 		const body = JSON.parse(req.postData() || '{}');
 		expect(body.budgetThresholdPercent).toBe(75);
-		expect(body.largeTransactionAmount).toBe(1000);
-		expect(body.lowBalanceAmount).toBe(200);
+		expect(body.largeTransactionAmounts.USD).toBe(1000);
+		expect(body.lowBalanceAmounts.USD).toBe(200);
 		expect(body.billDueSoonDays).toBe(7);
 
 		await notificationsPage.expectSuccessToast(/notification preferences saved/i);

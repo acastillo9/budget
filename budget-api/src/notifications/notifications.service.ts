@@ -252,11 +252,19 @@ export class NotificationsService {
       if (dto.budgetThresholdPercent !== undefined) {
         updateFields.budgetThresholdPercent = dto.budgetThresholdPercent;
       }
-      if (dto.largeTransactionAmount !== undefined) {
-        updateFields.largeTransactionAmount = dto.largeTransactionAmount;
+      if (dto.largeTransactionAmounts) {
+        for (const [currency, amount] of Object.entries(
+          dto.largeTransactionAmounts,
+        )) {
+          updateFields[`largeTransactionAmounts.${currency}`] = amount;
+        }
       }
-      if (dto.lowBalanceAmount !== undefined) {
-        updateFields.lowBalanceAmount = dto.lowBalanceAmount;
+      if (dto.lowBalanceAmounts) {
+        for (const [currency, amount] of Object.entries(
+          dto.lowBalanceAmounts,
+        )) {
+          updateFields[`lowBalanceAmounts.${currency}`] = amount;
+        }
       }
       if (dto.billDueSoonDays !== undefined) {
         updateFields.billDueSoonDays = dto.billDueSoonDays;

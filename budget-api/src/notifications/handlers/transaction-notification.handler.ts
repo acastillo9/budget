@@ -14,6 +14,8 @@ import {
 import { ObjectId } from 'mongodb';
 import { CategoriesService } from 'src/categories/categories.service';
 import { getPeriodStart, addPeriod } from '../utils/period.util';
+import { getThresholdForCurrency } from '../constants/currency-thresholds';
+import { CurrencyCode } from 'src/shared/entities/currency-code.enum';
 
 export interface TransactionCreatedEvent {
   transaction: any;
@@ -46,16 +48,21 @@ export class TransactionNotificationHandler {
     event: TransactionCreatedEvent,
   ): Promise<void> {
     try {
-      // Query preferences once and pass to all check methods
-      const prefs = await this.prefsModel.findOne({
-        user: event.userId,
-        workspace: event.workspaceId,
-      });
+      // Query preferences and account once, pass to all check methods
+      const [prefs, account] = await Promise.all([
+        this.prefsModel.findOne({
+          user: event.userId,
+          workspace: event.workspaceId,
+        }),
+        event.accountId
+          ? this.accountModel.findById(event.accountId)
+          : null,
+      ]);
 
       await Promise.allSettled([
         this.checkBudgetThresholds(event, prefs),
-        this.checkLargeTransaction(event, prefs),
-        this.checkLowBalance(event, prefs),
+        this.checkLargeTransaction(event, prefs, account),
+        this.checkLowBalance(event, prefs, account),
       ]);
     } catch (error) {
       this.logger.error(
@@ -175,9 +182,15 @@ export class TransactionNotificationHandler {
   private async checkLargeTransaction(
     event: TransactionCreatedEvent,
     prefs: NotificationPreferenceDocument | null,
+    account: any,
   ): Promise<void> {
     try {
-      const threshold = prefs?.largeTransactionAmount || 500;
+      const currencyCode = (account?.currencyCode as CurrencyCode) || CurrencyCode.USD;
+      const threshold = getThresholdForCurrency(
+        prefs?.largeTransactionAmounts,
+        currencyCode,
+        'largeTransactionAmount',
+      );
 
       if (Math.abs(event.amount) >= threshold) {
         await this.dispatcher.dispatch({
@@ -212,14 +225,17 @@ export class TransactionNotificationHandler {
   private async checkLowBalance(
     event: TransactionCreatedEvent,
     prefs: NotificationPreferenceDocument | null,
+    account: any,
   ): Promise<void> {
     try {
-      if (!event.accountId) return;
+      if (!event.accountId || !account) return;
 
-      const threshold = prefs?.lowBalanceAmount || 100;
-
-      const account = await this.accountModel.findById(event.accountId);
-      if (!account) return;
+      const currencyCode = (account.currencyCode as CurrencyCode) || CurrencyCode.USD;
+      const threshold = getThresholdForCurrency(
+        prefs?.lowBalanceAmounts,
+        currencyCode,
+        'lowBalanceAmount',
+      );
 
       if (account.balance < threshold) {
         const accountName = account.name || 'Account';

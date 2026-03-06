@@ -52,8 +52,8 @@ export function createMockPreferences(overrides: Record<string, unknown> = {}) {
 		id: 'mock-pref-1',
 		channels,
 		budgetThresholdPercent: 80,
-		largeTransactionAmount: 500,
-		lowBalanceAmount: 100,
+		largeTransactionAmounts: { USD: 500, COP: 2000000 },
+		lowBalanceAmounts: { USD: 100, COP: 500000 },
 		billDueSoonDays: 3,
 		quietHoursEnabled: false,
 		quietHoursStart: '22:00',
@@ -293,8 +293,8 @@ export class NotificationsPage {
 
 		// Threshold inputs
 		this.budgetThresholdInput = page.getByLabel(/budget alert threshold/i);
-		this.largeTransactionInput = page.getByLabel(/large transaction amount/i);
-		this.lowBalanceInput = page.getByLabel(/low balance amount/i);
+		this.largeTransactionInput = page.locator('#large-transaction-USD');
+		this.lowBalanceInput = page.locator('#low-balance-USD');
 		this.billDueSoonInput = page.getByLabel(/days before due date/i);
 
 		// Quiet hours

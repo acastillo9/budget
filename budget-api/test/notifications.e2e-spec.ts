@@ -566,8 +566,8 @@ describe('NotificationsController (e2e)', () => {
 
       // Verify default threshold values
       expect(response.body.budgetThresholdPercent).toBe(80);
-      expect(response.body.largeTransactionAmount).toBe(500);
-      expect(response.body.lowBalanceAmount).toBe(100);
+      expect(response.body.largeTransactionAmounts).toEqual({ USD: 500, COP: 2000000 });
+      expect(response.body.lowBalanceAmounts).toEqual({ USD: 100, COP: 500000 });
       expect(response.body.billDueSoonDays).toBe(3);
 
       // Verify default quiet hours
@@ -637,15 +637,17 @@ describe('NotificationsController (e2e)', () => {
         .set('Authorization', `Bearer ${authTokenA}`)
         .send({
           budgetThresholdPercent: 90,
-          largeTransactionAmount: 1000,
-          lowBalanceAmount: 50,
+          largeTransactionAmounts: { USD: 1000, COP: 3000000 },
+          lowBalanceAmounts: { USD: 50, COP: 200000 },
           billDueSoonDays: 7,
         });
 
       expect(response.status).toBe(200);
       expect(response.body.budgetThresholdPercent).toBe(90);
-      expect(response.body.largeTransactionAmount).toBe(1000);
-      expect(response.body.lowBalanceAmount).toBe(50);
+      expect(response.body.largeTransactionAmounts.USD).toBe(1000);
+      expect(response.body.largeTransactionAmounts.COP).toBe(3000000);
+      expect(response.body.lowBalanceAmounts.USD).toBe(50);
+      expect(response.body.lowBalanceAmounts.COP).toBe(200000);
       expect(response.body.billDueSoonDays).toBe(7);
     });
 
@@ -692,7 +694,7 @@ describe('NotificationsController (e2e)', () => {
         .set('Authorization', `Bearer ${authTokenA}`)
         .send({
           budgetThresholdPercent: 75,
-          largeTransactionAmount: 2000,
+          largeTransactionAmounts: { USD: 2000 },
         });
 
       // Now update only one field
@@ -705,8 +707,8 @@ describe('NotificationsController (e2e)', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.budgetThresholdPercent).toBe(60);
-      // largeTransactionAmount should still be 2000
-      expect(response.body.largeTransactionAmount).toBe(2000);
+      // largeTransactionAmounts.USD should still be 2000
+      expect(response.body.largeTransactionAmounts.USD).toBe(2000);
     });
 
     it('should return 400 when budgetThresholdPercent is below minimum (1)', async () => {
@@ -727,20 +729,29 @@ describe('NotificationsController (e2e)', () => {
       expect(response.status).toBe(400);
     });
 
-    it('should return 400 when largeTransactionAmount is negative', async () => {
+    it('should return 400 when largeTransactionAmounts has negative value', async () => {
       const response = await request(app.getHttpServer())
         .put('/notifications/preferences')
         .set('Authorization', `Bearer ${authTokenA}`)
-        .send({ largeTransactionAmount: -100 });
+        .send({ largeTransactionAmounts: { USD: -100 } });
 
       expect(response.status).toBe(400);
     });
 
-    it('should return 400 when lowBalanceAmount is negative', async () => {
+    it('should return 400 when lowBalanceAmounts has negative value', async () => {
       const response = await request(app.getHttpServer())
         .put('/notifications/preferences')
         .set('Authorization', `Bearer ${authTokenA}`)
-        .send({ lowBalanceAmount: -50 });
+        .send({ lowBalanceAmounts: { USD: -50 } });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should return 400 when largeTransactionAmounts has invalid currency key', async () => {
+      const response = await request(app.getHttpServer())
+        .put('/notifications/preferences')
+        .set('Authorization', `Bearer ${authTokenA}`)
+        .send({ largeTransactionAmounts: { INVALID: 100 } });
 
       expect(response.status).toBe(400);
     });
