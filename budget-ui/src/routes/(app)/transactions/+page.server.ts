@@ -9,7 +9,10 @@ import { createCategorySchema } from '$lib/schemas/category.schema';
 import { createTransactionSchema, createTransferSchema } from '$lib/schemas/transaction.schema';
 import { addCategoryAction } from '$lib/server/actions/category';
 
-export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
+export const load: PageServerLoad = async ({ cookies, fetch, url, parent }) => {
+	// Wait for the layout to resolve (sets X-Workspace-Id cookie for new accounts)
+	await parent();
+
 	const offset = url.searchParams.get('offset')
 		? parseInt(url.searchParams.get('offset') as string, 10)
 		: 0;

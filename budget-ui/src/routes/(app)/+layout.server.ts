@@ -40,7 +40,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies, fetch }) => {
 		const workspaceIdFromCookie = cookies.get('X-Workspace-Id');
 		currentWorkspace = workspaces.find((w) => w.id === workspaceIdFromCookie) || workspaces[0];
 
-		if (currentWorkspace && !workspaceIdFromCookie) {
+		if (currentWorkspace && currentWorkspace.id !== workspaceIdFromCookie) {
 			cookies.set('X-Workspace-Id', currentWorkspace.id, {
 				path: '/',
 				sameSite: 'strict',

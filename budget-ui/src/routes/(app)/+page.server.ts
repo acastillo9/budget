@@ -10,11 +10,14 @@ import { createCategorySchema } from '$lib/schemas/category.schema';
 import { createTransactionSchema, createTransferSchema } from '$lib/schemas/transaction.schema';
 import { addCategoryAction } from '$lib/server/actions/category';
 
-export const load: PageServerLoad = async ({ locals, cookies, fetch }) => {
+export const load: PageServerLoad = async ({ locals, cookies, fetch, parent }) => {
 	const { user } = locals;
 	if (!user) {
 		throw redirect(302, '/signin');
 	}
+
+	// Wait for the layout to resolve (sets X-Workspace-Id cookie for new accounts)
+	await parent();
 
 	// Load accounts from the API
 	let accounts = [];

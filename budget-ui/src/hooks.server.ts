@@ -50,6 +50,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (!accessToken) {
 		cookies.delete('AuthorizationToken', { path: '/' });
 		cookies.delete('RefreshToken', { path: '/' });
+		cookies.delete('X-Workspace-Id', { path: '/' });
 		return resolve(event);
 	}
 
@@ -61,6 +62,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		if (!refreshToken) {
 			cookies.delete('AuthorizationToken', { path: '/' });
 			cookies.delete('RefreshToken', { path: '/' });
+			cookies.delete('X-Workspace-Id', { path: '/' });
 			return resolve(event);
 		}
 
@@ -89,6 +91,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		} catch {
 			cookies.delete('AuthorizationToken', { path: '/' });
 			cookies.delete('RefreshToken', { path: '/' });
+			cookies.delete('X-Workspace-Id', { path: '/' });
 			return resolve(event); // User is invalid: proceed without user
 		}
 	}

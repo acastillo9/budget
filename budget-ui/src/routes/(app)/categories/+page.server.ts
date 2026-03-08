@@ -9,7 +9,10 @@ import { $t } from '$lib/i18n';
 import type { Category } from '$lib/types/category.types';
 import { addCategoryAction } from '$lib/server/actions/category';
 
-export const load: PageServerLoad = async ({ cookies, fetch }) => {
+export const load: PageServerLoad = async ({ cookies, fetch, parent }) => {
+	// Wait for the layout to resolve (sets X-Workspace-Id cookie for new accounts)
+	await parent();
+
 	let categories: Category[] = [];
 	try {
 		const response = await fetch(`${API_URL}/categories/tree`);

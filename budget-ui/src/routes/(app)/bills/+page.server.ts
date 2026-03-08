@@ -9,7 +9,10 @@ import { fail, type Actions } from '@sveltejs/kit';
 import { createCategorySchema } from '$lib/schemas/category.schema';
 import { addCategoryAction } from '$lib/server/actions/category';
 
-export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
+export const load: PageServerLoad = async ({ cookies, fetch, url, parent }) => {
+	// Wait for the layout to resolve (sets X-Workspace-Id cookie for new accounts)
+	await parent();
+
 	// Load accounts from the API
 	let accounts = [];
 	try {

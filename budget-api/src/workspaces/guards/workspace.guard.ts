@@ -39,15 +39,12 @@ export class WorkspaceGuard implements CanActivate {
         workspaceIdHeader,
         user.userId,
       );
-      if (!membership) {
-        throw new HttpException(
-          'Not a member of this workspace',
-          HttpStatus.FORBIDDEN,
-        );
+      if (membership) {
+        user.workspaceId = workspaceIdHeader;
+        user.workspaceRole = membership.role;
+        return true;
       }
-      user.workspaceId = workspaceIdHeader;
-      user.workspaceRole = membership.role;
-      return true;
+      // Header workspace is invalid (stale cookie or removed member) — fall through to default
     }
 
     // Default to user's first workspace

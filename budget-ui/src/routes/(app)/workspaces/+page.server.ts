@@ -5,7 +5,10 @@ import type { PageServerLoad } from './$types';
 import type { WorkspaceMember, Invitation } from '$lib/types/workspace.types';
 import type { ConsentStatus, UserConsent } from '$lib/types/terms.types';
 
-export const load: PageServerLoad = async ({ fetch, cookies }) => {
+export const load: PageServerLoad = async ({ fetch, cookies, parent }) => {
+	// Wait for the layout to resolve (sets X-Workspace-Id cookie for new accounts)
+	await parent();
+
 	let members: WorkspaceMember[] = [];
 	let invitations: Invitation[] = [];
 	let consentStatus: ConsentStatus | null = null;
