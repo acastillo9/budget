@@ -20,8 +20,8 @@
 	let {
 		accountsSummary,
 		currencyRates
-	}: { accountsSummary: AccountSummary[]; currencyRates: CurrencyRates } = $props();
-	let baseCurrency = $derived(getCurrencyByCode(currencyRates.baseCurrencyCode || 'USD'));
+	}: { accountsSummary: AccountSummary[]; currencyRates: CurrencyRates | undefined } = $props();
+	let baseCurrency = $derived(getCurrencyByCode(currencyRates?.baseCurrencyCode || 'USD'));
 	let accountsSummaryByCurrency: AccountsSummaryByCurrency = $derived(
 		accountsSummary.reduce((acc: AccountsSummaryByCurrency, accountSummary: AccountSummary) => {
 			if (!acc[accountSummary.currencyCode]) {
@@ -33,7 +33,8 @@
 			}
 			acc[accountSummary.currencyCode].totalBalance += accountSummary.totalBalance;
 			acc[accountSummary.currencyCode].totalBalanceConverted +=
-				accountSummary.totalBalance / currencyRates.rates[accountSummary.currencyCode].rate;
+				accountSummary.totalBalance /
+				(currencyRates?.rates?.[accountSummary.currencyCode]?.rate || 1);
 			acc[accountSummary.currencyCode].accountsCount += accountSummary.accountsCount;
 			return acc;
 		}, {})

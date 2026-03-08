@@ -27,7 +27,7 @@
 	let totalBalance = $derived(
 		data.accountsSummary.reduce(
 			(acc: number, accountSummary: AccountSummary) =>
-				acc + accountSummary.totalBalance / rates[accountSummary.currencyCode].rate,
+				acc + accountSummary.totalBalance / (rates[accountSummary.currencyCode]?.rate || 1),
 			0
 		)
 	);
@@ -40,10 +40,12 @@
 				return {
 					totalIncome:
 						acc.totalIncome +
-						transactionSummary.totalIncome / rates[transactionSummary.currencyCode].rate,
+						transactionSummary.totalIncome /
+							(rates[transactionSummary.currencyCode]?.rate || 1),
 					totalExpenses:
 						acc.totalExpenses +
-						transactionSummary.totalExpenses / rates[transactionSummary.currencyCode].rate
+						transactionSummary.totalExpenses /
+							(rates[transactionSummary.currencyCode]?.rate || 1)
 				};
 			},
 			{ totalIncome: 0, totalExpenses: 0 }
@@ -140,7 +142,7 @@
 				<div>
 					<BalanceBreakdownCard
 						accountsSummary={data.accountsSummary}
-						currencyRates={userState.currencyRates!}
+						currencyRates={userState.currencyRates}
 					/>
 				</div>
 			</div>

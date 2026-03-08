@@ -44,6 +44,11 @@ async function registerUser(
 		storageState: { cookies: [], origins: [] }
 	});
 	const page = await context.newPage();
+
+	// Capture uncaught JS errors so registration fails fast on runtime crashes
+	const pageErrors: Error[] = [];
+	page.on('pageerror', (err) => pageErrors.push(err));
+
 	const signUpPage = new SignUpPage(page);
 
 	// Step 1: Fill basic info and submit
@@ -71,6 +76,12 @@ async function registerUser(
 	// After setting the password the app redirects to the dashboard
 	await page.waitForURL('/', { timeout: 15_000 });
 	await base.expect(page.locator('h1')).toBeVisible();
+
+	// Fail if any uncaught JS errors occurred during registration/dashboard load
+	if (pageErrors.length > 0) {
+		const messages = pageErrors.map((e) => e.message).join('\n');
+		throw new Error(`Uncaught JS errors during registration:\n${messages}`);
+	}
 
 	// Capture storage state in-memory (no file I/O)
 	const state = await context.storageState();

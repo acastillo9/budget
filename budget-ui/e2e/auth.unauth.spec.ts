@@ -282,6 +282,10 @@ test.describe('Complete Registration Flow', () => {
 		const testEmail = `register-flow-${Date.now()}@example.com`;
 		const testName = 'Register Flow User';
 
+		// Capture uncaught JS errors to detect runtime crashes on the dashboard
+		const pageErrors: string[] = [];
+		page.on('pageerror', (err) => pageErrors.push(err.message));
+
 		// ---- Step 1: Basic info ----
 		await signUpPage.goto();
 		await expect(signUpPage.heading).toBeVisible();
@@ -313,9 +317,22 @@ test.describe('Complete Registration Flow', () => {
 		await signUpPage.fillPassword(TEST_PASSWORD);
 		await signUpPage.submitPassword();
 
-		// ---- Verify: redirected to dashboard ----
+		// ---- Verify: redirected to dashboard and fully rendered ----
 		await page.waitForURL('/', { timeout: 15_000 });
+		await page.waitForLoadState('networkidle');
 		await expect(page.locator('h1')).toBeVisible();
+
+		// Verify key dashboard cards rendered (not just the heading)
+		await expect(page.locator('[class*="card"]', { hasText: /net worth/i }).first()).toBeVisible();
+		await expect(
+			page.locator('[class*="card"]', { hasText: /balance breakdown/i }).first()
+		).toBeVisible();
+		await expect(
+			page.locator('[class*="card"]', { hasText: /exchange rates/i }).first()
+		).toBeVisible();
+
+		// No uncaught JS errors should have occurred
+		expect(pageErrors).toHaveLength(0);
 	});
 
 	test('should show activation code step after registering with valid info', async () => {
