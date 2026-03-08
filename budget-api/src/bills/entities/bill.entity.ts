@@ -43,7 +43,7 @@ export class Bill {
     type: SchemaTypes.ObjectId,
     ref: 'Category',
     required: true,
-    autopopulate: true,
+    autopopulate: { maxDepth: 2 },
   })
   category: CategoryDocument;
 
@@ -51,7 +51,7 @@ export class Bill {
     type: SchemaTypes.ObjectId,
     ref: 'Account',
     required: true,
-    autopopulate: true,
+    autopopulate: { maxDepth: 2 },
   })
   account: AccountDocument;
 
@@ -59,7 +59,7 @@ export class Bill {
     type: SchemaTypes.ObjectId,
     ref: 'User',
     required: true,
-    autopopulate: true,
+    autopopulate: { maxDepth: 2 },
   })
   user: UserDocument;
 

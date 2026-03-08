@@ -79,7 +79,8 @@ export class LowBalanceJob {
               if (!userId) continue;
 
               const prefs = prefsMap.get(userId);
-              const currencyCode = (account.currencyCode as CurrencyCode) || CurrencyCode.USD;
+              const currencyCode =
+                (account.currencyCode as CurrencyCode) || CurrencyCode.USD;
               const threshold = getThresholdForCurrency(
                 prefs?.lowBalanceAmounts,
                 currencyCode,

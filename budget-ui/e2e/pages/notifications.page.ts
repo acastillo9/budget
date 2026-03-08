@@ -109,7 +109,11 @@ export async function mockNotificationApi(
 				status: 200,
 				contentType: 'application/json',
 				body: JSON.stringify(
-					createMockPaginatedNotifications(state.notifications, state.notifications.length, nextPage)
+					createMockPaginatedNotifications(
+						state.notifications,
+						state.notifications.length,
+						nextPage
+					)
 				)
 			});
 		} else {
@@ -124,7 +128,11 @@ export async function mockNotificationApi(
 				status: 200,
 				contentType: 'application/json',
 				body: JSON.stringify(
-					createMockPaginatedNotifications(state.notifications, state.notifications.length, nextPage)
+					createMockPaginatedNotifications(
+						state.notifications,
+						state.notifications.length,
+						nextPage
+					)
 				)
 			});
 		} else {
@@ -396,7 +404,11 @@ export class NotificationsPage {
 		return this.page.locator(`#low-balance-${currency}`);
 	}
 
-	async fillThreshold(field: 'budget' | 'largeTransaction' | 'lowBalance' | 'billDueSoon', value: string, currency: string = 'COP') {
+	async fillThreshold(
+		field: 'budget' | 'largeTransaction' | 'lowBalance' | 'billDueSoon',
+		value: string,
+		currency: string = 'COP'
+	) {
 		const input =
 			field === 'budget'
 				? this.budgetThresholdInput

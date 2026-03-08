@@ -28,7 +28,7 @@ export class Budget {
   @Prop({
     type: [{ type: SchemaTypes.ObjectId, ref: 'Category' }],
     required: true,
-    autopopulate: true,
+    autopopulate: { maxDepth: 2 },
   })
   categories: CategoryDocument[];
 
@@ -36,7 +36,7 @@ export class Budget {
     type: SchemaTypes.ObjectId,
     ref: 'User',
     required: true,
-    autopopulate: true,
+    autopopulate: { maxDepth: 2 },
   })
   user: UserDocument;
 

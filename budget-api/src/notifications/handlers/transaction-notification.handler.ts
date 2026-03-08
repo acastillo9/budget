@@ -54,9 +54,7 @@ export class TransactionNotificationHandler {
           user: event.userId,
           workspace: event.workspaceId,
         }),
-        event.accountId
-          ? this.accountModel.findById(event.accountId)
-          : null,
+        event.accountId ? this.accountModel.findById(event.accountId) : null,
       ]);
 
       await Promise.allSettled([
@@ -185,7 +183,8 @@ export class TransactionNotificationHandler {
     account: any,
   ): Promise<void> {
     try {
-      const currencyCode = (account?.currencyCode as CurrencyCode) || CurrencyCode.USD;
+      const currencyCode =
+        (account?.currencyCode as CurrencyCode) || CurrencyCode.USD;
       const threshold = getThresholdForCurrency(
         prefs?.largeTransactionAmounts,
         currencyCode,
@@ -230,7 +229,8 @@ export class TransactionNotificationHandler {
     try {
       if (!event.accountId || !account) return;
 
-      const currencyCode = (account.currencyCode as CurrencyCode) || CurrencyCode.USD;
+      const currencyCode =
+        (account.currencyCode as CurrencyCode) || CurrencyCode.USD;
       const threshold = getThresholdForCurrency(
         prefs?.lowBalanceAmounts,
         currencyCode,

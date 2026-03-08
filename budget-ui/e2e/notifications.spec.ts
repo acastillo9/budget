@@ -81,9 +81,7 @@ test.describe('Notifications — Panel Open & Empty State', () => {
 		await expect(notificationsPage.emptyState).toBeVisible({ timeout: 10_000 });
 	});
 
-	test('should show mark-all-read and settings buttons in the panel header', async ({
-		page
-	}) => {
+	test('should show mark-all-read and settings buttons in the panel header', async ({ page }) => {
 		await mockNotificationApi(page, { notifications: [] });
 		const notificationsPage = new NotificationsPage(page);
 		await notificationsPage.goto();
@@ -325,9 +323,7 @@ test.describe('Notifications — Load More', () => {
 		await expect(notificationsPage.loadMoreButton).toBeVisible({ timeout: 10_000 });
 	});
 
-	test('should not show Load More button when all notifications are loaded', async ({
-		page
-	}) => {
+	test('should not show Load More button when all notifications are loaded', async ({ page }) => {
 		const notifications = [
 			createMockNotification({
 				id: 'notif-nomore-1',
@@ -447,9 +443,9 @@ test.describe('Notifications — Preferences Dialog', () => {
 		await notificationsPage.openPanel();
 		await notificationsPage.clickSettings();
 
-		await expect(
-			notificationsPage.preferencesDialog.getByText(/quiet hours/i).first()
-		).toBeVisible({ timeout: 10_000 });
+		await expect(notificationsPage.preferencesDialog.getByText(/quiet hours/i).first()).toBeVisible(
+			{ timeout: 10_000 }
+		);
 		await expect(notificationsPage.quietHoursSwitch).toBeVisible();
 	});
 
@@ -524,7 +520,7 @@ test.describe('Notifications — Preferences Save', () => {
 	});
 
 	test('should update threshold values and save them', async ({ page }) => {
-		const state = await mockNotificationApi(page, { notifications: [] });
+		await mockNotificationApi(page, { notifications: [] });
 		const notificationsPage = new NotificationsPage(page);
 		await notificationsPage.goto();
 		await page.waitForLoadState('networkidle');
@@ -541,8 +537,7 @@ test.describe('Notifications — Preferences Save', () => {
 
 		// Intercept the PUT request to verify the payload
 		const putRequest = page.waitForRequest(
-			(req) =>
-				req.url().includes('/api/notifications/preferences') && req.method() === 'PUT'
+			(req) => req.url().includes('/api/notifications/preferences') && req.method() === 'PUT'
 		);
 
 		await notificationsPage.savePreferences();
@@ -616,9 +611,7 @@ test.describe('Notifications — Click Navigation', () => {
 		await expect(page).toHaveURL(/\/bills/, { timeout: 10_000 });
 	});
 
-	test('should not navigate when clicking a notification without actionUrl', async ({
-		page
-	}) => {
+	test('should not navigate when clicking a notification without actionUrl', async ({ page }) => {
 		const notifications = [
 			createMockNotification({
 				id: 'nav-notif-2',

@@ -78,9 +78,7 @@ export class LegalSettingsSection {
 		this.page = page;
 
 		// The legal settings section is a Card containing "Legal & Privacy"
-		this.sectionCard = page
-			.locator('[data-slot="card"]')
-			.filter({ hasText: /legal & privacy/i });
+		this.sectionCard = page.locator('[data-slot="card"]').filter({ hasText: /legal & privacy/i });
 		this.sectionTitle = this.sectionCard.locator('[data-slot="card-title"]');
 		this.sectionDescription = this.sectionCard.getByText(
 			/your legal documents and consent history/i

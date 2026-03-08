@@ -62,7 +62,7 @@ export class AuthenticationProvider {
     type: SchemaTypes.ObjectId,
     ref: 'User',
     required: true,
-    autopopulate: true,
+    autopopulate: { maxDepth: 2 },
   })
   user: UserDocument;
 }

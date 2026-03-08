@@ -48,8 +48,7 @@
 			.filter((bill) => bill.status === BillStatus.PAID)
 			.sort(
 				(a, b) =>
-					new Date(b.paidDate ?? b.dueDate).getTime() -
-					new Date(a.paidDate ?? a.dueDate).getTime()
+					new Date(b.paidDate ?? b.dueDate).getTime() - new Date(a.paidDate ?? a.dueDate).getTime()
 			)
 	);
 </script>

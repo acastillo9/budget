@@ -96,7 +96,7 @@ test.describe('Legal Settings — Quick Links', () => {
 		await page.waitForLoadState('networkidle');
 	});
 
-	test('should open Terms of Service page from View Terms button', async ({ page, context }) => {
+	test('should open Terms of Service page from View Terms button', async ({ context }) => {
 		const [newPage] = await Promise.all([
 			context.waitForEvent('page'),
 			legalSection.viewTermsButton.click()
@@ -106,7 +106,7 @@ test.describe('Legal Settings — Quick Links', () => {
 		await newPage.close();
 	});
 
-	test('should open Privacy Policy page from View Privacy button', async ({ page, context }) => {
+	test('should open Privacy Policy page from View Privacy button', async ({ context }) => {
 		const [newPage] = await Promise.all([
 			context.waitForEvent('page'),
 			legalSection.viewPrivacyButton.click()

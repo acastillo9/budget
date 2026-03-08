@@ -48,7 +48,8 @@
 	);
 
 	let itemClasses = $derived.by(() => {
-		let classes = 'flex flex-col gap-3 overflow-hidden rounded-lg border p-4 md:flex-row md:items-center md:justify-between md:gap-4 ';
+		let classes =
+			'flex flex-col gap-3 overflow-hidden rounded-lg border p-4 md:flex-row md:items-center md:justify-between md:gap-4 ';
 		if (bill.status === BillStatus.OVERDUE) {
 			classes += 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950';
 		} else if (bill.status === BillStatus.DUE || useYellowForUpcoming) {

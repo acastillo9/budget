@@ -35,6 +35,7 @@
 			</Card.Header>
 			<Card.Content>
 				<div class="prose dark:prose-invert max-w-none">
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 					{@html htmlContent}
 				</div>
 			</Card.Content>

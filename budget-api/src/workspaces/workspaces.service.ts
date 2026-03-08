@@ -158,6 +158,27 @@ export class WorkspacesService {
     }
   }
 
+  async findMembershipLean(
+    workspaceId: string,
+    userId: string,
+  ): Promise<{ role: WorkspaceRole } | null> {
+    const member = await this.workspaceMemberModel
+      .findOne({ workspace: workspaceId, user: userId })
+      .select('role')
+      .setOptions({ autopopulate: false })
+      .lean();
+    return member ? { role: member.role } : null;
+  }
+
+  async findDefaultWorkspaceIdByUser(userId: string): Promise<string | null> {
+    const membership = await this.workspaceMemberModel
+      .findOne({ user: userId })
+      .select('workspace')
+      .setOptions({ autopopulate: false })
+      .lean();
+    return membership ? membership.workspace.toString() : null;
+  }
+
   async findMembership(
     workspaceId: string,
     userId: string,

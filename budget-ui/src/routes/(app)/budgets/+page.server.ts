@@ -14,18 +14,6 @@ export const load: PageServerLoad = async ({ cookies, fetch, url, parent }) => {
 	// Wait for the layout to resolve (sets X-Workspace-Id cookie for new accounts)
 	await parent();
 
-	// Load categories from the API
-	let categories = [];
-	try {
-		const response = await fetch(`${API_URL}/categories/tree`);
-		if (!response.ok) {
-			throw new Error('Failed to load categories');
-		}
-		categories = await response.json();
-	} catch {
-		setFlash({ type: 'error', message: $t('categories.loadCategoriesError') }, cookies);
-	}
-
 	// Parse month from URL query parameter (format: YYYY-MM) or use current month
 	const monthParam = url.searchParams.get('month');
 	let targetDate: Date;
@@ -44,24 +32,28 @@ export const load: PageServerLoad = async ({ cookies, fetch, url, parent }) => {
 		.toISOString()
 		.split('T')[0];
 
-	// Load budgets from the API
-	let budgets: Budget[] = [];
-	try {
-		const response = await fetch(`${API_URL}/budgets`);
-		if (!response.ok) {
-			throw new Error('Failed to load budgets');
-		}
-		budgets = await response.json();
-	} catch {
-		setFlash({ type: 'error', message: $t('budgets.loadBudgetsError') }, cookies);
-	}
+	// Fetch categories and budgets in parallel
+	const [categories, budgets] = await Promise.all([
+		fetch(`${API_URL}/categories/tree`)
+			.then((r) => (r.ok ? r.json() : Promise.reject()))
+			.catch(() => {
+				setFlash({ type: 'error', message: $t('categories.loadCategoriesError') }, cookies);
+				return [];
+			}),
+		fetch(`${API_URL}/budgets`)
+			.then((r) => (r.ok ? r.json() : Promise.reject()))
+			.catch(() => {
+				setFlash({ type: 'error', message: $t('budgets.loadBudgetsError') }, cookies);
+				return [] as Budget[];
+			})
+	]);
 
 	// Fetch progress for each budget in parallel with from/to params
 	let budgetProgressList: BudgetProgress[] = [];
 	if (budgets.length > 0) {
 		try {
 			const progressResults = await Promise.all(
-				budgets.map(async (budget) => {
+				budgets.map(async (budget: Budget) => {
 					const response = await fetch(
 						`${API_URL}/budgets/${budget.id}/progress?from=${from}&to=${to}`
 					);

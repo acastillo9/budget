@@ -55,6 +55,7 @@
 						Google
 					</Button>
 					<p class="text-muted-foreground mb-4 text-center text-xs">
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 						{@html $t('legal.googleConsentNote', {
 							values: {
 								termsLink: `<a href="/terms" target="_blank" class="text-primary underline underline-offset-2 hover:opacity-80">${$t('legal.termsLink')}</a>`,

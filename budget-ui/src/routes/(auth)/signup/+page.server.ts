@@ -50,6 +50,7 @@ export const actions: Actions = {
 		let userEmail;
 		let userActivationCodeResendAt;
 		try {
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { termsAccepted: _, ...registrationData } = form.data;
 			const response = await fetch(`${API_URL}/auth/register`, {
 				method: 'POST',

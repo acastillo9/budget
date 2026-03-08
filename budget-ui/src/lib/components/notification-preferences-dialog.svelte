@@ -173,11 +173,7 @@
 					{#if showCurrencySelector}
 						<div class="space-y-2">
 							<Label>{$t('notifications.currency')}</Label>
-							<div
-								class="flex gap-1"
-								role="radiogroup"
-								aria-label={$t('notifications.currency')}
-							>
+							<div class="flex gap-1" role="radiogroup" aria-label={$t('notifications.currency')}>
 								{#each currencies as currency (currency.code)}
 									<button
 										type="button"
@@ -223,9 +219,7 @@
 							min={0}
 							value={lowBalanceAmounts[selectedCurrency] ?? 0}
 							oninput={(e) => {
-								lowBalanceAmounts[selectedCurrency] = Number(
-									(e.target as HTMLInputElement).value
-								);
+								lowBalanceAmounts[selectedCurrency] = Number((e.target as HTMLInputElement).value);
 							}}
 						/>
 					</div>

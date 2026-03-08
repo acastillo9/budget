@@ -83,7 +83,12 @@
 					</DropdownMenu.Item>
 				{/each}
 				<DropdownMenu.Separator />
-				<DropdownMenu.Item onSelect={() => { closeMobileSidebar(); goto('/workspaces'); }}>
+				<DropdownMenu.Item
+					onSelect={() => {
+						closeMobileSidebar();
+						goto('/workspaces');
+					}}
+				>
 					<SettingsIcon class="mr-2 size-4" />
 					{$t('workspaces.settings')}
 				</DropdownMenu.Item>

@@ -40,12 +40,10 @@
 				return {
 					totalIncome:
 						acc.totalIncome +
-						transactionSummary.totalIncome /
-							(rates[transactionSummary.currencyCode]?.rate || 1),
+						transactionSummary.totalIncome / (rates[transactionSummary.currencyCode]?.rate || 1),
 					totalExpenses:
 						acc.totalExpenses +
-						transactionSummary.totalExpenses /
-							(rates[transactionSummary.currencyCode]?.rate || 1)
+						transactionSummary.totalExpenses / (rates[transactionSummary.currencyCode]?.rate || 1)
 				};
 			},
 			{ totalIncome: 0, totalExpenses: 0 }

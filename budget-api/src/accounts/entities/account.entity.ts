@@ -23,7 +23,7 @@ export class Account {
     type: SchemaTypes.ObjectId,
     ref: 'AccountType',
     required: true,
-    autopopulate: true,
+    autopopulate: { maxDepth: 2 },
   })
   accountType: AccountTypeDocument;
 
@@ -31,7 +31,7 @@ export class Account {
     type: SchemaTypes.ObjectId,
     ref: 'User',
     required: true,
-    autopopulate: true,
+    autopopulate: { maxDepth: 2 },
   })
   user: UserDocument;
 

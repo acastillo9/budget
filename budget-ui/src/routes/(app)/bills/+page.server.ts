@@ -13,30 +13,6 @@ export const load: PageServerLoad = async ({ cookies, fetch, url, parent }) => {
 	// Wait for the layout to resolve (sets X-Workspace-Id cookie for new accounts)
 	await parent();
 
-	// Load accounts from the API
-	let accounts = [];
-	try {
-		const response = await fetch(`${API_URL}/accounts`);
-		if (!response.ok) {
-			throw new Error('Failed to load accounts');
-		}
-		accounts = await response.json();
-	} catch {
-		setFlash({ type: 'error', message: $t('accounts.loadAccountsError') }, cookies);
-	}
-
-	// load categories from the API
-	let categories = [];
-	try {
-		const response = await fetch(`${API_URL}/categories/tree`);
-		if (!response.ok) {
-			throw new Error('Failed to load categories');
-		}
-		categories = await response.json();
-	} catch {
-		setFlash({ type: 'error', message: $t('categories.loadCategoriesError') }, cookies);
-	}
-
 	// Parse month from URL query parameter (format: YYYY-MM) or use current month
 	const monthParam = url.searchParams.get('month');
 	let targetDate: Date;
@@ -48,8 +24,6 @@ export const load: PageServerLoad = async ({ cookies, fetch, url, parent }) => {
 		targetDate = new Date();
 	}
 
-	// load bills from the API for the selected month
-	let bills = [];
 	const dateStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1)
 		.toISOString()
 		.split('T')[0];
@@ -57,17 +31,28 @@ export const load: PageServerLoad = async ({ cookies, fetch, url, parent }) => {
 		.toISOString()
 		.split('T')[0];
 
-	try {
-		const response = await fetch(`${API_URL}/bills?dateStart=${dateStart}&dateEnd=${dateEnd}`);
-		if (!response.ok) {
-			throw new Error('Failed to load bills');
-		}
-		bills = await response.json();
-	} catch {
-		setFlash({ type: 'error', message: $t('bills.loadBillsError') }, cookies);
-	}
+	// Fetch all data in parallel
+	const [accounts, categories, bills] = await Promise.all([
+		fetch(`${API_URL}/accounts`)
+			.then((r) => (r.ok ? r.json() : Promise.reject()))
+			.catch(() => {
+				setFlash({ type: 'error', message: $t('accounts.loadAccountsError') }, cookies);
+				return [];
+			}),
+		fetch(`${API_URL}/categories/tree`)
+			.then((r) => (r.ok ? r.json() : Promise.reject()))
+			.catch(() => {
+				setFlash({ type: 'error', message: $t('categories.loadCategoriesError') }, cookies);
+				return [];
+			}),
+		fetch(`${API_URL}/bills?dateStart=${dateStart}&dateEnd=${dateEnd}`)
+			.then((r) => (r.ok ? r.json() : Promise.reject()))
+			.catch(() => {
+				setFlash({ type: 'error', message: $t('bills.loadBillsError') }, cookies);
+				return [];
+			})
+	]);
 
-	// Return the current selected month for the UI
 	const selectedMonth = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}`;
 
 	return {

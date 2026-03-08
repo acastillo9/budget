@@ -82,9 +82,7 @@ test.describe('Footer — Legal Links', () => {
 		await expect(legalPage.footerPrivacyLink).toBeVisible();
 	});
 
-	test('should navigate to /terms when clicking footer Terms of Service link', async ({
-		page
-	}) => {
+	test('should navigate to /terms when clicking footer Terms of Service link', async ({ page }) => {
 		await page.goto('/signin');
 		await page.waitForLoadState('networkidle');
 		const legalPage = new LegalPage(page, '/terms');
@@ -92,9 +90,7 @@ test.describe('Footer — Legal Links', () => {
 		await expect(page).toHaveURL(/\/terms/);
 	});
 
-	test('should navigate to /privacy when clicking footer Privacy Policy link', async ({
-		page
-	}) => {
+	test('should navigate to /privacy when clicking footer Privacy Policy link', async ({ page }) => {
 		await page.goto('/signin');
 		await page.waitForLoadState('networkidle');
 		const legalPage = new LegalPage(page, '/privacy');
@@ -191,37 +187,32 @@ test.describe('Sign Up — Consent Checkbox', () => {
 	});
 
 	test('should have Terms and Privacy links in the Google consent note', async () => {
-		const googleNote = signUpPage.googleConsentNote;
 		// The note uses {@html} to render links — check for anchor elements
-		const termsLink = signUpPage.page.locator('p').filter({ hasText: /by signing up with google/i }).locator('a[href="/terms"]');
-		const privacyLink = signUpPage.page.locator('p').filter({ hasText: /by signing up with google/i }).locator('a[href="/privacy"]');
+		const termsLink = signUpPage.page
+			.locator('p')
+			.filter({ hasText: /by signing up with google/i })
+			.locator('a[href="/terms"]');
+		const privacyLink = signUpPage.page
+			.locator('p')
+			.filter({ hasText: /by signing up with google/i })
+			.locator('a[href="/privacy"]');
 		await expect(termsLink).toBeVisible();
 		await expect(privacyLink).toBeVisible();
 	});
 
 	test('should open Terms of Service in new tab from consent checkbox link', async ({
-		page,
 		context
 	}) => {
 		const termsLink = signUpPage.consentLabel.locator('a[href="/terms"]');
-		const [newPage] = await Promise.all([
-			context.waitForEvent('page'),
-			termsLink.click()
-		]);
+		const [newPage] = await Promise.all([context.waitForEvent('page'), termsLink.click()]);
 		await newPage.waitForLoadState('networkidle');
 		expect(newPage.url()).toContain('/terms');
 		await newPage.close();
 	});
 
-	test('should open Privacy Policy in new tab from consent checkbox link', async ({
-		page,
-		context
-	}) => {
+	test('should open Privacy Policy in new tab from consent checkbox link', async ({ context }) => {
 		const privacyLink = signUpPage.consentLabel.locator('a[href="/privacy"]');
-		const [newPage] = await Promise.all([
-			context.waitForEvent('page'),
-			privacyLink.click()
-		]);
+		const [newPage] = await Promise.all([context.waitForEvent('page'), privacyLink.click()]);
 		await newPage.waitForLoadState('networkidle');
 		expect(newPage.url()).toContain('/privacy');
 		await newPage.close();

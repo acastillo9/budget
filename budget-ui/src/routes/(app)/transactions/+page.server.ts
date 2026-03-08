@@ -22,60 +22,45 @@ export const load: PageServerLoad = async ({ cookies, fetch, url, parent }) => {
 	const accountId = url.searchParams.get('accountId') || undefined;
 	const search = url.searchParams.get('search') || undefined;
 
-	// Load accounts from the API
-	let accounts = [];
-	try {
-		const response = await fetch(`${API_URL}/accounts`);
-		if (!response.ok) {
-			throw new Error('Failed to load accounts');
-		}
-		accounts = await response.json();
-	} catch {
-		setFlash({ type: 'error', message: $t('accounts.loadAccountsError') }, cookies);
-	}
+	// Build transaction query string
+	const params = new URLSearchParams();
+	if (offset) params.set('offset', String(offset));
+	if (dateFrom) params.set('dateFrom', `${dateFrom}T00:00:00.000Z`);
+	if (dateTo) params.set('dateTo', `${dateTo}T00:00:00.000Z`);
+	if (categoryId) params.set('categoryId', categoryId);
+	if (accountId) params.set('accountId', accountId);
+	if (search) params.set('search', search);
+	const qs = params.toString();
 
-	// load categories from the API
-	let categories = [];
-	try {
-		const response = await fetch(`${API_URL}/categories/tree`);
-		if (!response.ok) {
-			throw new Error('Failed to load categories');
-		}
-		categories = await response.json();
-	} catch {
-		setFlash({ type: 'error', message: $t('categories.loadCategoriesError') }, cookies);
-	}
+	// Fetch all data in parallel
+	const [accounts, categories, transactionsResult] = await Promise.all([
+		fetch(`${API_URL}/accounts`)
+			.then((r) => (r.ok ? r.json() : Promise.reject()))
+			.catch(() => {
+				setFlash({ type: 'error', message: $t('accounts.loadAccountsError') }, cookies);
+				return [];
+			}),
+		fetch(`${API_URL}/categories/tree`)
+			.then((r) => (r.ok ? r.json() : Promise.reject()))
+			.catch(() => {
+				setFlash({ type: 'error', message: $t('categories.loadCategoriesError') }, cookies);
+				return [];
+			}),
+		fetch(`${API_URL}/transactions${qs ? `?${qs}` : ''}`)
+			.then((r) => (r.ok ? r.json() : Promise.reject()))
+			.catch(() => {
+				setFlash({ type: 'error', message: $t('transactions.loadTransactionsError') }, cookies);
+				return { data: [], total: 0, limit: 10, offset, nextPage: null };
+			})
+	]);
 
-	// load transactions from the API
 	const transactions = {
-		data: [],
-		total: 0,
-		limit: 10,
-		offset,
-		nextPage: null
+		data: transactionsResult.data ?? [],
+		total: transactionsResult.total ?? 0,
+		limit: transactionsResult.limit ?? 10,
+		offset: transactionsResult.offset ?? offset,
+		nextPage: transactionsResult.nextPage ?? null
 	};
-	try {
-		const params = new URLSearchParams();
-		if (offset) params.set('offset', String(offset));
-		if (dateFrom) params.set('dateFrom', `${dateFrom}T00:00:00.000Z`);
-		if (dateTo) params.set('dateTo', `${dateTo}T00:00:00.000Z`);
-		if (categoryId) params.set('categoryId', categoryId);
-		if (accountId) params.set('accountId', accountId);
-		if (search) params.set('search', search);
-		const qs = params.toString();
-		const response = await fetch(`${API_URL}/transactions${qs ? `?${qs}` : ''}`);
-		if (!response.ok) {
-			throw new Error('Failed to load transactions');
-		}
-		const { data, total, limit, offset: resOffset, nextPage } = await response.json();
-		transactions.data = data;
-		transactions.total = total;
-		transactions.limit = limit;
-		transactions.offset = resOffset;
-		transactions.nextPage = nextPage;
-	} catch {
-		setFlash({ type: 'error', message: $t('transactions.loadTransactionsError') }, cookies);
-	}
 
 	return {
 		createCategoryForm: await superValidate(zod4(createCategorySchema)),

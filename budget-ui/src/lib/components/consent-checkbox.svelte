@@ -24,6 +24,7 @@
 	<div class="flex items-start gap-2">
 		<Checkbox id="terms-consent" bind:checked class="mt-0.5" aria-invalid={!!error} />
 		<label for="terms-consent" class="text-sm leading-snug">
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 			{@html labelHtml}
 		</label>
 	</div>

@@ -32,7 +32,7 @@ export class Transaction {
   @Prop({
     type: SchemaTypes.ObjectId,
     ref: 'Category',
-    autopopulate: true,
+    autopopulate: { maxDepth: 2 },
   })
   category?: CategoryDocument;
 
@@ -40,7 +40,7 @@ export class Transaction {
     type: SchemaTypes.ObjectId,
     ref: 'Account',
     required: true,
-    autopopulate: true,
+    autopopulate: { maxDepth: 2 },
   })
   account: AccountDocument;
 
@@ -50,14 +50,14 @@ export class Transaction {
   @Prop({
     type: SchemaTypes.ObjectId,
     ref: 'Transaction',
-    autopopulate: true,
+    autopopulate: { maxDepth: 2 },
   })
   transfer?: TransactionDocument;
 
   @Prop({
     type: SchemaTypes.ObjectId,
     ref: 'Bill',
-    autopopulate: true,
+    autopopulate: { maxDepth: 2 },
   })
   bill?: BillDocument;
 
@@ -65,7 +65,7 @@ export class Transaction {
     type: SchemaTypes.ObjectId,
     ref: 'User',
     required: true,
-    autopopulate: true,
+    autopopulate: { maxDepth: 2 },
   })
   user: UserDocument;
 

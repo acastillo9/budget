@@ -15,7 +15,7 @@ export class UserConsent {
     type: SchemaTypes.ObjectId,
     ref: 'TermsVersion',
     required: true,
-    autopopulate: true,
+    autopopulate: { maxDepth: 2 },
   })
   termsVersion: TermsVersionDocument;
 

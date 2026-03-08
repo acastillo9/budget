@@ -26,14 +26,14 @@ export class BillModification {
   @Prop({
     type: SchemaTypes.ObjectId,
     ref: 'Category',
-    autopopulate: true,
+    autopopulate: { maxDepth: 2 },
   })
   category?: CategoryDocument;
 
   @Prop({
     type: SchemaTypes.ObjectId,
     ref: 'Account',
-    autopopulate: true,
+    autopopulate: { maxDepth: 2 },
   })
   account?: AccountDocument;
 

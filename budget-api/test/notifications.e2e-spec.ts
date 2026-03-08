@@ -566,8 +566,14 @@ describe('NotificationsController (e2e)', () => {
 
       // Verify default threshold values
       expect(response.body.budgetThresholdPercent).toBe(80);
-      expect(response.body.largeTransactionAmounts).toEqual({ USD: 500, COP: 2000000 });
-      expect(response.body.lowBalanceAmounts).toEqual({ USD: 100, COP: 500000 });
+      expect(response.body.largeTransactionAmounts).toEqual({
+        USD: 500,
+        COP: 2000000,
+      });
+      expect(response.body.lowBalanceAmounts).toEqual({
+        USD: 100,
+        COP: 500000,
+      });
       expect(response.body.billDueSoonDays).toBe(3);
 
       // Verify default quiet hours

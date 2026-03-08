@@ -8,7 +8,6 @@
 		Edit,
 		FileText,
 		Paperclip,
-		RefreshCw,
 		Trash2
 	} from '@lucide/svelte';
 	import { slide } from 'svelte/transition';
@@ -108,14 +107,12 @@
 </script>
 
 <div class="border-b last:border-0">
-	<!-- svelte-ignore a11y_no_static_element_interactions a11y_no_noninteractive_tabindex -->
 	<div
-		class="flex items-center justify-between gap-4 py-3 {hasDetails
-			? 'cursor-pointer'
-			: ''}"
-		role={hasDetails ? 'button' : undefined}
-		tabindex={hasDetails ? 0 : undefined}
+		class="flex items-center justify-between gap-4 py-3 {hasDetails ? 'cursor-pointer' : ''}"
+		role="button"
+		tabindex={0}
 		aria-expanded={hasDetails ? expanded : undefined}
+		aria-disabled={!hasDetails}
 		onclick={() => hasDetails && onToggleExpand?.()}
 		onkeydown={(e) => {
 			if (hasDetails && (e.key === 'Enter' || e.key === ' ')) {
@@ -181,17 +178,26 @@
 		</div>
 		<div class="flex items-center gap-2">
 			{#if editable}
-				<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
-				<div class="flex items-center gap-2" onclick={(e) => e.stopPropagation()}>
+				<div class="flex items-center gap-2">
 					{#if !transaction.isTransfer || (transaction.isTransfer && transaction.transfer)}
-						<Button variant="ghost" size="icon" onclick={onEdit}>
+						<Button
+							variant="ghost"
+							size="icon"
+							onclick={(e) => {
+								e.stopPropagation();
+								onEdit?.(e);
+							}}
+						>
 							<Edit class="h-4 w-4" />
 						</Button>
 					{/if}
 					<Button
 						variant="ghost"
 						size="icon"
-						onclick={onDelete}
+						onclick={(e) => {
+							e.stopPropagation();
+							onDelete?.(e);
+						}}
 						class="text-destructive hover:text-destructive"
 					>
 						<Trash2 class="h-4 w-4" />
@@ -202,10 +208,7 @@
 	</div>
 
 	{#if expanded}
-		<div
-			class="text-muted-foreground pl-12 pb-3 text-sm"
-			transition:slide={{ duration: 200 }}
-		>
+		<div class="text-muted-foreground pb-3 pl-12 text-sm" transition:slide={{ duration: 200 }}>
 			<div class="flex flex-col gap-3">
 				{#if transaction.notes}
 					<div class="flex items-start gap-2">
@@ -220,11 +223,15 @@
 				{/if}
 
 				{#if transaction.attachmentCount && transaction.attachmentCount > 0}
-					<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
-					<div class="flex items-start gap-2" onclick={(e) => e.stopPropagation()}>
+					<div
+						class="flex items-start gap-2"
+						role="presentation"
+						onclick={(e) => e.stopPropagation()}
+						onkeydown={(e) => e.stopPropagation()}
+					>
 						<Paperclip class="mt-0.5 h-4 w-4 shrink-0" />
 						<div class="w-full">
-							<p class="text-foreground text-xs font-medium mb-1">
+							<p class="text-foreground mb-1 text-xs font-medium">
 								{$t('transactions.detail.attachments')}
 							</p>
 							{#if attachmentsLoading}
@@ -234,17 +241,13 @@
 								</div>
 							{:else if attachmentsError}
 								<button
-									class="text-destructive hover:underline text-xs cursor-pointer"
+									class="text-destructive cursor-pointer text-xs hover:underline"
 									onclick={loadAttachments}
 								>
 									{$t('transactions.detail.loadAttachmentsError')}
 								</button>
 							{:else}
-								<AttachmentList
-									{attachments}
-									transactionId={transaction.id}
-									editable={false}
-								/>
+								<AttachmentList {attachments} transactionId={transaction.id} editable={false} />
 							{/if}
 						</div>
 					</div>

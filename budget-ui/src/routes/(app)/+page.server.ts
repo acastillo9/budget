@@ -19,80 +19,6 @@ export const load: PageServerLoad = async ({ locals, cookies, fetch, parent }) =
 	// Wait for the layout to resolve (sets X-Workspace-Id cookie for new accounts)
 	await parent();
 
-	// Load accounts from the API
-	let accounts = [];
-	try {
-		const response = await fetch(`${API_URL}/accounts`);
-		if (!response.ok) {
-			throw new Error('Failed to load accounts');
-		}
-		accounts = await response.json();
-	} catch {
-		setFlash({ type: 'error', message: $t('accounts.loadAccountsError') }, cookies);
-	}
-
-	// load categories from the API
-	let categories = [];
-	try {
-		const response = await fetch(`${API_URL}/categories/tree`);
-		if (!response.ok) {
-			throw new Error('Failed to load categories');
-		}
-		categories = await response.json();
-	} catch {
-		setFlash({ type: 'error', message: $t('categories.loadCategoriesError') }, cookies);
-	}
-
-	// load transactions from the API
-	let transactions = [];
-	try {
-		const response = await fetch(`${API_URL}/transactions?limit=5`);
-		if (!response.ok) {
-			throw new Error('Failed to load transactions');
-		}
-		const { data } = await response.json();
-		transactions = data;
-	} catch {
-		setFlash({ type: 'error', message: $t('transactions.loadTransactionsError') }, cookies);
-	}
-
-	// Get the total balance, income, and expenses
-	let accountsSummary = [];
-	try {
-		const response = await fetch(`${API_URL}/accounts/summary`);
-		if (!response.ok) {
-			throw new Error('Failed to load account summary');
-		}
-		accountsSummary = await response.json();
-	} catch {
-		setFlash({ type: 'error', message: $t('accounts.loadSummaryError') }, cookies);
-	}
-
-	let transactionsSummary = [];
-	try {
-		const response = await fetch(`${API_URL}/transactions/summary`);
-		if (!response.ok) {
-			throw new Error('Failed to load transaction summary');
-		}
-		transactionsSummary = await response.json();
-	} catch {
-		setFlash({ type: 'error', message: $t('transactions.loadSummaryError') }, cookies);
-	}
-
-	// load USD exchange rates
-	let usdExchangeRates = undefined;
-	try {
-		const response = await fetch(`${API_URL}/currencies/USD`);
-		if (!response.ok) {
-			throw new Error('Failed to load exchange rates');
-		}
-		usdExchangeRates = await response.json();
-	} catch {
-		setFlash({ type: 'error', message: $t('currencies.loadExchangeRatesError') }, cookies);
-	}
-
-	// Load bills for the current month
-	let bills = [];
 	const currentDate = new Date();
 	const dateStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
 		.toISOString()
@@ -100,15 +26,62 @@ export const load: PageServerLoad = async ({ locals, cookies, fetch, parent }) =
 	const dateEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
 		.toISOString()
 		.split('T')[0];
-	try {
-		const response = await fetch(`${API_URL}/bills?dateStart=${dateStart}&dateEnd=${dateEnd}`);
-		if (!response.ok) {
-			throw new Error('Failed to load bills');
-		}
-		bills = await response.json();
-	} catch {
-		setFlash({ type: 'error', message: $t('bills.loadBillsError') }, cookies);
-	}
+
+	// Fetch all independent data in parallel
+	const [
+		accounts,
+		categories,
+		transactionsData,
+		accountsSummary,
+		transactionsSummary,
+		usdExchangeRates,
+		bills
+	] = await Promise.all([
+		fetch(`${API_URL}/accounts`)
+			.then((r) => (r.ok ? r.json() : Promise.reject()))
+			.catch(() => {
+				setFlash({ type: 'error', message: $t('accounts.loadAccountsError') }, cookies);
+				return [];
+			}),
+		fetch(`${API_URL}/categories/tree`)
+			.then((r) => (r.ok ? r.json() : Promise.reject()))
+			.catch(() => {
+				setFlash({ type: 'error', message: $t('categories.loadCategoriesError') }, cookies);
+				return [];
+			}),
+		fetch(`${API_URL}/transactions?limit=5`)
+			.then((r) => (r.ok ? r.json() : Promise.reject()))
+			.catch(() => {
+				setFlash({ type: 'error', message: $t('transactions.loadTransactionsError') }, cookies);
+				return { data: [] };
+			}),
+		fetch(`${API_URL}/accounts/summary`)
+			.then((r) => (r.ok ? r.json() : Promise.reject()))
+			.catch(() => {
+				setFlash({ type: 'error', message: $t('accounts.loadSummaryError') }, cookies);
+				return [];
+			}),
+		fetch(`${API_URL}/transactions/summary`)
+			.then((r) => (r.ok ? r.json() : Promise.reject()))
+			.catch(() => {
+				setFlash({ type: 'error', message: $t('transactions.loadSummaryError') }, cookies);
+				return [];
+			}),
+		fetch(`${API_URL}/currencies/USD`)
+			.then((r) => (r.ok ? r.json() : Promise.reject()))
+			.catch(() => {
+				setFlash({ type: 'error', message: $t('currencies.loadExchangeRatesError') }, cookies);
+				return undefined;
+			}),
+		fetch(`${API_URL}/bills?dateStart=${dateStart}&dateEnd=${dateEnd}`)
+			.then((r) => (r.ok ? r.json() : Promise.reject()))
+			.catch(() => {
+				setFlash({ type: 'error', message: $t('bills.loadBillsError') }, cookies);
+				return [];
+			})
+	]);
+
+	const transactions = transactionsData.data ?? [];
 
 	return {
 		addAccountForm: await superValidate(zod4(createAccountSchema)),
