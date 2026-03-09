@@ -1,6 +1,7 @@
+import '$lib/i18n';
 import { API_URL } from '$env/static/private';
 import { type Handle, type HandleFetch } from '@sveltejs/kit';
-import { locale } from 'svelte-i18n';
+import { locale, waitLocale } from 'svelte-i18n';
 
 const getUserFromToken = async (token: string) => {
 	const res = await fetch(`${API_URL}/auth/me`, {
@@ -43,6 +44,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (lang) {
 		locale.set(lang);
 	}
+	await waitLocale();
 
 	const { cookies } = event;
 	const accessToken = cookies.get('AuthorizationToken');
