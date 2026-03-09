@@ -12,6 +12,9 @@ import {
 } from './bill-modification.entity';
 import { CategoryDocument } from 'src/categories/entities/category.entity';
 import { WorkspaceDocument } from 'src/workspaces/entities/workspace.entity';
+import { Logger } from '@nestjs/common';
+
+const MAX_INSTANCES = 5000;
 
 export type BillDocument = HydratedDocument<Bill>;
 
@@ -137,10 +140,17 @@ BillSchema.methods.getInstances = function (
     isDeleted: false,
   };
 
+  let iterations = 0;
   while (
     runningState.dueDate <= rangeEnd &&
     (!runningState.endDate || runningState.dueDate <= runningState.endDate)
   ) {
+    if (++iterations > MAX_INSTANCES) {
+      new Logger('Bill').warn(
+        `getInstances exceeded ${MAX_INSTANCES} iterations for bill ${this.id} (frequency: ${runningState.frequency}). Breaking to prevent infinite loop.`,
+      );
+      break;
+    }
     const instanceKey = runningState.dueDate.toISOString().split('T')[0];
     const override = this.overrides.get(instanceKey);
 
@@ -187,7 +197,7 @@ BillSchema.methods.getInstances = function (
       }
     }
 
-    if (runningState.frequency === BillFrequency.ONCE) {
+    if (runningState.frequency === BillFrequency.ONCE || runningState.frequency === BillFrequency.NEVER) {
       return [...overdueInstances, ...rangeInstances];
     }
 
