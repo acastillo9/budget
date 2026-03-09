@@ -244,7 +244,7 @@
 						<Switch bind:checked={quietHoursEnabled} />
 					</div>
 					{#if quietHoursEnabled}
-						<div class="grid grid-cols-2 gap-4">
+						<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<div class="space-y-2">
 								<Label for="quiet-start">{$t('notifications.quietHoursStart')}</Label>
 								<Input id="quiet-start" type="time" bind:value={quietHoursStart} />
