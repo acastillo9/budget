@@ -1,11 +1,11 @@
-# Phase 3 — Documentation
+# Phase 4 — Documentation
 
 ## Contract
 
 1. Write detailed output to the designated phase file
 2. Return a **single-line summary** (no more) back to the orchestrator
 
-Workspace path: `.claude/orchestrator/<EPIC-KEY>/`
+Workspace path: `.claude/orchestrator/<SPEC-NAME>/`
 
 ---
 
@@ -14,7 +14,7 @@ Workspace path: `.claude/orchestrator/<EPIC-KEY>/`
 ```
 Create Mermaid diagrams documenting the feature design.
 
-1. Read .claude/orchestrator/<EPIC-KEY>/phase-2-design.md for the design
+1. Read .claude/orchestrator/<SPEC-NAME>/phase-3-design.md for the design
 2. Invoke the budget-mermaid-docs skill
 
 Create these diagrams in budget-api/docs/:
@@ -22,7 +22,7 @@ Create these diagrams in budget-api/docs/:
 - **Sequence diagram** showing the primary user flow end-to-end
 - **ER diagram** if new database entities are introduced
 
-Write a log of created files to: .claude/orchestrator/<EPIC-KEY>/phase-3-docs.md
+Write a log of created files to: .claude/orchestrator/<SPEC-NAME>/phase-4-docs.md
 
 Format:
 # Documentation: <Feature>
