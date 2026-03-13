@@ -25,10 +25,8 @@ import { I18nService } from 'nestjs-i18n';
           adapter: new HandlebarsAdapter({
             t: (key: string, options: any) => {
               const lang =
-                options?.hash?.lang ||
-                options?.data?.root?.i18nLang ||
-                'en';
-              const { lang: _lang, ...args } = options?.hash || {};
+                options?.hash?.lang || options?.data?.root?.i18nLang || 'en';
+              const { ...args } = options?.hash || {};
               return i18n.t(key, { lang, args });
             },
           }),
@@ -43,4 +41,4 @@ import { I18nService } from 'nestjs-i18n';
   providers: [MailService],
   exports: [MailService],
 })
-export class MailModule {}
+export class MailModule { }
