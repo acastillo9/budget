@@ -107,7 +107,7 @@ export class BillScannerJob {
                     message: `Your bill "${billName}" is overdue`,
                     data: { billId: bill._id.toString() },
                     actionUrl: '/bills',
-                    deduplicationKey: `bill_overdue_${bill._id}_${dateStr}`,
+                    deduplicationKey: `bill_overdue_${bill._id}_${dateStr}_${now.toISOString().split('T')[0]}`,
                     emailTemplate: 'billOverdue',
                     emailContext: {
                       billName,
