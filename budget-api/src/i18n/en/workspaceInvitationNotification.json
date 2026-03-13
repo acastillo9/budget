@@ -4,7 +4,7 @@
   "heading": "Workspace Invitation",
   "greeting": "Hi there,",
   "instruction": "You've been invited to join a workspace on Budget App.",
-  "invitedBy": "Invited by: {{invitedBy}}",
+  "invitedBy": "Invited by: {invitedBy}",
   "button": "View Workspaces",
   "regards": "Best regards,",
   "signature": "The Budget Team.",

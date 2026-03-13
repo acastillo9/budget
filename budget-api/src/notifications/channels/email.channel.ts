@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ChannelStrategy } from './channel-strategy.interface';
 import { NotificationEvent } from '../services/notification-event.interface';
 import { MailService } from 'src/mail/mail.service';
@@ -11,6 +12,7 @@ export class EmailChannel implements ChannelStrategy {
   constructor(
     private readonly mailService: MailService,
     private readonly usersService: UsersService,
+    private readonly configService: ConfigService,
   ) {}
 
   async send(event: NotificationEvent): Promise<void> {
@@ -30,12 +32,18 @@ export class EmailChannel implements ChannelStrategy {
         return;
       }
 
+      const appUrl = this.configService.get('APP_URL', 'http://localhost:5173');
+      const actionLink = event.actionUrl
+        ? `${appUrl}${event.actionUrl}`
+        : appUrl;
+
       await this.mailService.sendMail({
         to: user.email,
         subject: event.title,
         template: event.emailTemplate,
         context: {
           ...event.emailContext,
+          actionLink,
           year: new Date().getFullYear(),
         },
       });

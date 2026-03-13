@@ -22,7 +22,16 @@ import { I18nService } from 'nestjs-i18n';
         },
         template: {
           dir: __dirname + '/templates',
-          adapter: new HandlebarsAdapter({ t: i18n.hbsHelper }),
+          adapter: new HandlebarsAdapter({
+            t: (key: string, options: any) => {
+              const lang =
+                options?.hash?.lang ||
+                options?.data?.root?.i18nLang ||
+                'en';
+              const { lang: _lang, ...args } = options?.hash || {};
+              return i18n.t(key, { lang, args });
+            },
+          }),
           options: {
             strict: true,
           },

@@ -4,7 +4,7 @@
   "heading": "Invitación al espacio de trabajo",
   "greeting": "Hola,",
   "instruction": "Te han invitado a unirte a un espacio de trabajo en Budget App.",
-  "invitedBy": "Invitado por: {{invitedBy}}",
+  "invitedBy": "Invitado por: {invitedBy}",
   "button": "Ver espacios de trabajo",
   "regards": "Un saludo,",
   "signature": "El equipo de Budget App.",

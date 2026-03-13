@@ -13,7 +13,7 @@
 </head>
 <body style="margin:0; padding:0; background:#f4f4f4; font-family:Arial, sans-serif; -webkit-font-smoothing:antialiased;">
   <div style="display:none; max-height:0; overflow:hidden; font-size:1px; line-height:1px; color:#f4f4f4; opacity:0;">
-    {{t "recurringBillEnding.preheader"}}
+    {{t "recurringBillEnding.preheader" billName=billName}}
   </div>
 
   <table role="presentation" width="100%" bgcolor="#f4f4f4" cellpadding="0" cellspacing="0">
@@ -43,8 +43,8 @@
               </p>
 
               <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
-                <tr><td style="color:#333333; padding:4px 0;">{{t "recurringBillEnding.billName"}}</td></tr>
-                <tr><td style="color:#333333; padding:4px 0;">{{t "recurringBillEnding.endDate"}}</td></tr>
+                <tr><td style="color:#333333; padding:4px 0;">{{t "recurringBillEnding.billName" billName=billName}}</td></tr>
+                <tr><td style="color:#333333; padding:4px 0;">{{t "recurringBillEnding.endDate" endDate=endDate}}</td></tr>
               </table>
 
               <table role="presentation" cellpadding="0" cellspacing="0" style="margin:20px auto;">
