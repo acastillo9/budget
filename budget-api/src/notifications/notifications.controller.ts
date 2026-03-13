@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Put,
   Query,
   Request,
@@ -21,14 +22,61 @@ import { NotificationDto } from './dto/notification.dto';
 import { NotificationPreferenceDto } from './dto/notification-preference.dto';
 import { NotificationsQueryDto } from './dto/notifications-query.dto';
 import { UpdateNotificationPreferenceDto } from './dto/update-notification-preference.dto';
+import { JobName, RunJobParamDto } from './dto/run-job-param.dto';
 import { AuthenticatedRequest } from 'src/shared/types';
 import { PaginatedDataDto } from 'src/shared/dto/paginated-data.dto';
+import { Roles } from 'src/workspaces/decorators/roles.decorator';
+import { WorkspaceRole } from 'src/workspaces/entities/workspace-role.enum';
+import { BillScannerJob } from './jobs/bill-scanner.job';
+import { BudgetCheckerJob } from './jobs/budget-checker.job';
+import { LowBalanceJob } from './jobs/low-balance.job';
+import { MonthlySummaryJob } from './jobs/monthly-summary.job';
+import { NotificationCleanupJob } from './jobs/notification-cleanup.job';
 
 @ApiTags('Notifications')
 @ApiBearerAuth('JWT')
 @Controller('notifications')
 export class NotificationsController {
-  constructor(private readonly notificationsService: NotificationsService) {}
+  private readonly jobMap: Record<JobName, { handleCron(): Promise<void> }>;
+
+  constructor(
+    private readonly notificationsService: NotificationsService,
+    private readonly billScannerJob: BillScannerJob,
+    private readonly budgetCheckerJob: BudgetCheckerJob,
+    private readonly lowBalanceJob: LowBalanceJob,
+    private readonly monthlySummaryJob: MonthlySummaryJob,
+    private readonly notificationCleanupJob: NotificationCleanupJob,
+  ) {
+    this.jobMap = {
+      [JobName.BILL_SCANNER]: this.billScannerJob,
+      [JobName.BUDGET_CHECKER]: this.budgetCheckerJob,
+      [JobName.LOW_BALANCE]: this.lowBalanceJob,
+      [JobName.MONTHLY_SUMMARY]: this.monthlySummaryJob,
+      [JobName.NOTIFICATION_CLEANUP]: this.notificationCleanupJob,
+    };
+  }
+
+  @ApiOperation({ summary: 'Manually trigger a cron notification job' })
+  @ApiParam({
+    name: 'jobName',
+    enum: JobName,
+    description: 'Name of the cron job to trigger',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Job executed successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid job name' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden — requires OWNER role' })
+  @Roles(WorkspaceRole.OWNER)
+  @Post('jobs/:jobName')
+  async runJob(
+    @Param() params: RunJobParamDto,
+  ): Promise<{ job: string; status: string }> {
+    await this.jobMap[params.jobName].handleCron();
+    return { job: params.jobName, status: 'completed' };
+  }
 
   @ApiOperation({ summary: 'List notifications for current user in workspace' })
   @ApiResponse({
