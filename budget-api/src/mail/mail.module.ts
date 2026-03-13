@@ -41,4 +41,4 @@ import { I18nService } from 'nestjs-i18n';
   providers: [MailService],
   exports: [MailService],
 })
-export class MailModule { }
+export class MailModule {}
