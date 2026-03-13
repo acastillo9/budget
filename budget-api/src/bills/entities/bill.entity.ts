@@ -197,7 +197,10 @@ BillSchema.methods.getInstances = function (
       }
     }
 
-    if (runningState.frequency === BillFrequency.ONCE || runningState.frequency === BillFrequency.NEVER) {
+    if (
+      runningState.frequency === BillFrequency.ONCE ||
+      runningState.frequency === BillFrequency.NEVER
+    ) {
       return [...overdueInstances, ...rangeInstances];
     }
 

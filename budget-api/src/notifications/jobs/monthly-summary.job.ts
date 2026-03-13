@@ -83,7 +83,7 @@ export class MonthlySummaryJob {
           });
 
           for (const member of members) {
-            const userId = member.user?.toString();
+            const userId = (member.user?._id ?? member.user)?.toString();
             if (!userId) continue;
 
             const message =

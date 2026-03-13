@@ -70,7 +70,7 @@ export class BudgetCheckerJob {
           workspace: workspaceId,
         });
         const memberUserIds = members
-          .map((m) => m.user?.toString())
+          .map((m) => (m.user?._id ?? m.user)?.toString())
           .filter(Boolean);
         const allPrefs = await this.prefsModel.find({
           user: { $in: memberUserIds },
@@ -127,7 +127,7 @@ export class BudgetCheckerJob {
             const budgetName = (budget as { name?: string }).name || 'Budget';
 
             for (const member of members) {
-              const userId = member.user?.toString();
+              const userId = (member.user?._id ?? member.user)?.toString();
               if (!userId) continue;
 
               const prefs = prefsMap.get(userId);
