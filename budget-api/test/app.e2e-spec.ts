@@ -19,7 +19,7 @@ describe('AppController (e2e)', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
       name: 'Personal Finance API',
-      version: '1.0.6',
+      version: '1.0.7',
       status: 'running',
       commit: 'unknown',
     });
