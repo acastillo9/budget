@@ -3,8 +3,10 @@
 	import type { PageProps } from './$types';
 	import BillList from '$lib/components/bill-list.svelte';
 	import CreateBillDialog from '$lib/components/create-bill-wizard/create-bill-dialog.svelte';
-	import type { Bill } from '$lib/types/bill.types';
+	import { BillStatus, type Bill } from '$lib/types/bill.types';
 	import { toast } from 'svelte-sonner';
+	import BillSummaryCard from '$lib/components/bill-summary-card.svelte';
+	import { formatCurrencyWithSymbol } from '$lib/utils/currency';
 	import { goto, invalidateAll } from '$app/navigation';
 	import ConfirmationDialog from '$lib/components/confirmation-dialog.svelte';
 	import * as Card from '$lib/components/ui/card';
@@ -19,6 +21,44 @@
 
 	const userState = getUserContext();
 	let editable = $derived(canEdit(userState.workspaceRole!));
+
+	let userCurrencyCode = $derived(userState.user?.currencyCode || 'USD');
+	let rates = $derived(userState.currencyRates?.rates || {});
+
+	let billsSummary = $derived(
+		data.bills.reduce(
+			(
+				acc: {
+					overdue: { count: number; total: number };
+					dueSoon: { count: number; total: number };
+					paid: { count: number; total: number };
+				},
+				bill: Bill
+			) => {
+				const convertedAmount = bill.amount / (rates[bill.account.currencyCode]?.rate || 1);
+				if (bill.status === BillStatus.OVERDUE) {
+					acc.overdue.count++;
+					acc.overdue.total += convertedAmount;
+				} else if (bill.status === BillStatus.DUE || bill.status === BillStatus.UPCOMING) {
+					acc.dueSoon.count++;
+					acc.dueSoon.total += convertedAmount;
+				} else if (bill.status === BillStatus.PAID) {
+					acc.paid.count++;
+					acc.paid.total += convertedAmount;
+				}
+				return acc;
+			},
+			{
+				overdue: { count: 0, total: 0 },
+				dueSoon: { count: 0, total: 0 },
+				paid: { count: 0, total: 0 }
+			}
+		)
+	);
+	let totalToPay = $derived({
+		count: billsSummary.overdue.count + billsSummary.dueSoon.count,
+		total: billsSummary.overdue.total + billsSummary.dueSoon.total
+	});
 
 	// Month navigation
 	let selectedMonth = $derived(data.selectedMonth);
@@ -227,6 +267,38 @@
 				</div>
 			</Card.Content>
 		</Card.Root>
+	</div>
+	<div class="container mx-auto">
+		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+			<BillSummaryCard
+				title={$t('dashboard.overdueBills')}
+				description={$t('dashboard.overdueBillsDescription')}
+				count={billsSummary.overdue.count}
+				total={formatCurrencyWithSymbol(billsSummary.overdue.total, userCurrencyCode)}
+				variant="overdue"
+			/>
+			<BillSummaryCard
+				title={$t('dashboard.dueSoonBills')}
+				description={$t('dashboard.dueSoonBillsDescription')}
+				count={billsSummary.dueSoon.count}
+				total={formatCurrencyWithSymbol(billsSummary.dueSoon.total, userCurrencyCode)}
+				variant="due"
+			/>
+			<BillSummaryCard
+				title={$t('dashboard.paidBills')}
+				description={$t('dashboard.paidBillsDescription')}
+				count={billsSummary.paid.count}
+				total={formatCurrencyWithSymbol(billsSummary.paid.total, userCurrencyCode)}
+				variant="paid"
+			/>
+			<BillSummaryCard
+				title={$t('dashboard.totalToPay')}
+				description={$t('dashboard.totalToPayDescription')}
+				count={totalToPay.count}
+				total={formatCurrencyWithSymbol(totalToPay.total, userCurrencyCode)}
+				variant="total"
+			/>
+		</div>
 	</div>
 	<div class="container mx-auto">
 		<BillList

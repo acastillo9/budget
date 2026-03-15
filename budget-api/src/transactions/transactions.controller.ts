@@ -112,8 +112,20 @@ export class TransactionsController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @Get('summary')
-  getSummary(@Request() req: AuthenticatedRequest) {
-    return this.transactionsService.getSummary(req.user.workspaceId);
+  getSummary(
+    @Request() req: AuthenticatedRequest,
+    @Query('dateStart') dateStart?: string,
+    @Query('dateEnd') dateEnd?: string,
+    @Query('accountId') accountId?: string,
+    @Query('categoryId') categoryId?: string,
+  ) {
+    return this.transactionsService.getSummary(
+      req.user.workspaceId,
+      dateStart ? new Date(dateStart) : undefined,
+      dateEnd ? new Date(dateEnd) : undefined,
+      accountId,
+      categoryId,
+    );
   }
 
   @ApiOperation({ summary: 'Update a transaction' })

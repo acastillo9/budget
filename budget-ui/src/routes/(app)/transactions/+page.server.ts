@@ -32,8 +32,16 @@ export const load: PageServerLoad = async ({ cookies, fetch, url, parent }) => {
 	if (search) params.set('search', search);
 	const qs = params.toString();
 
+	// Build summary query string (same filters minus pagination)
+	const summaryParams = new URLSearchParams();
+	if (dateFrom) summaryParams.set('dateStart', `${dateFrom}T00:00:00.000Z`);
+	if (dateTo) summaryParams.set('dateEnd', `${dateTo}T00:00:00.000Z`);
+	if (categoryId) summaryParams.set('categoryId', categoryId);
+	if (accountId) summaryParams.set('accountId', accountId);
+	const summaryQs = summaryParams.toString();
+
 	// Fetch all data in parallel
-	const [accounts, categories, transactionsResult] = await Promise.all([
+	const [accounts, categories, transactionsResult, transactionsSummary] = await Promise.all([
 		fetch(`${API_URL}/accounts`)
 			.then((r) => (r.ok ? r.json() : Promise.reject()))
 			.catch(() => {
@@ -51,6 +59,12 @@ export const load: PageServerLoad = async ({ cookies, fetch, url, parent }) => {
 			.catch(() => {
 				setFlash({ type: 'error', message: $t('transactions.loadTransactionsError') }, cookies);
 				return { data: [], total: 0, limit: 10, offset, nextPage: null };
+			}),
+		fetch(`${API_URL}/transactions/summary${summaryQs ? `?${summaryQs}` : ''}`)
+			.then((r) => (r.ok ? r.json() : Promise.reject()))
+			.catch(() => {
+				setFlash({ type: 'error', message: $t('transactions.loadSummaryError') }, cookies);
+				return [];
 			})
 	]);
 
@@ -67,6 +81,7 @@ export const load: PageServerLoad = async ({ cookies, fetch, url, parent }) => {
 		addTransactionForm: await superValidate(zod4(createTransactionSchema)),
 		addTransferForm: await superValidate(zod4(createTransferSchema)),
 		transactions: transactions,
+		transactionsSummary,
 		accounts,
 		categories,
 		filters: { dateFrom, dateTo, categoryId, accountId, search }

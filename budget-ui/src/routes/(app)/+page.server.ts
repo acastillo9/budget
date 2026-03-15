@@ -61,7 +61,7 @@ export const load: PageServerLoad = async ({ locals, cookies, fetch, parent }) =
 				setFlash({ type: 'error', message: $t('accounts.loadSummaryError') }, cookies);
 				return [];
 			}),
-		fetch(`${API_URL}/transactions/summary`)
+		fetch(`${API_URL}/transactions/summary?dateStart=${dateStart}&dateEnd=${dateEnd}`)
 			.then((r) => (r.ok ? r.json() : Promise.reject()))
 			.catch(() => {
 				setFlash({ type: 'error', message: $t('transactions.loadSummaryError') }, cookies);

@@ -11,6 +11,8 @@
 	import * as Pagination from '$lib/components/ui/pagination/index.js';
 	import { getUserContext } from '$lib/context';
 	import { canEdit } from '$lib/utils/permissions';
+	import TotalCard from '$lib/components/total-card.svelte';
+	import { formatCurrencyWithSymbol } from '$lib/utils/currency';
 
 	let { data }: PageProps = $props();
 
@@ -18,6 +20,21 @@
 	let selectedTransaction: Transaction | undefined = $state(undefined);
 	const userState = getUserContext();
 	let editable = $derived(canEdit(userState.workspaceRole!));
+
+	let userCurrencyCode = $derived(userState.user?.currencyCode || 'USD');
+	let rates = $derived(userState.currencyRates?.rates || {});
+	let summary = $derived(
+		data.transactionsSummary.reduce(
+			(
+				acc: { totalIncome: number; totalExpenses: number },
+				s: { totalIncome: number; totalExpenses: number; currencyCode: string }
+			) => ({
+				totalIncome: acc.totalIncome + s.totalIncome / (rates[s.currencyCode]?.rate || 1),
+				totalExpenses: acc.totalExpenses + s.totalExpenses / (rates[s.currencyCode]?.rate || 1)
+			}),
+			{ totalIncome: 0, totalExpenses: 0 }
+		)
+	);
 
 	let confirmationDialog = $state({
 		open: false,
@@ -141,6 +158,38 @@
 				);
 			}}
 		/>
+	</div>
+
+	<div class="container mx-auto">
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+			<TotalCard
+				title={$t('transactions.income')}
+				description={$t('dashboard.totalTransactionsDescription', {
+					values: { currency: userCurrencyCode }
+				})}
+				total={formatCurrencyWithSymbol(summary.totalIncome, userCurrencyCode)}
+				variant="income"
+			/>
+			<TotalCard
+				title={$t('transactions.expense')}
+				description={$t('dashboard.totalTransactionsDescription', {
+					values: { currency: userCurrencyCode }
+				})}
+				total={formatCurrencyWithSymbol(summary.totalExpenses, userCurrencyCode)}
+				variant="expense"
+			/>
+			<TotalCard
+				title={$t('dashboard.cashFlow')}
+				description={$t('dashboard.cashFlowDescription', {
+					values: { currency: userCurrencyCode }
+				})}
+				total={formatCurrencyWithSymbol(
+					summary.totalIncome - summary.totalExpenses,
+					userCurrencyCode
+				)}
+				variant={summary.totalIncome - summary.totalExpenses >= 0 ? 'income' : 'expense'}
+			/>
+		</div>
 	</div>
 
 	<div class="container mx-auto">

@@ -8,11 +8,13 @@
 	import { getUserContext } from '$lib/context';
 	import { canEdit } from '$lib/utils/permissions';
 	import TotalCard from '$lib/components/total-card.svelte';
+	import BillSummaryCard from '$lib/components/bill-summary-card.svelte';
 	import CurrencyRatesCard from '$lib/components/currency-rates-card.svelte';
 	import { toast } from 'svelte-sonner';
 	import BalanceBreakdownCard from '$lib/components/balance-breakdown-card.svelte';
 	import UpcomingBillsCard from '$lib/components/upcoming-bills-card.svelte';
 	import type { AccountSummary } from '$lib/types/account.types';
+	import { BillStatus, type Bill } from '$lib/types/bill.types';
 
 	let { data }: PageProps = $props();
 
@@ -49,6 +51,41 @@
 			{ totalIncome: 0, totalExpenses: 0 }
 		)
 	);
+
+	let billsSummary = $derived(
+		data.bills.reduce(
+			(
+				acc: {
+					overdue: { count: number; total: number };
+					dueSoon: { count: number; total: number };
+					paid: { count: number; total: number };
+				},
+				bill: Bill
+			) => {
+				const convertedAmount = bill.amount / (rates[bill.account.currencyCode]?.rate || 1);
+				if (bill.status === BillStatus.OVERDUE) {
+					acc.overdue.count++;
+					acc.overdue.total += convertedAmount;
+				} else if (bill.status === BillStatus.DUE || bill.status === BillStatus.UPCOMING) {
+					acc.dueSoon.count++;
+					acc.dueSoon.total += convertedAmount;
+				} else if (bill.status === BillStatus.PAID) {
+					acc.paid.count++;
+					acc.paid.total += convertedAmount;
+				}
+				return acc;
+			},
+			{
+				overdue: { count: 0, total: 0 },
+				dueSoon: { count: 0, total: 0 },
+				paid: { count: 0, total: 0 }
+			}
+		)
+	);
+	let totalToPay = $derived({
+		count: billsSummary.overdue.count + billsSummary.dueSoon.count,
+		total: billsSummary.overdue.total + billsSummary.dueSoon.total
+	});
 
 	async function onRefreshRates() {
 		isRefreshingRates = true;
@@ -128,6 +165,36 @@
 						? 'income'
 						: 'expense'}
 				></TotalCard>
+			</div>
+			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+				<BillSummaryCard
+					title={$t('dashboard.overdueBills')}
+					description={$t('dashboard.overdueBillsDescription')}
+					count={billsSummary.overdue.count}
+					total={formatCurrencyWithSymbol(billsSummary.overdue.total, userCurrencyCode)}
+					variant="overdue"
+				/>
+				<BillSummaryCard
+					title={$t('dashboard.dueSoonBills')}
+					description={$t('dashboard.dueSoonBillsDescription')}
+					count={billsSummary.dueSoon.count}
+					total={formatCurrencyWithSymbol(billsSummary.dueSoon.total, userCurrencyCode)}
+					variant="due"
+				/>
+				<BillSummaryCard
+					title={$t('dashboard.paidBills')}
+					description={$t('dashboard.paidBillsDescription')}
+					count={billsSummary.paid.count}
+					total={formatCurrencyWithSymbol(billsSummary.paid.total, userCurrencyCode)}
+					variant="paid"
+				/>
+				<BillSummaryCard
+					title={$t('dashboard.totalToPay')}
+					description={$t('dashboard.totalToPayDescription')}
+					count={totalToPay.count}
+					total={formatCurrencyWithSymbol(totalToPay.total, userCurrencyCode)}
+					variant="total"
+				/>
 			</div>
 			<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 				<div>

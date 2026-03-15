@@ -362,7 +362,16 @@
 		"totalTransactionsDescription": "This month • Converted to {currency}",
 		"upcomingBills": "Upcoming Bills",
 		"upcomingBillsDescription": "Bills due this month",
-		"viewAll": "View All"
+		"viewAll": "View All",
+		"overdueBills": "Overdue",
+		"overdueBillsDescription": "Past due date",
+		"dueSoonBills": "Due Soon",
+		"dueSoonBillsDescription": "Due and upcoming this month",
+		"paidBills": "Paid",
+		"paidBillsDescription": "Completed this month",
+		"totalToPay": "Total to Pay",
+		"totalToPayDescription": "Remaining this month",
+		"billCount": "{count} bills"
 	},
 	"forgotPassword": {
 		"description": "Enter your email to receive a password reset link.",

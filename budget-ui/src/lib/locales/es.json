@@ -362,7 +362,16 @@
 		"totalTransactionsDescription": "Este mes • Convertido a {currency}",
 		"upcomingBills": "Facturas pendientes",
 		"upcomingBillsDescription": "Facturas de este mes",
-		"viewAll": "Ver todo"
+		"viewAll": "Ver todo",
+		"overdueBills": "Vencidas",
+		"overdueBillsDescription": "Pasada la fecha de vencimiento",
+		"dueSoonBills": "Por vencer",
+		"dueSoonBillsDescription": "Por vencer y próximas este mes",
+		"paidBills": "Pagadas",
+		"paidBillsDescription": "Completadas este mes",
+		"totalToPay": "Total a pagar",
+		"totalToPayDescription": "Pendiente este mes",
+		"billCount": "{count} facturas"
 	},
 	"forgotPassword": {
 		"description": "Ingresa tu correo electrónico para recibir un enlace para restablecer la contraseña.",

@@ -697,7 +697,13 @@ export class TransactionsService {
     return result.dto;
   }
 
-  async getSummary(workspaceId: string): Promise<
+  async getSummary(
+    workspaceId: string,
+    dateStart?: Date,
+    dateEnd?: Date,
+    accountId?: string,
+    categoryId?: string,
+  ): Promise<
     {
       currencyCode: string;
       totalIncome: number;
@@ -705,16 +711,33 @@ export class TransactionsService {
     }[]
   > {
     const now = new Date();
-    const startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const endDate = now;
+    const startDate =
+      dateStart ?? new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const endDate = dateEnd ?? now;
+
+    const matchFilter: any = {
+      workspace: new ObjectId(workspaceId),
+      date: { $gte: startDate, $lt: endDate },
+      isTransfer: false,
+    };
+
+    if (accountId) {
+      matchFilter.account = new ObjectId(accountId);
+    }
+
+    if (categoryId) {
+      const expandedIds =
+        await this.categoriesService.findCategoryIdsWithChildren(
+          [categoryId],
+          workspaceId,
+        );
+      matchFilter.category = { $in: expandedIds };
+    }
+
     try {
       const transactions = await this.transactionModel.aggregate([
         {
-          $match: {
-            workspace: new ObjectId(workspaceId),
-            date: { $gte: startDate, $lt: endDate },
-            isTransfer: false,
-          },
+          $match: matchFilter,
         },
         {
           $lookup: {
