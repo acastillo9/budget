@@ -40,12 +40,6 @@ const refreshTokens = async (refreshToken: string) => {
 };
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const lang = event.request.headers.get('accept-language')?.split(',')[0]?.split('-')[0];
-	if (lang) {
-		locale.set(lang);
-	}
-	await waitLocale();
-
 	const { cookies } = event;
 	const accessToken = cookies.get('AuthorizationToken');
 
@@ -53,50 +47,55 @@ export const handle: Handle = async ({ event, resolve }) => {
 		cookies.delete('AuthorizationToken', { path: '/' });
 		cookies.delete('RefreshToken', { path: '/' });
 		cookies.delete('X-Workspace-Id', { path: '/' });
-		return resolve(event);
-	}
-
-	try {
-		event.locals.user = await getUserFromToken(accessToken);
-		return resolve(event); // User is valid: proceed
-	} catch {
-		const refreshToken = cookies.get('RefreshToken');
-		if (!refreshToken) {
-			cookies.delete('AuthorizationToken', { path: '/' });
-			cookies.delete('RefreshToken', { path: '/' });
-			cookies.delete('X-Workspace-Id', { path: '/' });
-			return resolve(event);
-		}
-
+	} else {
 		try {
-			const { access_token, refresh_token, isLongLived } = await refreshTokens(refreshToken);
-
-			// Overwrite cookies with new tokens
-			cookies.set('AuthorizationToken', access_token, {
-				httpOnly: true,
-				secure: import.meta.env.MODE === 'production', // Use secure cookies in production
-				sameSite: 'strict',
-				path: '/'
-			});
-
-			cookies.set('RefreshToken', refresh_token, {
-				httpOnly: true,
-				secure: import.meta.env.MODE === 'production', // Use secure cookies in production
-				sameSite: 'strict',
-				path: '/',
-				maxAge: isLongLived ? 60 * 60 * 24 * 30 : 60 * 60 * 2 // 30 days for long-lived, 2 hours for short-lived
-			});
-
-			// Finally, fetch the user profile with the new access token
-			event.locals.user = await getUserFromToken(access_token);
-			return resolve(event);
+			event.locals.user = await getUserFromToken(accessToken);
 		} catch {
-			cookies.delete('AuthorizationToken', { path: '/' });
-			cookies.delete('RefreshToken', { path: '/' });
-			cookies.delete('X-Workspace-Id', { path: '/' });
-			return resolve(event); // User is invalid: proceed without user
+			const refreshToken = cookies.get('RefreshToken');
+			if (!refreshToken) {
+				cookies.delete('AuthorizationToken', { path: '/' });
+				cookies.delete('RefreshToken', { path: '/' });
+				cookies.delete('X-Workspace-Id', { path: '/' });
+			} else {
+				try {
+					const { access_token, refresh_token, isLongLived } = await refreshTokens(refreshToken);
+
+					// Overwrite cookies with new tokens
+					cookies.set('AuthorizationToken', access_token, {
+						httpOnly: true,
+						secure: import.meta.env.MODE === 'production',
+						sameSite: 'strict',
+						path: '/'
+					});
+
+					cookies.set('RefreshToken', refresh_token, {
+						httpOnly: true,
+						secure: import.meta.env.MODE === 'production',
+						sameSite: 'strict',
+						path: '/',
+						maxAge: isLongLived ? 60 * 60 * 24 * 30 : 60 * 60 * 2
+					});
+
+					event.locals.user = await getUserFromToken(access_token);
+				} catch {
+					cookies.delete('AuthorizationToken', { path: '/' });
+					cookies.delete('RefreshToken', { path: '/' });
+					cookies.delete('X-Workspace-Id', { path: '/' });
+				}
+			}
 		}
 	}
+
+	// Set locale from user's saved language preference, falling back to Accept-Language header
+	const lang =
+		event.locals.user?.language ||
+		event.request.headers.get('accept-language')?.split(',')[0]?.split('-')[0];
+	if (lang) {
+		locale.set(lang);
+	}
+	await waitLocale();
+
+	return resolve(event);
 };
 
 export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
@@ -110,7 +109,10 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		request.headers.set('X-Workspace-Id', workspaceId);
 	}
 
-	request.headers.set('Accept-Language', event.request.headers.get('accept-language') || 'en');
+	request.headers.set(
+		'Accept-Language',
+		event.locals.user?.language || event.request.headers.get('accept-language') || 'en'
+	);
 
 	return fetch(request);
 };

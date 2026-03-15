@@ -32,7 +32,12 @@
 	let { data, children } = $props();
 
 	// Sync data to userState immediately (works during SSR, unlike $effect.pre)
-	untrack(() => syncUserState(data));
+	untrack(() => {
+		syncUserState(data);
+		if (userState.user?.language) {
+			locale.set(userState.user.language);
+		}
+	});
 
 	setUserContext(userState);
 
