@@ -372,7 +372,14 @@
 		"title": "Forgot Password"
 	},
 	"header": {
-		"toggleTheme": "Toggle Theme"
+		"toggleTheme": "Toggle Theme",
+		"language": "Language",
+		"languageUpdateSuccess": "Language updated successfully.",
+		"languageUpdateError": "Error updating language. Please try again later.",
+		"languages": {
+			"en": "English",
+			"es": "Español"
+		}
 	},
 	"resetPassword": {
 		"description": "Please enter your new password.",

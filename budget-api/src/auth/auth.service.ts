@@ -139,6 +139,7 @@ export class AuthService {
               currencyCode:
                 registerDto.currencyCode ??
                 this.getCurrencyCodeFromLocale(locale),
+              language: this.getLanguageFromLocale(locale),
             };
             const newUser = await this.usersService.create(
               createUserDto,
@@ -801,6 +802,7 @@ export class AuthService {
                 email: googleLogin.email,
                 picture: googleLogin.picture,
                 currencyCode: this.getCurrencyCodeFromLocale(locale),
+                language: this.getLanguageFromLocale(locale),
               };
               user = await this.usersService.create(createUserDto, session);
               await this.workspacesService.createDefaultWorkspace(
@@ -905,6 +907,11 @@ export class AuthService {
    * @return The currency code.
    * @private
    */
+  private getLanguageFromLocale(locale: string): string {
+    const lang = locale?.split('-')[0];
+    return ['en', 'es'].includes(lang) ? lang : 'en';
+  }
+
   private getCurrencyCodeFromLocale(locale: string): CurrencyCode {
     const currencyByLocale: Record<string, CurrencyCode> = {
       'en-US': CurrencyCode.USD,

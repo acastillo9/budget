@@ -18,6 +18,9 @@ export class User {
 
   @Prop({ type: String, enum: CurrencyCode, required: true })
   currencyCode: CurrencyCode;
+
+  @Prop({ type: String, default: 'en' })
+  language: string;
 }
 
 export const UserSchema =

@@ -372,7 +372,14 @@
 		"title": "¿Olvidaste tu contraseña?"
 	},
 	"header": {
-		"toggleTheme": "Cambiar tema"
+		"toggleTheme": "Cambiar tema",
+		"language": "Idioma",
+		"languageUpdateSuccess": "Idioma actualizado correctamente.",
+		"languageUpdateError": "Error al actualizar el idioma. Por favor, inténtalo de nuevo más tarde.",
+		"languages": {
+			"en": "English",
+			"es": "Español"
+		}
 	},
 	"resetPassword": {
 		"description": "Por favor, ingresa tu nueva contraseña.",

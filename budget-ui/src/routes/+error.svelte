@@ -7,7 +7,7 @@
 	<p class="text-muted-foreground text-lg">{page.error?.message ?? 'Something went wrong'}</p>
 	<a
 		href="/"
-		class="mt-4 inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+		class="bg-primary text-primary-foreground hover:bg-primary/90 mt-4 inline-flex items-center rounded-md px-4 py-2 text-sm font-medium"
 	>
 		Go home
 	</a>

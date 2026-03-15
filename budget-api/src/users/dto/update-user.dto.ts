@@ -27,4 +27,12 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEnum(CurrencyCode)
   currencyCode?: CurrencyCode;
+
+  @ApiPropertyOptional({
+    description: 'Preferred language (en, es)',
+    example: 'en',
+  })
+  @IsOptional()
+  @IsString()
+  language?: string;
 }

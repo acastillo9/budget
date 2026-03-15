@@ -26,4 +26,7 @@ export class UserDto {
     example: CurrencyCode.USD,
   })
   currencyCode: CurrencyCode;
+
+  @ApiProperty({ description: 'Preferred language', example: 'en' })
+  language: string;
 }

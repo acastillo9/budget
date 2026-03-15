@@ -11,6 +11,7 @@ export type UserSession = {
 	email: string;
 	picture?: string;
 	currencyCode: string;
+	language: string;
 };
 
 export type EntityUser = {

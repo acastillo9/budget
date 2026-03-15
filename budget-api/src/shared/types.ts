@@ -8,6 +8,7 @@ export interface Session {
   email?: string;
   picture?: string;
   currencyCode?: string;
+  language?: string;
   refreshToken?: string;
   isLongLived?: boolean;
   workspaceId?: string;

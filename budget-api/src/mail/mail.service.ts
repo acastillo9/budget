@@ -13,7 +13,10 @@ export class MailService {
       // hbsHelper needs to know the current language
       sendMailOptions.context = {
         ...(sendMailOptions.context || {}),
-        i18nLang: I18nContext.current()?.lang || 'en',
+        i18nLang:
+          sendMailOptions.context?.i18nLang ||
+          I18nContext.current()?.lang ||
+          'en',
       };
       return await this.mailerService.sendMail(sendMailOptions);
     } catch (error) {

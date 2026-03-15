@@ -7,12 +7,13 @@
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { page } from '$app/state';
 	import { getBreadcrumbs } from '$lib/utils/breadcrumb.js';
-	import { t } from 'svelte-i18n';
+	import { t, locale } from 'svelte-i18n';
 	import Sun from '@lucide/svelte/icons/sun';
 	import Moon from '@lucide/svelte/icons/moon';
 	import { toggleMode } from 'mode-watcher';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import CurrencySelector from '$lib/components/currency-selector.svelte';
+	import LanguageSelector from '$lib/components/language-selector.svelte';
 	import NotificationBell from '$lib/components/notification-bell.svelte';
 	import NotificationPanel from '$lib/components/notification-panel.svelte';
 	import NotificationPreferencesDialog from '$lib/components/notification-preferences-dialog.svelte';
@@ -270,6 +271,29 @@
 			toast.error($t('currencies.currencyUpdateError'));
 		}
 	}
+
+	async function updateLanguage(language: string) {
+		try {
+			const response = await fetch('/api/users', {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ language })
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to update language');
+			}
+
+			const updatedUser = await response.json();
+			userState.user = updatedUser;
+			locale.set(language);
+			toast.success($t('header.languageUpdateSuccess'));
+		} catch {
+			toast.error($t('header.languageUpdateError'));
+		}
+	}
 </script>
 
 <Sidebar.Provider>
@@ -309,6 +333,10 @@
 						onChange={updateCurrencyCode}
 					/>
 				</div>
+				<LanguageSelector
+					bind:selectedLanguage={userState.user!.language}
+					onChange={updateLanguage}
+				/>
 				<NotificationBell {unreadCount} onclick={handleOpenPanel} />
 				<Button class="mr-4" onclick={toggleMode} variant="outline" size="icon">
 					<Sun class="h-5 w-5 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
