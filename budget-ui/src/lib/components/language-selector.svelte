@@ -24,8 +24,8 @@
 		})}
 	>
 		<Globe class="h-4 w-4" />
-		<span class="font-medium">{$t(`header.languages.${selectedLanguage}`)}</span>
-		<ChevronDown class="h-3 w-3 opacity-50" />
+		<span class="hidden font-medium sm:inline">{$t(`header.languages.${selectedLanguage}`)}</span>
+		<ChevronDown class="hidden h-3 w-3 opacity-50 sm:block" />
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content class="w-40">
 		{#each languages as lang (lang.code)}

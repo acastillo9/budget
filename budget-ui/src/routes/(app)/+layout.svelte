@@ -302,11 +302,11 @@
 		<header
 			class="flex h-16 shrink-0 items-center justify-between transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
 		>
-			<div class="flex items-center gap-2 px-4">
+			<div class="flex min-w-0 flex-1 items-center gap-2 px-4">
 				<Sidebar.Trigger class="-ml-1" />
 				<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
-				<Breadcrumb.Root>
-					<Breadcrumb.List>
+				<Breadcrumb.Root class="min-w-0">
+					<Breadcrumb.List class="flex-nowrap overflow-hidden">
 						{#each breadcrumbs as breadcrumb, index}
 							{#if index > 0}
 								<Breadcrumb.Separator />
@@ -324,7 +324,7 @@
 					</Breadcrumb.List>
 				</Breadcrumb.Root>
 			</div>
-			<div class="flex items-center gap-2 pr-4">
+			<div class="flex shrink-0 items-center gap-2 pr-4">
 				<div class="ml-auto flex items-center gap-2">
 					<div class="text-muted-foreground hidden text-xs sm:block">Currency:</div>
 					<CurrencySelector
