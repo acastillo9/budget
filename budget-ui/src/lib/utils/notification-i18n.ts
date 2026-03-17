@@ -22,7 +22,9 @@ function hasI18nData(notification: Notification): boolean {
 
 export function getNotificationTitle(notification: Notification, t: TranslateFunction): string {
 	if (!hasI18nData(notification)) return notification.title;
-	return t(`notifications.inAppMessages.${notification.type}.title`);
+	return t(`notifications.inAppMessages.${notification.type}.title`, {
+		values: notification.data as Record<string, unknown>
+	});
 }
 
 export function getNotificationMessage(
@@ -45,15 +47,16 @@ export function getNotificationMessage(
 				? 'notifications.inAppMessages.MONTHLY_SUMMARY.messageWithActivity'
 				: 'notifications.inAppMessages.MONTHLY_SUMMARY.messageNoActivity';
 		return t(messageKey, {
-			monthName,
-			totalIncome: data.totalIncome,
-			totalExpenses: data.totalExpenses,
-			netSavings: data.netSavings
+			values: {
+				monthName,
+				totalIncome: data.totalIncome,
+				totalExpenses: data.totalExpenses,
+				netSavings: data.netSavings
+			}
 		});
 	}
 
-	return t(
-		`notifications.inAppMessages.${notification.type}.message`,
-		data as Record<string, unknown>
-	);
+	return t(`notifications.inAppMessages.${notification.type}.message`, {
+		values: data as Record<string, unknown>
+	});
 }
