@@ -138,7 +138,11 @@ export class TransactionNotificationHandler {
             workspaceId: event.workspaceId,
             title: 'Budget Exceeded',
             message: `Your budget "${budgetName}" has been exceeded (${percentUsed}% used)`,
-            data: { budgetId: budget._id.toString() },
+            data: {
+              budgetId: budget._id.toString(),
+              budgetName,
+              percentUsed: percentUsed.toFixed(1),
+            },
             actionUrl: '/budgets',
             deduplicationKey: `budget_exceeded_${budget._id}_${periodStart.toISOString().split('T')[0]}`,
             emailTemplate: 'budgetExceeded',
@@ -156,7 +160,11 @@ export class TransactionNotificationHandler {
             workspaceId: event.workspaceId,
             title: 'Budget Threshold Reached',
             message: `Your budget "${budgetName}" has reached ${percentUsed}% of the limit`,
-            data: { budgetId: budget._id.toString() },
+            data: {
+              budgetId: budget._id.toString(),
+              budgetName,
+              percentUsed: percentUsed.toFixed(1),
+            },
             actionUrl: '/budgets',
             deduplicationKey: `budget_threshold_${budget._id}_${periodStart.toISOString().split('T')[0]}`,
             emailTemplate: 'budgetThreshold',
@@ -201,6 +209,7 @@ export class TransactionNotificationHandler {
           data: {
             transactionId:
               event.transaction._id?.toString() || event.transaction.id,
+            amount: Math.abs(event.amount).toFixed(2),
           },
           actionUrl: '/transactions',
           deduplicationKey: `large_tx_${event.transaction._id?.toString() || event.transaction.id}`,
@@ -245,7 +254,12 @@ export class TransactionNotificationHandler {
           workspaceId: event.workspaceId,
           title: 'Low Account Balance',
           message: `Your account "${accountName}" balance is ${account.balance.toFixed(2)}, below the ${threshold.toFixed(2)} threshold`,
-          data: { accountId: event.accountId },
+          data: {
+            accountId: event.accountId,
+            accountName,
+            balance: account.balance.toFixed(2),
+            threshold: threshold.toFixed(2),
+          },
           actionUrl: '/accounts',
           deduplicationKey: `low_balance_${event.accountId}_${new Date().toISOString().split('T')[0]}`,
           emailTemplate: 'lowBalance',

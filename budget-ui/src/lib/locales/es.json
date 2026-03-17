@@ -649,6 +649,45 @@
 			"MONTHLY_SUMMARY": "Resumen mensual"
 		},
 		"save": "Guardar preferencias",
-		"cancel": "Cancelar"
+		"cancel": "Cancelar",
+		"inAppMessages": {
+			"BUDGET_EXCEEDED": {
+				"title": "Presupuesto excedido",
+				"message": "Tu presupuesto \"{budgetName}\" ha sido excedido ({percentUsed}% usado)"
+			},
+			"BUDGET_THRESHOLD": {
+				"title": "Umbral de presupuesto alcanzado",
+				"message": "Tu presupuesto \"{budgetName}\" ha alcanzado el {percentUsed}% del límite"
+			},
+			"LARGE_TRANSACTION": {
+				"title": "Transacción grande",
+				"message": "Se registró una transacción grande de {amount}"
+			},
+			"LOW_BALANCE": {
+				"title": "Saldo bajo en cuenta",
+				"message": "Tu cuenta \"{accountName}\" tiene un saldo de {balance}, por debajo del umbral de {threshold}"
+			},
+			"BILL_OVERDUE": {
+				"title": "Factura vencida",
+				"message": "Tu factura \"{billName}\" está vencida"
+			},
+			"BILL_DUE_SOON": {
+				"title": "Factura por vencer",
+				"message": "Tu factura \"{billName}\" vence en {daysUntilDue} día(s)"
+			},
+			"RECURRING_BILL_ENDING": {
+				"title": "Factura recurrente por terminar",
+				"message": "Tu factura recurrente \"{billName}\" termina en {daysUntilEnd} día(s)"
+			},
+			"WORKSPACE_INVITATION": {
+				"title": "Invitación al espacio de trabajo",
+				"message": "{invitedByName} te invitó a unirte a un espacio de trabajo"
+			},
+			"MONTHLY_SUMMARY": {
+				"title": "Resumen mensual",
+				"messageWithActivity": "Tu resumen mensual de {monthName}: Ingresos {totalIncome}, Gastos {totalExpenses}, Neto {netSavings}",
+				"messageNoActivity": "Tu resumen mensual de {monthName}: Sin actividad este mes"
+			}
+		}
 	}
 }

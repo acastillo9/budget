@@ -97,6 +97,13 @@ export class MonthlySummaryJob {
               workspaceId,
               title: 'Monthly Summary',
               message,
+              data: {
+                monthDate: lastMonth.toISOString(),
+                totalIncome: totalIncome.toFixed(2),
+                totalExpenses: totalExpenses.toFixed(2),
+                netSavings: netSavings.toFixed(2),
+                hasActivity: String(totalIncome !== 0 || totalExpenses !== 0),
+              },
               actionUrl: '/transactions',
               deduplicationKey: `monthly_summary_${workspaceId}_${lastMonth.toISOString().split('T')[0]}`,
               emailTemplate: 'monthlySummary',

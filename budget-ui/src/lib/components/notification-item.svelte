@@ -12,9 +12,11 @@
 	import Bell from '@lucide/svelte/icons/bell';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import { t, locale } from 'svelte-i18n';
 	import dayjs from 'dayjs';
 	import '$lib/utils/date';
 	import type { Component } from 'svelte';
+	import { getNotificationTitle, getNotificationMessage } from '$lib/utils/notification-i18n';
 
 	interface Props {
 		notification: Notification;
@@ -38,6 +40,8 @@
 
 	let IconComponent = $derived(iconMap[notification.type] || Bell);
 	let timeAgo = $derived(dayjs(notification.createdAt).fromNow());
+	let translatedTitle = $derived(getNotificationTitle(notification, $t));
+	let translatedMessage = $derived(getNotificationMessage(notification, $t, $locale));
 
 	function handleClick() {
 		onclick(notification);
@@ -71,14 +75,14 @@
 	<div class="min-w-0 flex-1">
 		<div class="flex items-start justify-between gap-2">
 			<p class="text-sm font-medium {notification.isRead ? '' : 'font-semibold'}">
-				{notification.title}
+				{translatedTitle}
 			</p>
 			{#if !notification.isRead}
 				<span class="bg-primary mt-1.5 h-2 w-2 flex-shrink-0 rounded-full"></span>
 			{/if}
 		</div>
 		<p class="text-muted-foreground mt-0.5 line-clamp-2 text-xs">
-			{notification.message}
+			{translatedMessage}
 		</p>
 		<p class="text-muted-foreground mt-1 text-[10px]">
 			{timeAgo}

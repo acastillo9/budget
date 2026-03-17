@@ -95,7 +95,12 @@ export class LowBalanceJob {
                   workspaceId,
                   title: 'Low Account Balance',
                   message: `Your account "${accountName}" balance is ${account.balance.toFixed(2)}, below the ${threshold.toFixed(2)} threshold`,
-                  data: { accountId: account._id.toString() },
+                  data: {
+                    accountId: account._id.toString(),
+                    accountName,
+                    balance: account.balance.toFixed(2),
+                    threshold: threshold.toFixed(2),
+                  },
                   actionUrl: '/accounts',
                   deduplicationKey: `low_balance_${account._id}_${new Date().toISOString().split('T')[0]}`,
                   emailTemplate: 'lowBalance',

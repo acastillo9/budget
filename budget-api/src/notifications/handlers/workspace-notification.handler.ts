@@ -39,6 +39,7 @@ export class WorkspaceNotificationHandler {
         data: {
           invitationId:
             event.invitation?._id?.toString() || event.invitation?.id,
+          invitedByName: event.invitedByName || 'Someone',
         },
         actionUrl: '/workspaces',
         deduplicationKey: `workspace_invitation_${event.invitation?._id?.toString() || event.invitation?.id}`,

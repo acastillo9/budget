@@ -649,6 +649,45 @@
 			"MONTHLY_SUMMARY": "Monthly Summary"
 		},
 		"save": "Save Preferences",
-		"cancel": "Cancel"
+		"cancel": "Cancel",
+		"inAppMessages": {
+			"BUDGET_EXCEEDED": {
+				"title": "Budget Exceeded",
+				"message": "Your budget \"{budgetName}\" has been exceeded ({percentUsed}% used)"
+			},
+			"BUDGET_THRESHOLD": {
+				"title": "Budget Threshold Reached",
+				"message": "Your budget \"{budgetName}\" has reached {percentUsed}% of the limit"
+			},
+			"LARGE_TRANSACTION": {
+				"title": "Large Transaction",
+				"message": "A large transaction of {amount} was recorded"
+			},
+			"LOW_BALANCE": {
+				"title": "Low Account Balance",
+				"message": "Your account \"{accountName}\" balance is {balance}, below the {threshold} threshold"
+			},
+			"BILL_OVERDUE": {
+				"title": "Bill Overdue",
+				"message": "Your bill \"{billName}\" is overdue"
+			},
+			"BILL_DUE_SOON": {
+				"title": "Bill Due Soon",
+				"message": "Your bill \"{billName}\" is due in {daysUntilDue} day(s)"
+			},
+			"RECURRING_BILL_ENDING": {
+				"title": "Recurring Bill Ending",
+				"message": "Your recurring bill \"{billName}\" ends in {daysUntilEnd} day(s)"
+			},
+			"WORKSPACE_INVITATION": {
+				"title": "Workspace Invitation",
+				"message": "{invitedByName} invited you to join a workspace"
+			},
+			"MONTHLY_SUMMARY": {
+				"title": "Monthly Summary",
+				"messageWithActivity": "Your monthly summary for {monthName}: Income {totalIncome}, Expenses {totalExpenses}, Net {netSavings}",
+				"messageNoActivity": "Your monthly summary for {monthName}: No activity this month"
+			}
+		}
 	}
 }
