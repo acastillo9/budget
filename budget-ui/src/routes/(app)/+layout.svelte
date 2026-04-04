@@ -44,6 +44,10 @@
 	// Re-sync on client-side data changes (e.g. after invalidateAll)
 	$effect.pre(() => {
 		syncUserState(data);
+		const lang = data.user?.language;
+		if (lang) {
+			untrack(() => locale.set(lang));
+		}
 	});
 
 	let breadcrumbs = $derived(getBreadcrumbs(page.route.id || '/'));
