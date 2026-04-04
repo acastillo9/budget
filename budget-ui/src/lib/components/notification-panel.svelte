@@ -5,6 +5,7 @@
 	import NotificationItem from './notification-item.svelte';
 	import CheckCheck from '@lucide/svelte/icons/check-check';
 	import Settings from '@lucide/svelte/icons/settings';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import Bell from '@lucide/svelte/icons/bell';
 	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
 	import { t } from 'svelte-i18n';
@@ -15,6 +16,7 @@
 		loading: boolean;
 		onMarkAsRead: (id: string) => void;
 		onMarkAllAsRead: () => void;
+		onDeleteAll: () => void;
 		onDelete: (id: string) => void;
 		onLoadMore: () => void;
 		onOpenPreferences: () => void;
@@ -27,6 +29,7 @@
 		loading,
 		onMarkAsRead,
 		onMarkAllAsRead,
+		onDeleteAll,
 		onDelete,
 		onLoadMore,
 		onOpenPreferences,
@@ -57,6 +60,15 @@
 						aria-label={$t('notifications.markAllRead')}
 					>
 						<CheckCheck class="h-4 w-4" />
+					</Button>
+					<Button
+						variant="ghost"
+						size="icon"
+						class="h-8 w-8"
+						onclick={onDeleteAll}
+						aria-label={$t('notifications.deleteAll')}
+					>
+						<Trash2 class="h-4 w-4" />
 					</Button>
 					<Button
 						variant="ghost"

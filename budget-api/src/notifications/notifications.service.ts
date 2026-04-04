@@ -172,6 +172,28 @@ export class NotificationsService {
     }
   }
 
+  async removeAll(
+    userId: string,
+    workspaceId: string,
+  ): Promise<{ deletedCount: number }> {
+    try {
+      const result = await this.notificationModel.deleteMany({
+        user: userId,
+        workspace: workspaceId,
+      });
+      return { deletedCount: result.deletedCount };
+    } catch (error) {
+      this.logger.error(
+        `Failed to delete all notifications: ${error.message}`,
+        error.stack,
+      );
+      throw new HttpException(
+        'Error deleting all notifications',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async remove(
     id: string,
     userId: string,

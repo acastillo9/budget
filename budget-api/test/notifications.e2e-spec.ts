@@ -481,6 +481,83 @@ describe('NotificationsController (e2e)', () => {
   });
 
   // ──────────────────────────────────────────────────
+  // DELETE /notifications (delete all)
+  // ──────────────────────────────────────────────────
+  describe('DELETE /notifications', () => {
+    beforeAll(async () => {
+      // Seed fresh notifications for User A so delete-all has something to delete
+      await seedNotification({
+        type: NotificationType.BILL_DUE_SOON,
+        title: 'Bill Due Soon',
+        message: 'Your internet bill is due in 3 days',
+        user: userIdA,
+        workspace: workspaceIdA,
+      });
+      await seedNotification({
+        type: NotificationType.BUDGET_EXCEEDED,
+        title: 'Budget Exceeded',
+        message: 'Your dining budget has been exceeded',
+        user: userIdA,
+        workspace: workspaceIdA,
+        isRead: true,
+        readAt: new Date(),
+      });
+    });
+
+    it('should delete all notifications and return deletedCount', async () => {
+      // First check how many notifications User A has
+      const listResponse = await request(app.getHttpServer())
+        .get('/notifications')
+        .set('Authorization', `Bearer ${authTokenA}`);
+      const totalBefore = listResponse.body.total;
+
+      const response = await request(app.getHttpServer())
+        .delete('/notifications')
+        .set('Authorization', `Bearer ${authTokenA}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('deletedCount');
+      expect(response.body.deletedCount).toBe(totalBefore);
+    });
+
+    it('should return deletedCount 0 when no notifications exist', async () => {
+      const response = await request(app.getHttpServer())
+        .delete('/notifications')
+        .set('Authorization', `Bearer ${authTokenA}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.deletedCount).toBe(0);
+    });
+
+    it('should verify no notifications remain in list', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/notifications')
+        .set('Authorization', `Bearer ${authTokenA}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(0);
+      expect(response.body.total).toBe(0);
+    });
+
+    it('should not affect other users notifications', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/notifications')
+        .set('Authorization', `Bearer ${authTokenB}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.total).toBeGreaterThan(0);
+    });
+
+    it('should return 401 when no auth token is provided', async () => {
+      const response = await request(app.getHttpServer()).delete(
+        '/notifications',
+      );
+
+      expect(response.status).toBe(401);
+    });
+  });
+
+  // ──────────────────────────────────────────────────
   // DELETE /notifications/:id
   // ──────────────────────────────────────────────────
   describe('DELETE /notifications/:id', () => {

@@ -202,6 +202,22 @@ export async function mockNotificationApi(
 		}
 	});
 
+	// DELETE /api/notifications/delete-all
+	await page.route('**/api/notifications/delete-all', async (route, request) => {
+		if (request.method() === 'DELETE') {
+			const deletedCount = state.notifications.length;
+			state.notifications = [];
+			state.unreadCount = 0;
+			await route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ deletedCount })
+			});
+		} else {
+			await route.fallback();
+		}
+	});
+
 	// DELETE /api/notifications/:id
 	await page.route(/\/api\/notifications\/[^/]+$/, async (route, request) => {
 		if (request.method() === 'DELETE') {
@@ -242,6 +258,7 @@ export class NotificationsPage {
 	readonly panel: Locator;
 	readonly panelTitle: Locator;
 	readonly markAllReadButton: Locator;
+	readonly deleteAllButton: Locator;
 	readonly settingsButton: Locator;
 	readonly emptyState: Locator;
 	readonly loadMoreButton: Locator;
@@ -282,6 +299,7 @@ export class NotificationsPage {
 		this.panel = page.locator('[data-slot="sheet-content"]');
 		this.panelTitle = this.panel.locator('[data-slot="sheet-title"]');
 		this.markAllReadButton = page.getByRole('button', { name: /mark all as read/i });
+		this.deleteAllButton = page.getByRole('button', { name: /delete all notifications/i });
 		this.settingsButton = page.getByRole('button', { name: /notification preferences/i });
 		this.emptyState = this.panel.getByText(/no notifications yet/i);
 		this.loadMoreButton = this.panel.getByRole('button', { name: /load more/i });
@@ -346,6 +364,10 @@ export class NotificationsPage {
 
 	async clickMarkAllAsRead() {
 		await this.markAllReadButton.click();
+	}
+
+	async clickDeleteAll() {
+		await this.deleteAllButton.click();
 	}
 
 	async clickSettings() {

@@ -299,6 +299,76 @@ test.describe('Notifications — Delete', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Notifications — Delete All
+// ---------------------------------------------------------------------------
+test.describe('Notifications — Delete All', () => {
+	test.setTimeout(30_000);
+
+	test('should show delete all button in panel header', async ({ page }) => {
+		const notifications = [createMockNotification({ id: 'notif-da-1', title: 'Notification A' })];
+		await mockNotificationApi(page, { notifications });
+		const notificationsPage = new NotificationsPage(page);
+		await notificationsPage.goto();
+		await page.waitForLoadState('networkidle');
+
+		await notificationsPage.openPanel();
+
+		await expect(notificationsPage.deleteAllButton).toBeVisible({ timeout: 10_000 });
+	});
+
+	test('should delete all notifications and show success toast', async ({ page }) => {
+		const notifications = [
+			createMockNotification({
+				id: 'notif-da-2',
+				title: 'First Notification',
+				isRead: false
+			}),
+			createMockNotification({
+				id: 'notif-da-3',
+				title: 'Second Notification',
+				isRead: true
+			})
+		];
+		await mockNotificationApi(page, { notifications, unreadCount: 1 });
+		const notificationsPage = new NotificationsPage(page);
+		await notificationsPage.goto();
+		await page.waitForLoadState('networkidle');
+
+		await notificationsPage.openPanel();
+		await expect(notificationsPage.getNotificationItem('First Notification')).toBeVisible({
+			timeout: 10_000
+		});
+
+		await notificationsPage.clickDeleteAll();
+
+		await notificationsPage.expectSuccessToast(/all notifications deleted/i);
+	});
+
+	test('should show empty state after deleting all notifications', async ({ page }) => {
+		const notifications = [
+			createMockNotification({
+				id: 'notif-da-4',
+				title: 'Only Notification',
+				isRead: false
+			})
+		];
+		await mockNotificationApi(page, { notifications, unreadCount: 1 });
+		const notificationsPage = new NotificationsPage(page);
+		await notificationsPage.goto();
+		await page.waitForLoadState('networkidle');
+
+		await notificationsPage.openPanel();
+		await expect(notificationsPage.getNotificationItem('Only Notification')).toBeVisible({
+			timeout: 10_000
+		});
+
+		await notificationsPage.clickDeleteAll();
+
+		await expect(notificationsPage.emptyState).toBeVisible({ timeout: 10_000 });
+	});
+});
+
+// ---------------------------------------------------------------------------
 // Notifications — Load More
 // ---------------------------------------------------------------------------
 test.describe('Notifications — Load More', () => {

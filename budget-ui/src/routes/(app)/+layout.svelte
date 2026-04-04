@@ -180,6 +180,24 @@
 		}
 	}
 
+	async function handleDeleteAllNotifications() {
+		try {
+			const response = await fetch('/api/notifications/delete-all', {
+				method: 'DELETE'
+			});
+			if (response.ok) {
+				notifications.data = [];
+				notifications.total = 0;
+				unreadCount = 0;
+				toast.success($t('notifications.deleteAllSuccess'));
+			} else {
+				toast.error($t('notifications.deleteAllError'));
+			}
+		} catch {
+			toast.error($t('notifications.deleteAllError'));
+		}
+	}
+
 	function handleNotificationClick(notification: Notification) {
 		if (notification.actionUrl) {
 			notificationPanelOpen = false;
@@ -365,6 +383,7 @@
 	loading={notificationsLoading}
 	onMarkAsRead={handleMarkAsRead}
 	onMarkAllAsRead={handleMarkAllAsRead}
+	onDeleteAll={handleDeleteAllNotifications}
 	onDelete={handleDeleteNotification}
 	onLoadMore={handleLoadMore}
 	onOpenPreferences={handleOpenPreferences}

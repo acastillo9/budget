@@ -166,6 +166,24 @@ export class NotificationsController {
     );
   }
 
+  @ApiOperation({
+    summary: 'Delete all notifications for current user in workspace',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Count of deleted notifications',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Delete()
+  removeAll(
+    @Request() req: AuthenticatedRequest,
+  ): Promise<{ deletedCount: number }> {
+    return this.notificationsService.removeAll(
+      req.user.userId,
+      req.user.workspaceId,
+    );
+  }
+
   @ApiOperation({ summary: 'Mark a single notification as read' })
   @ApiParam({
     name: 'id',
