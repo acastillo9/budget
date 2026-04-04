@@ -637,6 +637,13 @@
 		"quietHoursStart": "Hora de inicio",
 		"quietHoursEnd": "Hora de fin",
 		"quietHoursTimezone": "Zona horaria",
+		"emailDelivery": "Entrega de correos",
+		"emailDeliveryDescription": "Elige como recibir las notificaciones por correo",
+		"emailDeliveryImmediate": "Enviar inmediatamente",
+		"emailDeliveryDigest": "Resumen diario",
+		"emailDeliveryDigestDescription": "Combinar todas las notificaciones por correo en un resumen diario enviado a la hora elegida",
+		"digestTime": "Hora de envio del resumen",
+		"digestTimezone": "Zona horaria del resumen",
 		"eventTypes": {
 			"BILL_OVERDUE": "Factura vencida",
 			"BILL_DUE_SOON": "Factura por vencer",

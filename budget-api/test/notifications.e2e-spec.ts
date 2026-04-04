@@ -577,7 +577,7 @@ describe('NotificationsController (e2e)', () => {
       expect(response.body.billDueSoonDays).toBe(3);
 
       // Verify default quiet hours
-      expect(response.body.quietHoursEnabled).toBe(false);
+      expect(response.body.quietHoursEnabled).toBe(true);
       expect(response.body.quietHoursStart).toBe('22:00');
       expect(response.body.quietHoursEnd).toBe('08:00');
       expect(response.body.quietHoursTimezone).toBe('UTC');

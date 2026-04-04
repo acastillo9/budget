@@ -11,6 +11,7 @@ import {
 } from '../entities/notification-preference.entity';
 import { NotificationType } from '../entities/notification-type.enum';
 import { WorkspaceMember } from 'src/workspaces/entities/workspace-member.entity';
+import { WorkspaceRole } from 'src/workspaces/entities/workspace-role.enum';
 import { getThresholdForCurrency } from '../constants/currency-thresholds';
 import { CurrencyCode } from 'src/shared/entities/currency-code.enum';
 
@@ -74,10 +75,20 @@ export class LowBalanceJob {
         for (const account of workspaceAccounts) {
           processed++;
           try {
+            // Target only account creator + workspace owners
+            const targetUserIds = new Set<string>();
+            const accountCreatorId = (
+              account.user?._id ?? account.user
+            )?.toString();
+            if (accountCreatorId) targetUserIds.add(accountCreatorId);
             for (const member of members) {
-              const userId = (member.user?._id ?? member.user)?.toString();
-              if (!userId) continue;
+              if (member.role === WorkspaceRole.OWNER) {
+                const id = (member.user?._id ?? member.user)?.toString();
+                if (id) targetUserIds.add(id);
+              }
+            }
 
+            for (const userId of targetUserIds) {
               const prefs = prefsMap.get(userId);
               const currencyCode =
                 (account.currencyCode as CurrencyCode) || CurrencyCode.USD;

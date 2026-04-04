@@ -281,6 +281,15 @@ export class NotificationsService {
       if (dto.quietHoursTimezone !== undefined) {
         updateFields.quietHoursTimezone = dto.quietHoursTimezone;
       }
+      if (dto.emailDeliveryMode !== undefined) {
+        updateFields.emailDeliveryMode = dto.emailDeliveryMode;
+      }
+      if (dto.digestTime !== undefined) {
+        updateFields.digestTime = dto.digestTime;
+      }
+      if (dto.digestTimezone !== undefined) {
+        updateFields.digestTimezone = dto.digestTimezone;
+      }
 
       const updated = await this.notificationPreferenceModel.findOneAndUpdate(
         { user: userId, workspace: workspaceId },

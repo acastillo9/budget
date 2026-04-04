@@ -75,4 +75,26 @@ export class NotificationPreferenceDto {
     example: 'UTC',
   })
   quietHoursTimezone: string;
+
+  @Expose()
+  @ApiProperty({
+    description: 'Email delivery mode',
+    example: 'immediate',
+    enum: ['immediate', 'daily_digest'],
+  })
+  emailDeliveryMode: string;
+
+  @Expose()
+  @ApiProperty({
+    description: 'Daily digest send time (HH:mm)',
+    example: '08:00',
+  })
+  digestTime: string;
+
+  @Expose()
+  @ApiProperty({
+    description: 'Daily digest timezone (IANA)',
+    example: 'UTC',
+  })
+  digestTimezone: string;
 }

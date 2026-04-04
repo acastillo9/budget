@@ -1,0 +1,11 @@
+{
+  "subject": "Your Daily Notification Digest ({count} notifications)",
+  "preheader": "You have {count} new notifications to review.",
+  "heading": "Daily Notification Digest",
+  "greeting": "Hi there,",
+  "instruction": "Here is a summary of your {count} notification(s) from the past day.",
+  "button": "View All Notifications",
+  "regards": "Best regards,",
+  "signature": "The Budget Team.",
+  "rightsReserved": "All rights reserved."
+}

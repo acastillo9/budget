@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type {
+		EmailDeliveryMode,
 		NotificationPreference,
 		NotificationType,
 		UpdateNotificationPreference
@@ -47,6 +48,9 @@
 	let quietHoursStart = $state('22:00');
 	let quietHoursEnd = $state('08:00');
 	let quietHoursTimezone = $state('UTC');
+	let emailDeliveryMode = $state<EmailDeliveryMode>('immediate');
+	let digestTime = $state('08:00');
+	let digestTimezone = $state('UTC');
 
 	// Currency selector for thresholds
 	let selectedCurrency = $state(currencies[0]?.code ?? 'USD');
@@ -74,6 +78,9 @@
 			quietHoursStart = preferences.quietHoursStart;
 			quietHoursEnd = preferences.quietHoursEnd;
 			quietHoursTimezone = preferences.quietHoursTimezone;
+			emailDeliveryMode = preferences.emailDeliveryMode || 'immediate';
+			digestTime = preferences.digestTime || '08:00';
+			digestTimezone = preferences.digestTimezone || 'UTC';
 		}
 	});
 
@@ -87,7 +94,10 @@
 			quietHoursEnabled,
 			quietHoursStart,
 			quietHoursEnd,
-			quietHoursTimezone
+			quietHoursTimezone,
+			emailDeliveryMode,
+			digestTime,
+			digestTimezone
 		};
 
 		const result = updateNotificationPreferencesSchema.safeParse(data);
@@ -227,6 +237,64 @@
 						<Label for="bill-due-soon">{$t('notifications.billDueSoonDays')}</Label>
 						<Input id="bill-due-soon" type="number" min={1} max={30} bind:value={billDueSoonDays} />
 					</div>
+				</div>
+			</div>
+
+			<Separator />
+
+			<!-- Email Delivery Section -->
+			<div>
+				<h4 class="mb-1 text-sm font-medium">{$t('notifications.emailDelivery')}</h4>
+				<p class="text-muted-foreground mb-3 text-xs">
+					{$t('notifications.emailDeliveryDescription')}
+				</p>
+				<div class="space-y-4">
+					<div class="flex gap-2" role="radiogroup" aria-label={$t('notifications.emailDelivery')}>
+						<button
+							type="button"
+							role="radio"
+							aria-checked={emailDeliveryMode === 'immediate'}
+							class="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors
+								{emailDeliveryMode === 'immediate'
+								? 'bg-primary text-primary-foreground border-primary'
+								: 'bg-background text-muted-foreground hover:bg-muted border-input'}"
+							onclick={() => (emailDeliveryMode = 'immediate')}
+						>
+							{$t('notifications.emailDeliveryImmediate')}
+						</button>
+						<button
+							type="button"
+							role="radio"
+							aria-checked={emailDeliveryMode === 'daily_digest'}
+							class="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors
+								{emailDeliveryMode === 'daily_digest'
+								? 'bg-primary text-primary-foreground border-primary'
+								: 'bg-background text-muted-foreground hover:bg-muted border-input'}"
+							onclick={() => (emailDeliveryMode = 'daily_digest')}
+						>
+							{$t('notifications.emailDeliveryDigest')}
+						</button>
+					</div>
+					{#if emailDeliveryMode === 'daily_digest'}
+						<p class="text-muted-foreground text-xs">
+							{$t('notifications.emailDeliveryDigestDescription')}
+						</p>
+						<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+							<div class="space-y-2">
+								<Label for="digest-time">{$t('notifications.digestTime')}</Label>
+								<Input id="digest-time" type="time" bind:value={digestTime} />
+							</div>
+							<div class="space-y-2">
+								<Label for="digest-timezone">{$t('notifications.digestTimezone')}</Label>
+								<Input
+									id="digest-timezone"
+									type="text"
+									placeholder="UTC"
+									bind:value={digestTimezone}
+								/>
+							</div>
+						</div>
+					{/if}
 				</div>
 			</div>
 

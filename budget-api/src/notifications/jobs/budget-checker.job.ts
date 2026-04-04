@@ -12,6 +12,7 @@ import {
 } from '../entities/notification-preference.entity';
 import { NotificationType } from '../entities/notification-type.enum';
 import { WorkspaceMember } from 'src/workspaces/entities/workspace-member.entity';
+import { WorkspaceRole } from 'src/workspaces/entities/workspace-role.enum';
 import { ObjectId } from 'mongodb';
 import { CategoriesService } from 'src/categories/categories.service';
 import { getPeriodStart, addPeriod } from '../utils/period.util';
@@ -33,7 +34,7 @@ export class BudgetCheckerJob {
     private readonly categoriesService: CategoriesService,
   ) {}
 
-  @Cron(process.env.CRON_BUDGET_CHECKER || '0 */6 * * *')
+  @Cron(process.env.CRON_BUDGET_CHECKER || '0 10 * * *')
   async handleCron(): Promise<void> {
     const startTime = Date.now();
     const locked = await this.lockService.acquireLock('budget-checker', 30);
@@ -126,10 +127,20 @@ export class BudgetCheckerJob {
 
             const budgetName = (budget as { name?: string }).name || 'Budget';
 
+            // Target only budget creator + workspace owners
+            const targetUserIds = new Set<string>();
+            const budgetCreatorId = (
+              budget.user?._id ?? budget.user
+            )?.toString();
+            if (budgetCreatorId) targetUserIds.add(budgetCreatorId);
             for (const member of members) {
-              const userId = (member.user?._id ?? member.user)?.toString();
-              if (!userId) continue;
+              if (member.role === WorkspaceRole.OWNER) {
+                const id = (member.user?._id ?? member.user)?.toString();
+                if (id) targetUserIds.add(id);
+              }
+            }
 
+            for (const userId of targetUserIds) {
               const prefs = prefsMap.get(userId);
               const thresholdPercent = prefs?.budgetThresholdPercent || 80;
 

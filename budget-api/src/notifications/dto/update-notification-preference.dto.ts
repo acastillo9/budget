@@ -160,4 +160,31 @@ export class UpdateNotificationPreferenceDto {
   @IsOptional()
   @IsString()
   quietHoursTimezone?: string;
+
+  @ApiPropertyOptional({
+    description: 'Email delivery mode: immediate or daily_digest',
+    example: 'immediate',
+    enum: ['immediate', 'daily_digest'],
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^(immediate|daily_digest)$/)
+  emailDeliveryMode?: string;
+
+  @ApiPropertyOptional({
+    description: 'Daily digest send time (HH:mm format)',
+    example: '08:00',
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{2}:\d{2}$/)
+  digestTime?: string;
+
+  @ApiPropertyOptional({
+    description: 'Daily digest timezone (IANA timezone)',
+    example: 'UTC',
+  })
+  @IsOptional()
+  @IsString()
+  digestTimezone?: string;
 }

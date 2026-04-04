@@ -12,6 +12,11 @@ import {
   NotificationLock,
   NotificationLockSchema,
 } from './entities/notification-lock.entity';
+import {
+  EmailDailyCount,
+  EmailDailyCountSchema,
+} from './entities/email-daily-count.entity';
+import { DigestQueue, DigestQueueSchema } from './entities/digest-queue.entity';
 import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
 import { NotificationDispatcher } from './services/notification-dispatcher.service';
@@ -25,6 +30,7 @@ import { BudgetCheckerJob } from './jobs/budget-checker.job';
 import { LowBalanceJob } from './jobs/low-balance.job';
 import { MonthlySummaryJob } from './jobs/monthly-summary.job';
 import { NotificationCleanupJob } from './jobs/notification-cleanup.job';
+import { DigestSenderJob } from './jobs/digest-sender.job';
 import { MailModule } from 'src/mail/mail.module';
 import { UsersModule } from 'src/users/users.module';
 import { CategoriesModule } from 'src/categories/categories.module';
@@ -53,6 +59,8 @@ import {
         schema: NotificationPreferenceSchema,
       },
       { name: NotificationLock.name, schema: NotificationLockSchema },
+      { name: EmailDailyCount.name, schema: EmailDailyCountSchema },
+      { name: DigestQueue.name, schema: DigestQueueSchema },
       { name: Bill.name, schema: BillSchema },
       { name: Budget.name, schema: BudgetSchema },
       { name: Transaction.name, schema: TransactionSchema },
@@ -78,6 +86,7 @@ import {
     LowBalanceJob,
     MonthlySummaryJob,
     NotificationCleanupJob,
+    DigestSenderJob,
   ],
   exports: [NotificationsService, NotificationDispatcher],
 })

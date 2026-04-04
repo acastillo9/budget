@@ -1,18 +1,34 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { ConfigService } from '@nestjs/config';
 import { NotificationEvent } from './notification-event.interface';
 import { NotificationsService } from '../notifications.service';
 import { InAppChannel } from '../channels/in-app.channel';
 import { EmailChannel } from '../channels/email.channel';
+import { EmailDailyCount } from '../entities/email-daily-count.entity';
+import { DigestQueue } from '../entities/digest-queue.entity';
 
 @Injectable()
 export class NotificationDispatcher {
   private readonly logger: Logger = new Logger(NotificationDispatcher.name);
+  private readonly emailDailyCap: number;
 
   constructor(
     private readonly notificationsService: NotificationsService,
     private readonly inAppChannel: InAppChannel,
     private readonly emailChannel: EmailChannel,
-  ) {}
+    @InjectModel(EmailDailyCount.name)
+    private readonly emailDailyCountModel: Model<EmailDailyCount>,
+    @InjectModel(DigestQueue.name)
+    private readonly digestQueueModel: Model<DigestQueue>,
+    private readonly configService: ConfigService,
+  ) {
+    this.emailDailyCap = parseInt(
+      this.configService.get<string>('EMAIL_DAILY_CAP', '5'),
+      10,
+    );
+  }
 
   async dispatch(event: NotificationEvent): Promise<void> {
     try {
@@ -69,13 +85,39 @@ export class NotificationDispatcher {
       }
 
       if (emailEnabled && !isQuietHours) {
-        try {
-          await this.emailChannel.send(event);
-        } catch (error) {
-          this.logger.error(
-            `Email channel failed: ${error.message}`,
-            error.stack,
-          );
+        if (prefs.emailDeliveryMode === 'daily_digest') {
+          try {
+            await this.digestQueueModel.create({
+              user: event.userId,
+              workspace: event.workspaceId,
+              type: event.type,
+              title: event.title,
+              message: event.message,
+              data: event.data,
+              actionUrl: event.actionUrl,
+            });
+          } catch (error) {
+            this.logger.error(
+              `Failed to queue digest item: ${error.message}`,
+              error.stack,
+            );
+          }
+        } else {
+          const withinCap = await this.checkDailyCap(event.userId);
+          if (withinCap) {
+            try {
+              await this.emailChannel.send(event);
+            } catch (error) {
+              this.logger.error(
+                `Email channel failed: ${error.message}`,
+                error.stack,
+              );
+            }
+          } else {
+            this.logger.debug(
+              `Daily email cap reached for user ${event.userId}, skipping email`,
+            );
+          }
         }
       }
     } catch (error) {
@@ -83,6 +125,23 @@ export class NotificationDispatcher {
         `Failed to dispatch notification: ${error.message}`,
         error.stack,
       );
+    }
+  }
+
+  private async checkDailyCap(userId: string): Promise<boolean> {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const result = await this.emailDailyCountModel.findOneAndUpdate(
+        { user: userId, date: today },
+        { $inc: { count: 1 }, $setOnInsert: { createdAt: new Date() } },
+        { upsert: true, new: true },
+      );
+      return result.count <= this.emailDailyCap;
+    } catch (error) {
+      this.logger.warn(
+        `Failed to check daily email cap: ${error.message}, proceeding with send`,
+      );
+      return true;
     }
   }
 

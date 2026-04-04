@@ -34,6 +34,8 @@ export type ChannelPreference = {
 	email: boolean;
 };
 
+export type EmailDeliveryMode = 'immediate' | 'daily_digest';
+
 export type NotificationPreference = {
 	id: string;
 	channels: Record<NotificationType, ChannelPreference>;
@@ -45,6 +47,9 @@ export type NotificationPreference = {
 	quietHoursStart: string;
 	quietHoursEnd: string;
 	quietHoursTimezone: string;
+	emailDeliveryMode: EmailDeliveryMode;
+	digestTime: string;
+	digestTimezone: string;
 };
 
 export type UpdateNotificationPreference = Partial<Omit<NotificationPreference, 'id'>>;

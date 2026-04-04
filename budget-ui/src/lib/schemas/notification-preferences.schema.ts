@@ -20,7 +20,13 @@ export const updateNotificationPreferencesSchema = z.object({
 		.string()
 		.regex(/^\d{2}:\d{2}$/)
 		.optional(),
-	quietHoursTimezone: z.string().optional()
+	quietHoursTimezone: z.string().optional(),
+	emailDeliveryMode: z.enum(['immediate', 'daily_digest']).optional(),
+	digestTime: z
+		.string()
+		.regex(/^\d{2}:\d{2}$/)
+		.optional(),
+	digestTimezone: z.string().optional()
 });
 
 export type UpdateNotificationPreferencesSchema = z.infer<

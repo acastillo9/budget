@@ -637,6 +637,13 @@
 		"quietHoursStart": "Start time",
 		"quietHoursEnd": "End time",
 		"quietHoursTimezone": "Timezone",
+		"emailDelivery": "Email Delivery",
+		"emailDeliveryDescription": "Choose how you receive email notifications",
+		"emailDeliveryImmediate": "Send immediately",
+		"emailDeliveryDigest": "Daily digest",
+		"emailDeliveryDigestDescription": "Combine all email notifications into one daily summary sent at your chosen time",
+		"digestTime": "Digest send time",
+		"digestTimezone": "Digest timezone",
 		"eventTypes": {
 			"BILL_OVERDUE": "Bill Overdue",
 			"BILL_DUE_SOON": "Bill Due Soon",

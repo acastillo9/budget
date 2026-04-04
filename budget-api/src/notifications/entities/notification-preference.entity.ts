@@ -33,12 +33,12 @@ export class NotificationPreference {
   @Prop({
     type: {
       BILL_OVERDUE: ChannelToggleSchema,
-      BILL_DUE_SOON: ChannelToggleSchema,
-      BUDGET_THRESHOLD: ChannelToggleSchema,
+      BILL_DUE_SOON: ChannelToggleEmailOffSchema,
+      BUDGET_THRESHOLD: ChannelToggleEmailOffSchema,
       BUDGET_EXCEEDED: ChannelToggleSchema,
-      LOW_BALANCE: ChannelToggleSchema,
+      LOW_BALANCE: ChannelToggleEmailOffSchema,
       LARGE_TRANSACTION: ChannelToggleEmailOffSchema,
-      RECURRING_BILL_ENDING: ChannelToggleSchema,
+      RECURRING_BILL_ENDING: ChannelToggleEmailOffSchema,
       WORKSPACE_INVITATION: ChannelToggleEmailOffSchema,
       MONTHLY_SUMMARY: ChannelToggleInAppOffSchema,
       _id: false,
@@ -59,7 +59,7 @@ export class NotificationPreference {
   @Prop({ type: Number, default: 3 })
   billDueSoonDays: number;
 
-  @Prop({ type: Boolean, default: false })
+  @Prop({ type: Boolean, default: true })
   quietHoursEnabled: boolean;
 
   @Prop({ type: String, default: '22:00' })
@@ -70,6 +70,19 @@ export class NotificationPreference {
 
   @Prop({ type: String, default: 'UTC' })
   quietHoursTimezone: string;
+
+  @Prop({
+    type: String,
+    enum: ['immediate', 'daily_digest'],
+    default: 'immediate',
+  })
+  emailDeliveryMode: string;
+
+  @Prop({ type: String, default: '08:00' })
+  digestTime: string;
+
+  @Prop({ type: String, default: 'UTC' })
+  digestTimezone: string;
 }
 
 export const NotificationPreferenceSchema = SchemaFactory.createForClass(

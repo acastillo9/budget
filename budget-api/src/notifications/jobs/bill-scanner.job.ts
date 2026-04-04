@@ -13,6 +13,7 @@ import {
 } from '../entities/notification-preference.entity';
 import { NotificationType } from '../entities/notification-type.enum';
 import { WorkspaceMember } from 'src/workspaces/entities/workspace-member.entity';
+import { WorkspaceRole } from 'src/workspaces/entities/workspace-role.enum';
 
 @Injectable()
 export class BillScannerJob {
@@ -87,11 +88,19 @@ export class BillScannerJob {
               rangeEnd,
             );
 
-            for (const instance of instances) {
-              for (const member of members) {
-                const userId = (member.user?._id ?? member.user)?.toString();
-                if (!userId) continue;
+            // Target only bill creator + workspace owners
+            const billTargetUserIds = new Set<string>();
+            const billCreatorId = (bill.user?._id ?? bill.user)?.toString();
+            if (billCreatorId) billTargetUserIds.add(billCreatorId);
+            for (const member of members) {
+              if (member.role === WorkspaceRole.OWNER) {
+                const id = (member.user?._id ?? member.user)?.toString();
+                if (id) billTargetUserIds.add(id);
+              }
+            }
 
+            for (const instance of instances) {
+              for (const userId of billTargetUserIds) {
                 const prefs = prefsMap.get(userId);
                 const billDueSoonDays = prefs?.billDueSoonDays || 3;
                 const billName = instance.name || bill.name || 'Bill';
@@ -161,9 +170,7 @@ export class BillScannerJob {
                   (1000 * 60 * 60 * 24),
               );
               if (daysUntilEnd >= 0 && daysUntilEnd <= 7) {
-                for (const member of members) {
-                  const userId = (member.user?._id ?? member.user)?.toString();
-                  if (!userId) continue;
+                for (const userId of billTargetUserIds) {
                   await this.dispatcher.dispatch({
                     type: NotificationType.RECURRING_BILL_ENDING,
                     userId,

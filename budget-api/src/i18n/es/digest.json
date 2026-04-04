@@ -1,0 +1,11 @@
+{
+  "subject": "Tu resumen diario de notificaciones ({count} notificaciones)",
+  "preheader": "Tienes {count} notificaciones nuevas por revisar.",
+  "heading": "Resumen Diario de Notificaciones",
+  "greeting": "Hola,",
+  "instruction": "Aqui tienes un resumen de tus {count} notificacion(es) del ultimo dia.",
+  "button": "Ver Todas las Notificaciones",
+  "regards": "Saludos cordiales,",
+  "signature": "El Equipo de Budget.",
+  "rightsReserved": "Todos los derechos reservados."
+}
