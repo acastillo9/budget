@@ -18,5 +18,7 @@ COPY package.json package-lock.json ./
 COPY budget-api/package.json ./budget-api/
 RUN npm ci -w budget-api --omit=dev
 COPY --from=builder /app/budget-api/dist ./dist
+COPY --from=builder /app/budget-api/migrate-mongo-config.js ./
+COPY --from=builder /app/budget-api/migrations ./migrations
 EXPOSE 3000
 CMD ["node", "dist/main"]

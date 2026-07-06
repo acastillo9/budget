@@ -1,4 +1,4 @@
-name: Deploy Budget API to EC2
+name: Deploy Budget API to VPS
 
 on:
   push:
@@ -35,14 +35,15 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/budget-api:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/budget-api:${{ github.sha }}
 
-      - name: Deploy to EC2
+      - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd ~/budget/budget-api
+            cd ~/budget-api
             docker compose pull budget-api
             docker compose up -d --force-recreate budget-api
+            docker compose exec -T budget-api node node_modules/.bin/migrate-mongo up
             docker image prune -f
